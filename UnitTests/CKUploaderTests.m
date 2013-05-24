@@ -3,7 +3,7 @@
 //  Copyright 2012 Karelia Software. All rights reserved.
 //
 
-#import "CK2FileManagerBaseTests.h"
+#import "BaseCKTests.h"
 #import "KMSServer.h"
 
 #import "CKUploader.h"
@@ -12,7 +12,7 @@
 #import <curl/curl.h>
 
 
-@interface CKUploaderTests : CK2FileManagerBaseTests<CKUploaderDelegate>
+@interface CKUploaderTests : BaseCKTests<CKUploaderDelegate>
 
 @property (strong, nonatomic) NSError* error;
 @property (assign, nonatomic) BOOL finished;
@@ -30,17 +30,10 @@
     [super dealloc];
 }
 
-- (BOOL)setup
-{
-    BOOL result = ([self setupSessionWithResponses:@"webdav"]);
-
-    return result;
-}
-
 - (CKUploader*)setupUploader
 {
     CKUploader* result = nil;
-    if ([self setup])
+    if ([self setupTest])
     {
         NSURL* url = [self URLForPath:@"/"];
         NSURLRequest* request = [NSURLRequest requestWithURL:url];

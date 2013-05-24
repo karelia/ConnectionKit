@@ -3,17 +3,17 @@
 //  Copyright 2012 Karelia Software. All rights reserved.
 //
 
-#import "CK2FileManagerBaseTests.h"
+#import "BaseCKTests.h"
 #import "CK2Authentication.h"
 
 #import "CK2FileManagerWithTestSupport.h"
-#import <DAVKit/DAVKit.h>
+#import "KMSServer.h"
 
 static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 @interface TestFileDelegate : CK2FileManager<CK2FileManagerDelegate>
 
-@property (strong, nonatomic) CK2FileManagerBaseTests* tests;
+@property (strong, nonatomic) BaseCKTests* tests;
 
 @end
 
@@ -29,7 +29,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 //#define LogHousekeeping NSLog // macro to use for logging "housekeeping" output - ie stuff related to making/removing test files, rather than the tests themselves
 #define LogHousekeeping(...)
 
-+ (TestFileDelegate*)delegateWithTest:(CK2FileManagerBaseTests*)tests
++ (TestFileDelegate*)delegateWithTest:(BaseCKTests*)tests
 {
     TestFileDelegate* result = [[TestFileDelegate alloc] init];
     result.tests = tests;
@@ -77,13 +77,14 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 @end
 
 
-@implementation CK2FileManagerBaseTests
+@implementation BaseCKTests
 
 - (void)dealloc
 {
-    [_session release];
+    [_manager release];
+    [_originalPassword release];
+    [_originalUser release];
     [_transcript release];
-    [_type release];
     
     [super dealloc];
 }
@@ -91,8 +92,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 - (NSURL*)temporaryFolder
 {
-    NSString* type = self.type ?: @"CK2FileTest";
-    NSURL* result = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:[NSString stringWithFormat:@"%@Tests", type]];
+    NSURL* result = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:[NSString stringWithFormat:@"%@Tests", self.protocol]];
     NSError* error = nil;
     BOOL ok = [[NSFileManager defaultManager] createDirectoryAtURL:result withIntermediateDirectories:YES attributes:nil error:&error];
     STAssertTrue(ok, @"failed to make temporary folder with error %@", error);
@@ -119,59 +119,80 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     return ok;
 }
 
-- (BOOL)setupSession
+- (BOOL)setupManager
 {
     CK2FileManagerWithTestSupport* fm = [[CK2FileManagerWithTestSupport alloc] init];
     fm.dontShareConnections = YES;
     fm.delegate = self;
-    self.session = fm;
+    self.manager = fm;
     self.transcript = [[[NSMutableString alloc] init] autorelease];
     [fm release];
 
-    return self.session != nil;
+    return self.manager != nil;
 }
 
-- (BOOL)setupSessionWithResponses:(NSString*)responses;
+- (BOOL)isSetup
 {
-    if ([responses isEqualToString:@"webdav"])
-    {
-        self.type = @"CKWebDAVTest";
-    }
-    else if ([responses isEqualToString:@"ftp"])
-    {
-        self.type = @"CKFTPTest";
-    }
-    else if ([responses isEqualToString:@"sftp"])
-    {
-        self.type = @"CKSFTPTest";
-    }
-    else
-    {
-        self.type = nil;
-    }
+    return self.manager != nil;
+}
 
-    NSString* name = [[[self.name substringToIndex:[self.name length] - 1] componentsSeparatedByString:@" "] objectAtIndex:1];
-    self.extendedName = [NSString stringWithFormat:@"%@Using%@", name, [responses uppercaseString]];
+- (NSString*)protocol
+{
+    return @"Unknown";
+}
 
+- (BOOL)protocolUsesAuthentication
+{
+    return NO;
+}
+
+- (BOOL)usingProtocol:(NSString*)type
+{
+    return [[self.protocol lowercaseString] isEqualToString:type];
+}
+
+- (BOOL)usingMockServerWithProtocol:(NSString*)type
+{
+    return self.useMockServer && [self usingProtocol:type];
+}
+
+- (void)useBadLogin
+{
+    self.user = @"bad";
+    [self useResponseSet:@"bad login"];
+}
+
+
+- (NSData*)mockServerDirectoryListingData
+{
+    return nil;
+}
+
+
+- (BOOL)setupFromSettings
+{
     NSString* setting = nil;
-    if (self.type)
+    NSString* protocol = self.protocol;
+    
+    if (protocol)
     {
-        NSString* key = [NSString stringWithFormat:@"%@URL", self.type];
+        NSString* key = [NSString stringWithFormat:@"CK%@TestURL", protocol];
         setting = [[NSUserDefaults standardUserDefaults] objectForKey:key];
-        STAssertNotNil(setting, @"You need to set a test server address for %@ tests. Use the defaults command on the command line: defaults write otest %@ \"server-url-here\". Use \"MockServer\" instead of a url to use a mock server instead. Use \"Off\" instead of a url to disable %@ tests", responses, key, key, responses);
+        STAssertNotNil(setting, @"You need to set a test server address for %@ tests. Use the defaults command on the command line: defaults write otest %@ \"server-url-here\". Use \"MockServer\" instead of a url to use a mock server instead. Use \"Off\" instead of a url to disable %@ tests", protocol, key, key, protocol);
     }
 
     BOOL ok;
     if (!setting || [setting isEqualToString:@"Off"])
     {
-        NSLog(@"Tests turned off for %@", responses);
+        NSLog(@"Tests turned off for %@", protocol);
         ok = NO;
     }
     else if ([setting isEqualToString:@"MockServer"])
     {
-        NSLog(@"Tests using MockServer for %@", responses);
+        NSLog(@"Tests using MockServer for %@", protocol);
         self.useMockServer = YES;
-        ok = [super setupServerWithResponseFileNamed:responses];
+        ok = [super setupServerWithResponseFileNamed:[self.protocol lowercaseString]];
+        [KMSServer setLoggingLevel:KMSLoggingOff];
     }
     else
     {
@@ -182,22 +203,34 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         ok = YES;
     }
 
+    return ok;
+}
+
+- (NSString*)testName
+{
+    NSString* name = [[[self.name substringToIndex:[self.name length] - 1] componentsSeparatedByString:@" "] objectAtIndex:1];
+    return name;
+}
+
+- (BOOL)setupTest
+{
+    BOOL ok = [self setupFromSettings];
     if (ok)
     {
         self.originalUser = self.user;
         self.originalPassword = self.password;
 
-        [self setupSession];
-        ok = self.session != nil;
+        [self setupManager];
+        ok = self.manager != nil;
     }
 
     if (ok)
     {
-        NSLog(@"Tests setup for %@, user:%@, password:%@ url:%@", responses, self.user, self.password, self.url);
+        NSLog(@"Tests setup for %@, user:%@, password:%@ url:%@", self.protocol, self.user, self.password, self.url);
     }
     else
     {
-        NSLog(@"Tests not setup for %@", responses);
+        NSLog(@"Tests not setup for %@", self.protocol);
     }
 
     NSLog(@"====================================================================");
@@ -341,7 +374,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 - (NSURL*)URLForTestFolder
 {
-    return [self URLForPath:[@"CK2FileManagerTests" stringByAppendingPathComponent:self.extendedName]];
+    return [self URLForPath:[[@"CK2FileManagerTests" stringByAppendingPathComponent:self.protocol] stringByAppendingPathComponent:[self testName]]];
 }
 
 - (NSURL*)URLForTestFile1
@@ -375,16 +408,16 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         // make the folder if necessary
         NSURL* url = [self URLForTestFolder];
         [session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertTrue([self checkNoErrorOrFileExistsError:error], @"expected no error or file exists error, got %@", error);
+            STAssertTrue([self checkIsCreationError:error nilAllowed:YES], @"expected no error or file exists error, got %@", error);
 
             // if we want the files, make them too
             if (withFiles)
             {
                 NSData* contents = [@"This is a test file" dataUsingEncoding:NSUTF8StringEncoding];
                 [session createFileAtURL:[self URLForTestFile1] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-                    STAssertTrue([self checkNoErrorOrFileExistsError:error], @"expected no error or file exists error, got %@", error);
+                    STAssertTrue([self checkIsCreationError:error nilAllowed:YES], @"expected no error or file exists error, got %@", error);
                     [session createFileAtURL:[self URLForTestFile2] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-                        STAssertTrue([self checkNoErrorOrFileExistsError:error], @"expected no error or file exists error, got %@", error);
+                        STAssertTrue([self checkIsCreationError:error nilAllowed:YES], @"expected no error or file exists error, got %@", error);
                         [self pause];
                         LogHousekeeping(@"<<<< Made Test Files");
                     }];
@@ -431,112 +464,190 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     }
 }
 
-#pragma mark - Error Checking Helpers
+#pragma mark - Checking Helpers
 
-- (void)logError:(NSError*)error mustHaveError:(BOOL)mustHaveError domainOK:(BOOL)domainOK codeOK:(BOOL)codeOK
+- (void)checkURL:(NSURL*)url isNamed:(NSString*)name
 {
-    if (!error && mustHaveError)
-    {
-        NSLog(@"expecting error, got none");
-    }
-    else if (!domainOK && error)
-    {
-        NSLog(@"unexpected error domain %@", error.domain);
-    }
-    else if (!codeOK && error)
-    {
-        NSLog(@"unexpected error code %ld", error.code);
-    }
+    STAssertTrue([[url lastPathComponent] isEqualToString:name], @"URL %@ name was wrong, expected %@", url, name);
 }
 
-- (BOOL)checkIsAuthenticationError:(NSError*)error
+- (void)checkURLs:(NSMutableArray*)urls containItemNamed:(NSString*)name
+{
+    BOOL found = NO;
+    NSUInteger count = [urls count];
+    for (NSUInteger n = 0; n < count; ++n)
+    {
+        NSURL* url = urls[n];
+        if ([[url lastPathComponent] isEqualToString:name])
+        {
+            [urls removeObjectAtIndex:n];
+            found = YES;
+            break;
+        }
+    }
+
+    STAssertTrue(found, @"unexpected item with name %@", name);
+}
+
+- (BOOL)checkIsAuthenticationError:(NSError*)error log:(BOOL)log
 {
     BOOL domainOK = [error.domain isEqualToString:NSURLErrorDomain];
     BOOL codeOK = error.code == NSURLErrorUserAuthenticationRequired || error.code == NSURLErrorUserCancelledAuthentication;
     BOOL result = domainOK && codeOK;
+    if (log && !result)
+    {
+        NSLog(@"expecting authentication error, got %@", error);
+    }
 
     return result;
 }
 
-- (BOOL)checkNoErrorOrFileExistsError:(NSError*)error
+- (BOOL)checkIsAuthenticationError:(NSError*)error
+{
+    return [self checkIsAuthenticationError:error log:YES];
+}
+
+- (BOOL)checkIsFileCantWriteError:(NSError*)error log:(BOOL)log
 {
     BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
     BOOL codeOK = error.code == NSFileWriteUnknownError;
-    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+    BOOL result = domainOK && codeOK;
+    if (log && !result)
+    {
+        NSLog(@"expecting cant write error, got %@", error);
+    }
 
-    return error == nil || (domainOK && codeOK);
+    return result;
 }
 
-- (BOOL)checkIsFileCantWriteError:(NSError*)error
+- (BOOL)checkIsFileCantReadError:(NSError*)error log:(BOOL)log
 {
     BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
-    BOOL codeOK = error.code == NSFileWriteUnknownError;
-    [self logError:error mustHaveError:YES domainOK:domainOK codeOK:codeOK];
+    BOOL codeOK = error.code == NSFileReadUnknownError;
+    BOOL result = domainOK && codeOK;
+    if (log && !result)
+    {
+        NSLog(@"expecting file not found error, got %@", error);
+    }
 
-    return (error != nil) && domainOK && codeOK;
+    return result;
 }
 
-- (BOOL)checkNoErrorOrIsFileCantWriteError:(NSError*)error
-{
-    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
-    BOOL codeOK = error.code == NSFileWriteUnknownError;
-    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
 
-    return (error == nil) || (domainOK && codeOK);
-}
-
-- (BOOL)checkIsFileNotFoundError:(NSError*)error
-{
-    BOOL domainOK = [error.domain isEqualToString:NSURLErrorDomain];
-    BOOL codeOK = error.code == NSURLErrorNoPermissionsToReadFile;
-    [self logError:error mustHaveError:YES domainOK:domainOK codeOK:codeOK];
-
-    return (error != nil) && domainOK && codeOK;
-}
-
-- (BOOL)checkNoErrorOrIsFileNotFoundError:(NSError*)error
+- (BOOL)checkIsFileNotFoundError:(NSError*)error log:(BOOL)log
 {
     BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
     BOOL codeOK = error.code == NSFileNoSuchFileError;
-    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+    BOOL result = domainOK && codeOK;
+    if (log && !result)
+    {
+        NSLog(@"expecting file not found error, got %@", error);
+    }
 
-    return (error == nil) || (domainOK && codeOK);
+    return result;
 }
 
-- (BOOL)checkIsRemovalError:(NSError*)error
+- (BOOL)checkIsFileExistsError:(NSError*)error log:(BOOL)log
 {
-    // failure to remove something might result in the CK2Protocol's
-    // standardCouldntWriteErrorWithUnderlyingError or standardFileNotFoundErrorWithUnderlyingError errors, so we need to check for either
-    // (which one it is depends on how much error information the protocol gets)
     BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
-    BOOL codeOK = (error.code == NSFileWriteUnknownError) || (error.code == NSFileNoSuchFileError);
-    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+    BOOL codeOK = error.code == NSFileWriteFileExistsError;
+    BOOL result = domainOK && codeOK;
+    if (log && !result)
+    {
+        NSLog(@"expecting file exists error, got %@", error);
+    }
 
-    return (error == nil) || (domainOK && codeOK);
+    return result;
 }
 
-- (BOOL)checkIsFileCantReadError:(NSError*)error;
+
+- (BOOL)checkIsRemovalError:(NSError*)error nilAllowed:(BOOL)nilAllowed
 {
-    // failure to remove something might result in the CK2Protocol's
-    // standardCouldntWriteErrorWithUnderlyingError or standardFileNotFoundErrorWithUnderlyingError errors, so we need to check for either
-    // (which one it is depends on how much error information the protocol gets)
-    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
-    BOOL codeOK = error.code == NSFileReadUnknownError;
-    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+    BOOL result = nilAllowed && error == nil;
+    if (!result)
+    {
+        result = [self checkIsFileNotFoundError:error log:NO]; // file wasn't there?
+    }
     
-    return (error == nil) || (domainOK && codeOK);
+    if (!result)
+    {
+        result = [self checkIsFileCantWriteError:error log:NO]; // file was there but locked - or protocol is bad at reporting file not found
+    }
+
+    if (!result)
+    {
+        result = [self checkIsFileCantReadError:error log:NO]; // file wasn't there, but protocol isn't good a reporting it?
+    }
+
+    if (!result)
+    {
+        NSLog(@"expecting file not found or can't read or write errors, got %@", error);
+    }
+
+    return result;
 }
 
-- (BOOL)checkIsUpdateError:(NSError*)error
+- (BOOL)checkIsCreationError:(NSError*)error nilAllowed:(BOOL)nilAllowed
 {
-    // failure to update something might result in the CK2Protocol's
-    // standardCouldntWriteErrorWithUnderlyingError or standardFileNotFoundErrorWithUnderlyingError errors, so we need to check for either
-    // (which one it is depends on how much error information the protocol gets)
-    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
-    BOOL codeOK = (error.code == NSFileWriteUnknownError) || (error.code == NSFileNoSuchFileError);
-    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+    BOOL result = nilAllowed && error == nil;
+    if (!result)
+    {
+        result = [self checkIsFileExistsError:error log:NO];
+    }
+    
+    if (!result)
+    {
+        result = [self checkIsFileCantWriteError:error log:NO];
+    }
 
-    return (error == nil) || (domainOK && codeOK);
+    if (!result)
+    {
+        NSLog(@"expecting file exists or can't write errors, got %@", error);
+    }
+    
+    return result;
 }
+
+- (BOOL)checkIsUpdateError:(NSError*)error nilAllowed:(BOOL)nilAllowed
+{
+    BOOL result = nilAllowed && error == nil;
+    if (!result)
+    {
+        result = [self checkIsFileNotFoundError:error log:NO];
+    }
+    if (!result)
+    {
+        result = [self checkIsFileCantWriteError:error log:NO];
+    }
+
+    if (!result)
+    {
+        NSLog(@"expecting file not found or file can't write error, got %@", error);
+    }
+    
+    return result;
+}
+
+- (BOOL)checkIsMissingError:(NSError*)error nilAllowed:(BOOL)nilAllowed
+{
+    BOOL result = nilAllowed && error == nil;
+    if (!result)
+    {
+        result = [self checkIsFileNotFoundError:error log:NO];
+    }
+
+    if (!result)
+    {
+        result = [self checkIsFileCantReadError:error log:NO];
+    }
+
+    if (!result)
+    {
+        NSLog(@"expecting file not found or file can't read errors, got %@", error);
+    }
+
+    return result;
+}
+
 
 @end

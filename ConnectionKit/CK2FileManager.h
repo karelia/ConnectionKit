@@ -45,6 +45,11 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
  https  | WebDAV over HTTPS
  sftp   | SFTP
  
+ Completion handlers (and other blocks) and delegate methods are called by
+ CK2FileManager on arbitrary threads/queues. It is your responsibility not to
+ block that thread for too long, and to dispatch work over to another thread if
+ required.
+ 
 */
 
 @interface CK2FileManager : NSObject
@@ -365,7 +370,6 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 
 @protocol CK2FileManagerDelegate <NSObject>
-// Delegate methods are delivered on an arbitrary queue/thread. Your code needs to be threadsafe to handle that.
 @optional
 
 // If left unimplemented, -performDefaultHandlingForAuthenticationChallenge: will be called
