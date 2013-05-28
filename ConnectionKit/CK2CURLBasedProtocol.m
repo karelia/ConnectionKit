@@ -293,7 +293,8 @@
 {
     NSError* result = nil;
 
-    NSArray* items = [KSFTPDirectoryParser parseData:data includingExtraEntries:NO];
+    id<KSFTPLineParser> parser = [[FTPParseLineParser alloc] init];
+    NSArray* items = [KSFTPBufferParser parseData:data parser:parser includingExtraEntries:NO];
     for (NSDictionary* item in items)
     {
         NSString *name = [item objectForKey:@"name"];
@@ -412,7 +413,8 @@
             [self.client protocol:self didDiscoverItemAtURL:aURL];
         }
     }
-
+    [parser release];
+    
     return result;
 }
 
