@@ -1,14 +1,8 @@
 /* authorise */
 "%@\nWhat would you like to do?" = "%@\nどうしますか?";
 
-/* FTP Abort */
-"Action Aborted. Local Error" = "操作が取り消されました。ローカルエラー";
-
-/* FTP no data stream types available */
-"All data connection modes have been exhausted. Check with the server administrator." = "あらゆる接続モードでの接続に失敗しました。サーバ管理者にお問い合わせください。";
-
-/* multiple connection joiner */
-"and" = "と";
+/* ConnectionOpenPanel */
+"An unknown error occurred." = "不明なエラーが発生しました。";
 
 /* close window */
 "Are you sure you want to stop the upload?" = "アップロードを中断してもよろしいですか?";
@@ -31,9 +25,6 @@
 /* authorise */
 "Cancel" = "キャンセル";
 
-/* FTP upload error */
-"Cannot Upload File. Storage quota on server exceeded" = "ファイルをアップロードできません。サーバの保存容量を超過しています。";
-
 /* connected message */
 "Connected to %@" = "%@ に接続";
 
@@ -46,64 +37,17 @@
 /* config */
 "Couldn't find configuration file specified\n %@" = "指定した設定ファイルが見つかりませんでした\n %@";
 
-/* FTP Create directory error */
-"Create directory operation failed" = "ディレクトリ作成の操作に失敗しました";
-
-/* Failed to open a data stream connection */
-"Data Stream Timed Out" = "データストリームのタイムアウト";
-
 /* status */
 "Disconnected" = "切断";
 
 /* filesize: exabytes */
 "EB" = "EB";
 
-/* FTP no data streams available */
-"Exhausted all connection types to server. Please contact server administrator" = "すべてのサーバ接続タイプでの接続に失敗しました。サーバ管理者に連絡してください。";
-
-/* Bad FTP command */
-"Failed to change to directory" = "ディレクトリへの移動に失敗しました";
-
-/* couldn't delete the file */
-"Failed to delete directory" = "ディレクトリの削除に失敗しました";
-
-/* couldn't delete the file */
-"Failed to delete file" = "ファイルの削除に失敗しました";
-
-/* FTP Upload error */
-"Failed to set permissions for path %@" = "パス %@ へのアクセス許可の設定に失敗しました。";
-
-/* FTP file download error */
-"File %@ does not exist on server" = "ファイル %@ はサーバに存在しません";
-
-/* FTP file in use */
-"File in Use" = "ファイルが使用中です";
-
-/* FTP service timed out */
-"FTP service not available; Remote server has closed connection" = "FTP サービスがありません; リモートサーバーは接続を切断しました。";
-
-/* FTP no service */
-"FTP Service Unavailable" = "FTP サービスが使用できません";
-
 /* filesize: gigabytes */
 "GB" = "GB";
 
-/* Couldn't open the port to the host
-   Host Unavailable */
-
-"Host Unavailable" = "ホストが利用できません";
-
-/* FTP Error */
-"Invalid Account name" = "アカウント名が無効です";
-
-/* Stream Error before opening */
-"Is the service running on the server" = "サーバーは稼働していますか?";
-
 /* filesize: kilobytes */
 "KB" = "KB";
-
-/* File doesn't exist */
-"Local file %@ doesn't exist" = "ローカルファイル %@ は存在しません";
 
 /* FTP download error */
 "Local File already exists" = "このローカルファイルはすでに存在します";
@@ -117,20 +61,8 @@
 /* failed to find a connection class */
 "No connection available for requested connection type" = "この接続タイプは有効ではありません";
 
-/* FTP Error */
-"No Storage Space Available" = "保存スペースがありません";
-
-/* No such file */
-"No such file" = "そのようなファイルはありません";
-
-/* FTP Error */
-"Not Logged In" = "ログインしていません";
-
 /* filesize: petabytes */
 "PB" = "PB";
-
-/* Permission Denied */
-"Permission Denied" = "認証失敗";
 
 /* ConnectionOpenPanel */
 "Please check your settings." = "設定を確認して下さい。";
@@ -140,17 +72,11 @@
 
 "Quit" = "終了";
 
-/* abbreviation for seconds, e.g. 12 MB/s */
-"s" = "s";
-
 /* close window */
 "Stop Upload" = "アップロードを停止";
 
 /* close window */
 "Stop Upload?" = "アップロードを停止しますか?";
-
-/* Error creating stream */
-"Stream Unavailable" = "ストリームは利用できません";
 
 /* filesize: terabytes */
 "TB" = "TB";
@@ -158,14 +84,5 @@
 /* error */
 "This droplet is missing the original application that created it. You will need to reinstall the original application." = "ドロップレットを作成したときのアプリケーションがありません。そのアプリケーションを再インストールする必要があります。";
 
-/* time out */
-"Timed Out waiting for remote host." = "リモートホストの待ち時間がタイムアウトしました。";
-
 /* status */
 "Uploading %@" = "%@ をアップロード中";
-
-/* FTP file upload error */
-"You do not have access to write file %@" = "%@ というファイルへのアクセス権がありません";
-
-/* FTP Error */
-"You need an Account to Upload Files" = "アップロードをするためにアカウントが必要です";

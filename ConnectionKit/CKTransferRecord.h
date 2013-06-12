@@ -48,6 +48,8 @@
 	NSMutableDictionary *_properties;
 	
 	NSError *_error;
+    
+    void *_observationInfo;
 }
 
 - (NSString *)name;
@@ -72,6 +74,8 @@
 - (unsigned long long)transferred;
 - (NSInteger)progress;
 - (void)setProgress:(NSInteger)progress;
+
+- (NSDictionary *)nameWithProgressAndFileSize;
 
 - (void)addContent:(CKTransferRecord *)record;
 - (NSArray *)contents;
