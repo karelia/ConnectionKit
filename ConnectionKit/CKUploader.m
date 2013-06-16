@@ -142,6 +142,8 @@
         return op;
     }];
     
+    [self didAddTransferRecord:result];
+    
     return result;
 }
 
@@ -182,7 +184,18 @@
         return op;
     }];
     
+    [self didAddTransferRecord:result];
+    
     return result;
+}
+
+- (void)didAddTransferRecord:(CKTransferRecord *)record;
+{
+    id <CKUploaderDelegate> delegate = self.delegate;
+    if ([delegate respondsToSelector:@selector(uploader:didAddTransferRecord:)])
+    {
+        [delegate uploader:self didAddTransferRecord:record];
+    }
 }
 
 - (NSURL *)URLForPath:(NSString *)path;
