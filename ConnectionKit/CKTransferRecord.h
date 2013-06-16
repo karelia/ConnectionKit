@@ -85,7 +85,7 @@
 - (CKTransferRecord *)root;
 - (NSString *)path; 
 
-- (void)setProperty:(id)property forKey:(NSString *)key;
+- (void)setProperty:(id)property forKey:(NSString *)key __attribute((nonnull(2)));
 - (id)propertyForKey:(NSString *)key;
 
 /* backward compatibility with NSDictionary */
