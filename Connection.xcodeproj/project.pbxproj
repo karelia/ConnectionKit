@@ -495,7 +495,7 @@
 			children = (
 				220526E8165E96AA00A2BBC9 /* CURLHandle.framework */,
 				220526EA165E96AA00A2BBC9 /* CURLHandleTests.octest */,
-				22C9CFFB1703AD4D004610FE /* crashtest */,
+				22C9CFFB1703AD4D004610FE /* Standalone Test */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -980,10 +980,9 @@
 			remoteRef = 22AC1C0F174297C500AB09E1 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		22C9CFFB1703AD4D004610FE /* crashtest */ = {
+		22C9CFFB1703AD4D004610FE /* Standalone Test */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
-			name = crashtest;
 			path = "Standalone Test";
 			remoteRef = 22C9CFFA1703AD4D004610FE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -1429,6 +1428,7 @@
 		79CFD12909F702BF00172CDD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1468,6 +1468,7 @@
 		79CFD12A09F702BF00172CDD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
@@ -1507,7 +1508,6 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -1521,7 +1521,6 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
