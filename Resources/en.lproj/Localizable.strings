@@ -1,14 +1,8 @@
 ﻿/* authorise */
 "%@\nWhat would you like to do?" = "%@\nWhat would you like to do?";
 
-/* FTP Abort */
-"Action Aborted. Local Error" = "Action Aborted. Local Error";
-
-/* FTP no data stream types available */
-"All data connection modes have been exhausted. Check with the server administrator." = "All data connection modes have been exhausted. Check with the server administrator.";
-
-/* multiple connection joiner */
-"and" = "and";
+/* ConnectionOpenPanel */
+"An unknown error occurred." = "An unknown error occurred.";
 
 /* close window */
 "Are you sure you want to stop the upload?" = "Are you sure you want to stop the upload?";
@@ -31,9 +25,6 @@
 /* authorise */
 "Cancel" = "Cancel";
 
-/* FTP upload error */
-"Cannot Upload File. Storage quota on server exceeded" = "Cannot Upload File. Storage quota on server exceeded";
-
 /* connected message */
 "Connected to %@" = "Connected to %@";
 
@@ -46,63 +37,17 @@
 /* config */
 "Couldn't find configuration file specified\n %@" = "Couldn't find configuration file specified\n %@";
 
-/* FTP Create directory error */
-"Create directory operation failed" = "Create directory operation failed";
-
-/* Failed to open a data stream connection */
-"Data Stream Timed Out" = "Data Stream Timed Out";
-
 /* status */
 "Disconnected" = "Disconnected";
 
 /* filesize: exabytes */
 "EB" = "EB";
 
-/* FTP no data streams available */
-"Exhausted all connection types to server. Please contact server administrator" = "Exhausted all connection types to server. Please contact server administrator";
-
-/* Bad FTP command */
-"Failed to change to directory" = "Failed to change to directory";
-
-/* couldn't delete the file */
-"Failed to delete directory" = "Failed to delete directory";
-
-/* couldn't delete the file */
-"Failed to delete file" = "Failed to delete file";
-
-/* FTP Upload error */
-"Failed to set permissions for path %@" = "Failed to set permissions for path %@";
-
-/* FTP file download error */
-"File %@ does not exist on server" = "File %@ does not exist on server";
-
-/* FTP file in use */
-"File in Use" = "File in Use";
-
-/* FTP service timed out */
-"FTP service not available; Remote server has closed connection" = "FTP service not available; Remote server has closed connection";
-
-/* FTP no service */
-"FTP Service Unavailable" = "FTP Service Unavailable";
-
 /* filesize: gigabytes */
 "GB" = "GB";
 
-/* Couldn't open the port to the host
-   Host Unavailable */
-"Host Unavailable" = "Host Unavailable";
-
-/* FTP Error */
-"Invalid Account name" = "Invalid Account name";
-
-/* Stream Error before opening */
-"Is the service running on the server" = "Is the service running on the server";
-
 /* filesize: kilobytes */
 "KB" = "KB";
-
-/* File doesn't exist */
-"Local file %@ doesn't exist" = "Local file %@ doesn't exist";
 
 /* FTP download error */
 "Local File already exists" = "Local File already exists";
@@ -116,20 +61,8 @@
 /* failed to find a connection class */
 "No connection available for requested connection type" = "No connection available for requested connection type";
 
-/* FTP Error */
-"No Storage Space Available" = "No Storage Space Available";
-
-/* No such file */
-"No such file" = "No such file";
-
-/* FTP Error */
-"Not Logged In" = "Not Logged In";
-
 /* filesize: petabytes */
 "PB" = "PB";
-
-/* Permission Denied */
-"Permission Denied" = "Permission Denied";
 
 /* ConnectionOpenPanel */
 "Please check your settings." = "Please check your settings.";
@@ -138,17 +71,11 @@
    error */
 "Quit" = "Quit";
 
-/* abbreviation for seconds, e.g. 12 MB/s */
-"s" = "s";
-
 /* close window */
 "Stop Upload" = "Stop Upload";
 
 /* close window */
 "Stop Upload?" = "Stop Upload?";
-
-/* Error creating stream */
-"Stream Unavailable" = "Stream Unavailable";
 
 /* filesize: terabytes */
 "TB" = "TB";
@@ -156,15 +83,6 @@
 /* error */
 "This droplet is missing the original application that created it. You will need to reinstall the original application." = "This droplet is missing the original application that created it. You will need to reinstall the original application.";
 
-/* time out */
-"Timed Out waiting for remote host." = "Timed Out waiting for remote host.";
-
 /* status */
 "Uploading %@" = "Uploading %@";
-
-/* FTP file upload error */
-"You do not have access to write file %@" = "You do not have access to write file %@";
-
-/* FTP Error */
-"You need an Account to Upload Files" = "You need an Account to Upload Files";
 

@@ -118,7 +118,7 @@
             // parse the incoming data
             if (parsedDict)
             {
-                NSString *name = CFDictionaryGetValue(parsedDict, kCFFTPResourceName);
+                NSString *name = [self pathForKey:kCFFTPResourceName inDictionary:parsedDict];
 
                 if ([self shouldEnumerateFilename:name options:mask])
                 {
@@ -199,7 +199,7 @@
                         }
                         else if ([aKey isEqualToString:CK2URLSymbolicLinkDestinationKey])
                         {
-                            NSString *path = CFDictionaryGetValue(parsedDict, kCFFTPResourceLink);
+                            NSString *path = [self pathForKey:kCFFTPResourceLink inDictionary:parsedDict];
                             if ([path length])
                             {
                                 // Servers in my experience hand include a trailing slash to indicate if the target is a directory
@@ -280,6 +280,31 @@
         }
     }
 
+    return result;
+}
+
+// Retrieves the path/filename for a given key, and then tries to take into account tricky encoding issues
+// https://github.com/karelia/ConnectionKit/issues/41
+- (NSString *)pathForKey:(CFStringRef)key inDictionary:(CFDictionaryRef)dictionary;
+{
+    NSString *result = CFDictionaryGetValue(dictionary, key);
+    
+    // For strings which fall outside of ASCII, hope that they're UTF-8
+    if (![result canBeConvertedToEncoding:NSASCIIStringEncoding])
+    {
+        NSData *source = [result dataUsingEncoding:NSMacOSRomanStringEncoding];
+        // technically, this is a little dodgy. -dataUsingEncoding: could generate some sort of BOM, but I don't believe MacRoman has such a concept so we're safe for now
+        
+        if (source)
+        {
+            NSString *utf8 = [[NSString alloc] initWithData:source encoding:NSUTF8StringEncoding];
+            if (utf8)
+            {
+                result = [utf8 autorelease];
+            }
+        }
+    }
+    
     return result;
 }
 
