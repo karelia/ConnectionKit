@@ -48,7 +48,7 @@
 {
     if ([self setupTest])
     {
-        NSArray* badURLS = @[@"idontexist-noreally.com/nonexistantfolder", @"127.0.0.1/nonexistantfolder", @"karelia.com/nonexistantfolder"];
+        NSArray* badURLS = @[@"idontexist-noreally.com/nonexistantfolder", @"127.0.0.1/nonexistantfolder"];
         for (NSString* urlPart in badURLS)
         {
             NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@", [self.protocol lowercaseString], urlPart]];
