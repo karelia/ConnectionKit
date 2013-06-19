@@ -8,15 +8,15 @@
 
 #import "CK2Protocol.h"
 
-#import <CURLHandle/CURLHandle.h>
+#import <CURLHandle/CURLTransfer.h>
 
 
 @class CK2RemoteURL;
 
-@interface CK2CURLBasedProtocol : CK2Protocol <CURLHandleDelegate, NSURLAuthenticationChallengeSender>
+@interface CK2CURLBasedProtocol : CK2Protocol <CURLTransferDelegate, NSURLAuthenticationChallengeSender>
 {
-    CURLHandle  *_handle;
-    NSString    *_user;
+    CURLTransfer    *_transfer;
+    NSString        *_user;
     
     void    (^_completionHandler)(NSError *error);
     void    (^_dataBlock)(NSData *data);

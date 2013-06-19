@@ -8,10 +8,15 @@
 
 #import "CK2CURLBasedProtocol.h"
 
-#import <CurlHandle/NSURLRequest+CURLHandle.h>
+#import <CURLHandle/CURLHandle.h>
 #import <sys/dirent.h>
 
 #import <AppKit/AppKit.h>   // for NSImage
+
+
+@interface CURLTransfer (Testing)
+- (id)initWithRequest:(NSURLRequest *)request credential:(NSURLCredential *)credential delegate:(id<CURLTransferDelegate>)delegate delegateQueue:(NSOperationQueue *)queue multi:(CURLMultiHandle *)multi;
+@end
 
 
 @implementation CK2CURLBasedProtocol
@@ -38,8 +43,8 @@
                 [self reportToProtocolWithError:error];
             }
             
-            // Clean up handle
-            [_handle release]; _handle = nil;
+            // Clean up transfer
+            [_transfer release]; _transfer = nil;
         }];
     }
     
@@ -425,7 +430,7 @@
 
 - (void)dealloc;
 {
-    [_handle release];
+    [_transfer release];
     [_user release];
     [_completionHandler release];
     [_dataBlock release];
@@ -443,7 +448,7 @@
     _user = [credential.user copy];
     
     NSURLRequest* request = [self request];
-    CURLMulti* multi = nil;
+    CURLMultiHandle* multi = nil;
     if ([request respondsToSelector:@selector(ck2_multi)])  // should only be a testing/debugging feature
     {
         multi = [request performSelector:@selector(ck2_multi)]; // typically this is nil, meaning use the default, but we can override it for test purposes
@@ -451,38 +456,39 @@
 
     if ([[self class] usesMultiHandle])
     {
-        _handle = [[CURLHandle alloc] initWithRequest:request
-                                           credential:credential
-                                             delegate:self
-                                                multi:multi];
+        _transfer = [[CURLTransfer alloc] initWithRequest:request
+                                             credential:credential
+                                               delegate:self
+                                          delegateQueue:nil
+                                                  multi:multi];
     }
     else
     {
         // Create the queue & handle for whole app to share
-        static CURLHandle *handle;
+        static CURLTransfer *transfer;
         static dispatch_queue_t queue;
         
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
             
-            handle = [[CURLHandle alloc] init];
-            queue = dispatch_queue_create("com.karelia.connection.fallback-curlhandle", NULL);
+            transfer = [[CURLTransfer alloc] init];
+            queue = dispatch_queue_create("com.karelia.connection.fallback-CURLTransfer", NULL);
         });
 
-        CURLHandle* handleToUse;
+        CURLTransfer* transferToUse;
         if (multi) // although we're not using the multi, we use it being set here as a signal to use a new handle for this transaction
         {
-            handleToUse = [[[CURLHandle alloc] init] autorelease];
+            transferToUse = [[[CURLTransfer alloc] init] autorelease];
         }
         else
         {
-            handleToUse = handle;
+            transferToUse = transfer;
         }
 
         // Let the work commence!
         dispatch_async(queue, ^{
-            _handle = [handleToUse retain];
-            [_handle sendSynchronousRequest:self.request credential:credential delegate:self];
+            _transfer = [transferToUse retain];
+            [_transfer sendSynchronousRequest:self.request credential:credential delegate:self];
         });
     }
 }
@@ -501,7 +507,7 @@
 
 - (void)stop;
 {
-    [_handle cancel];
+    [_transfer cancel];
 }
 
 #pragma mark Managing the Completion Handler
@@ -586,7 +592,7 @@
 
 - (void)updateHomeDirectoryStore;
 {
-    NSString *homeDirectoryPath = [_handle initialFTPPath];
+    NSString *homeDirectoryPath = [_transfer initialFTPPath];
     
     if ([homeDirectoryPath isAbsolutePath])
     {
@@ -619,35 +625,25 @@
     return sHomeURLsByHostURL;
 }
 
-#pragma mark CURLHandleDelegate
+#pragma mark CURLTransferDelegate
 
-- (void)handle:(CURLHandle *)handle didFailWithError:(NSError *)error;
-{
-    if (!error)
-    {
-        error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
-    }
-    
-    [self popCompletionHandlerByExecutingWithError:error];
-}
-
-- (void)handle:(CURLHandle *)handle didReceiveData:(NSData *)data;
+- (void)transfer:(CURLTransfer *)transfer didReceiveData:(NSData *)data;
 {
     [self updateHomeDirectoryStore];    // Make sure is updated before parsing of directory listing
     if (_dataBlock) _dataBlock(data);
 }
 
-- (void)handle:(CURLHandle *)handle willSendBodyDataOfLength:(NSUInteger)bytesWritten
+- (void)transfer:(CURLTransfer *)transfer willSendBodyDataOfLength:(NSUInteger)bytesWritten
 {
     if (_progressBlock) _progressBlock(bytesWritten, 0);
 }
 
-- (void)handleDidFinish:(CURLHandle *)handle;
+- (void)transfer:(CURLTransfer *)transfer didCompleteWithError:(NSError *)error;
 {
-    [self popCompletionHandlerByExecutingWithError:nil];
+    [self popCompletionHandlerByExecutingWithError:error];
 }
 
-- (void)handle:(CURLHandle *)handle didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
+- (void)transfer:(CURLTransfer *)transfer didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
 {
     CKTranscriptType ckType;
     switch (type)

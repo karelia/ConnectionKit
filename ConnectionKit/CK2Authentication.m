@@ -8,7 +8,7 @@
 
 #import "CK2Authentication.h"
 
-#import <CURLHandle/CURLHandle.h>
+#import <CURLHandle/CURLTransfer.h>
 
 
 #pragma mark SSH Host Fingerprint

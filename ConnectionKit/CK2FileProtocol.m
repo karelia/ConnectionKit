@@ -274,13 +274,13 @@ static size_t kCopyBufferSize = 4096;
 }
 
 /**
- File creation implementation that uses CURLHandle.
- The main problem with this is that CURLHandle doesn't return very good error information.
+ File creation implementation that uses CURLTransfer.
+ The main problem with this is that CURLTransfer doesn't return very good error information.
  */
 
 - (void)createFileWithCURLForRequest:(NSURLRequest*)request openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock
 {
-    // Hand off to CURLHandle to create the file
+    // Hand off to CURLTransfer to create the file
     __block CK2CURLBasedProtocol *curlProtocol = [[CK2CURLBasedProtocol alloc] initWithRequest:request client:nil progressBlock:progressBlock completionHandler:^(NSError *error) {
 
         if (error)

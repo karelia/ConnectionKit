@@ -480,7 +480,7 @@
 
 - (void)testCreateFileSerialThrash
 {
-    // Create the same file multiple times in a row. This has been tending to fail weirdly when testing CURLHandle directly
+    // Create the same file multiple times in a row. This has been tending to fail weirdly when testing CURLTransfer directly
 
     if ([self setupTest])
     {
