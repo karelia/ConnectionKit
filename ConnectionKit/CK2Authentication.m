@@ -8,7 +8,7 @@
 
 #import "CK2Authentication.h"
 
-#import <CURLHandle/CURLHandle.h>
+#import <CURLHandle/CURLTransfer.h>
 
 
 #pragma mark SSH Host Fingerprint
@@ -35,7 +35,7 @@
 - (NSString *)authenticationMethod; { return CK2AuthenticationMethodHostFingerprint; }
 - (NSString *)protocol; { return @"ssh"; }
 
-- (enum curl_khmatch)ck2_knownHostMatch; { return _match; }
+- (CK2KnownHostMatch)ck2_knownHostMatch; { return _match; }
 
 // Make sure super doesn't create an actual copy
 - (id)copyWithZone:(NSZone *)zone; { return [self retain]; }

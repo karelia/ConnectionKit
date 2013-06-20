@@ -12,7 +12,7 @@
 #import <CURLHandle/CK2SSHCredential.h>
 
 #import <AppKit/AppKit.h>
-#import <CurlHandle/NSURLRequest+CURLHandle.h>
+#import <CURLHandle/CURLHandle.h>
 #import <libssh2_sftp.h>
 
 @implementation CK2SFTPProtocol
@@ -320,7 +320,7 @@
 
 #pragma mark Host Fingerprint
 
-- (enum curl_khstat)handle:(CURLHandle *)handle didFindHostFingerprint:(const struct curl_khkey *)foundKey knownFingerprint:(const struct curl_khkey *)knownkey match:(enum curl_khmatch)match;
+- (enum curl_khstat)transfer:(CURLTransfer *)transfer didFindHostFingerprint:(const struct curl_khkey *)foundKey knownFingerprint:(const struct curl_khkey *)knownkey match:(enum curl_khmatch)match;
 {
     if (!_fingerprintSemaphore)
     {

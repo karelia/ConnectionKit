@@ -48,7 +48,7 @@
 {
     if ([self setupTest])
     {
-        NSArray* badURLS = @[@"idontexist-noreally.com/nonexistantfolder", @"127.0.0.1/nonexistantfolder", @"karelia.com/nonexistantfolder"];
+        NSArray* badURLS = @[@"idontexist-noreally.com/nonexistantfolder", @"127.0.0.1/nonexistantfolder"];
         for (NSString* urlPart in badURLS)
         {
             NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@", [self.protocol lowercaseString], urlPart]];
@@ -143,6 +143,10 @@
     if ([self setupTest])
     {
         [self makeTestDirectoryWithFiles:YES];
+        if (self.useMockServer)
+        {
+            self.server.data = [self mockServerDirectoryListingData];
+        }
 
         NSURL* url = [self URLForTestFolder];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants|CK2DirectoryEnumerationIncludesDirectory;
@@ -476,7 +480,7 @@
 
 - (void)testCreateFileSerialThrash
 {
-    // Create the same file multiple times in a row. This has been tending to fail weirdly when testing CURLHandle directly
+    // Create the same file multiple times in a row. This has been tending to fail weirdly when testing CURLTransfer directly
 
     if ([self setupTest])
     {

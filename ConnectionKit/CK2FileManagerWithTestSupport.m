@@ -5,7 +5,14 @@
 #import "CK2FileManagerWithTestSupport.h"
 #import "CK2FileOperationWithTestSupport.h"
 
-#import <CURLHandle/CURLHandle+TestingSupport.h>
+#import <CURLHandle/CURLHandle.h>
+
+
+@interface CURLTransfer (Testing)
++ (void)cleanupStandaloneMulti:(CURLMultiHandle *)multi;
++ (CURLMultiHandle *)standaloneMultiForTestPurposes;
+@end
+
 
 @implementation CK2FileManagerWithTestSupport
 
@@ -14,7 +21,7 @@
 
 - (void)dealloc
 {
-    [CURLHandle cleanupStandaloneMulti:_multi];
+    [CURLTransfer cleanupStandaloneMulti:_multi];
     [_multi release];
 
     [super dealloc];
@@ -25,11 +32,11 @@
     return [CK2FileOperationWithTestSupport class];
 }
 
-- (CURLMulti*)multi
+- (CURLMultiHandle*)multi
 {
     if (_dontShareConnections && !_multi)
     {
-        _multi = [[CURLHandle standaloneMultiForTestPurposes] retain];
+        _multi = [[CURLTransfer standaloneMultiForTestPurposes] retain];
     }
 
     return _dontShareConnections ? _multi : nil;
@@ -39,7 +46,7 @@
 
 @implementation NSURLRequest(CK2FileManagerDebugging)
 
-- (CURLMulti*)ck2_multi
+- (CURLMultiHandle*)ck2_multi
 {
     return [NSURLProtocol propertyForKey:@"ck2_multi" inRequest:self];
 }
@@ -47,7 +54,7 @@
 @end
 @implementation NSMutableURLRequest(CK2FileManagerDebugging)
 
-- (void)ck2_setMulti:(CURLMulti*)multi
+- (void)ck2_setMulti:(CURLMultiHandle*)multi
 {
     [NSURLProtocol setProperty:multi forKey:@"ck2_multi" inRequest:self];
 }

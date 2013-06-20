@@ -8,7 +8,7 @@
 
 #import "CK2FTPProtocol.h"
 
-#import <CurlHandle/NSURLRequest+CURLHandle.h>
+#import <CURLHandle/CURLHandle.h>
 
 
 @implementation CK2FTPProtocol
@@ -254,7 +254,7 @@
     }
     else if ((code == NSURLErrorNoPermissionsToReadFile) && ([domain isEqualToString:NSURLErrorDomain]))
     {
-        // CURLHandle helpfully returns a URL error here, but we want to return a cocoa error instead
+        // CURLTransfer helpfully returns a URL error here, but we want to return a cocoa error instead
         error = [self standardCouldntWriteErrorWithUnderlyingError:error];
     }
     else
@@ -308,23 +308,23 @@
     [request setURL:[NSURL URLWithString:@"/" relativeToURL:[request URL]]];
     [request setHTTPMethod:@"HEAD"];
 
-    [self sendRequest:request dataHandler:nil completionHandler:^(CURLHandle *handle, NSError *error) {
+    [self sendRequest:request dataHandler:nil completionHandler:^(CURLTransfer *transfer, NSError *error) {
         if (error)
         {
             handler(nil, error);
         }
         else
         {
-            handler([handle initialFTPPath], error);
+            handler([transfer initialFTPPath], error);
         }
     }];
     
     [request release];
 }*/
 
-#pragma mark CURLHandleDelegate
+#pragma mark CURLTransferDelegate
 
-- (void)handle:(CURLHandle *)handle didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
+- (void)transfer:(CURLTransfer *)transfer didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
 {
     // Don't want to include password in transcripts usually!
     if (type == CURLINFO_HEADER_OUT &&
@@ -334,7 +334,7 @@
         string = @"PASS ####";
     }
     
-    [super handle:handle didReceiveDebugInformation:string ofType:type];
+    [super transfer:transfer didReceiveDebugInformation:string ofType:type];
 }
 
 #pragma mark Backend

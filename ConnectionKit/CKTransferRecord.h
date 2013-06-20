@@ -48,6 +48,8 @@
 	NSMutableDictionary *_properties;
 	
 	NSError *_error;
+    
+    void *_observationInfo;
 }
 
 - (NSString *)name;
@@ -73,6 +75,8 @@
 - (NSInteger)progress;
 - (void)setProgress:(NSInteger)progress;
 
+- (NSDictionary *)nameWithProgressAndFileSize;
+
 - (void)addContent:(CKTransferRecord *)record;
 - (NSArray *)contents;
 
@@ -81,7 +85,7 @@
 - (CKTransferRecord *)root;
 - (NSString *)path; 
 
-- (void)setProperty:(id)property forKey:(NSString *)key;
+- (void)setProperty:(id)property forKey:(NSString *)key __attribute((nonnull(2)));
 - (id)propertyForKey:(NSString *)key;
 
 /* backward compatibility with NSDictionary */

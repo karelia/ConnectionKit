@@ -70,7 +70,7 @@
 /* config
    error */
 
-"Quit" = "Sair";
+"Quit" = "Encerrar";
 
 /* close window */
 "Stop Upload" = "Suspender o Envio";

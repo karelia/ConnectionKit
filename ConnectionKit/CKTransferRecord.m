@@ -308,6 +308,8 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	return [_contents count] > 0;
 }
 
+#pragma mark KVO
+
 - (void)willChangeValueForKey:(NSString *)key
 {
 	//We override this because we need to call the same on the record's parents to update any bindings on them as well. This traverses all the way up the parental hierarchy.
@@ -325,6 +327,11 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	if ([self parent])
 		[[self parent] didChangeValueForKey:key];
 }
+
+- (void *)observationInfo; { return _observationInfo; }
+- (void)setObservationInfo:(void *)observationInfo; { _observationInfo = observationInfo; }
+
+#pragma mark
 
 - (CKTransferRecord *)root
 {
@@ -397,12 +404,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (void)setProperty:(id)property forKey:(NSString *)key
 {
-	/// Terrence added this NSLog since the exception doesn't log the key
-	if ( nil == property )
-	{
-		NSLog(@"attempted to set nil property for key %@", key);
-	}
-	
 	[_properties setObject:property forKey:key];
 }
 

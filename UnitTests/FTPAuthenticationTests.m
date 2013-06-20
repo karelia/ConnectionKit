@@ -7,7 +7,7 @@
 
 #import "CK2FileManager.h"
 
-#import <CURLHandle/CURLHandle.h>
+#import <CURLHandle/CURLTransfer.h>
 
 @interface FTPAuthenticationTests : BaseCKTests
 
