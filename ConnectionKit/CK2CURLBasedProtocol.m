@@ -456,11 +456,18 @@
 
     if ([[self class] usesMultiHandle])
     {
-        _transfer = [[CURLTransfer alloc] initWithRequest:request
-                                             credential:credential
-                                               delegate:self
-                                          delegateQueue:nil
-                                                  multi:multi];
+        if (multi)
+        {
+            _transfer = [[CURLTransfer alloc] initWithRequest:request
+                                                 credential:credential
+                                                   delegate:self
+                                              delegateQueue:nil
+                                                      multi:multi];
+        }
+        else
+        {
+            _transfer = [[CURLTransfer alloc] initWithRequest:request credential:credential delegate:self delegateQueue:nil];
+        }
     }
     else
     {
