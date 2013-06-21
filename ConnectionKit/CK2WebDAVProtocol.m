@@ -76,13 +76,22 @@
         DAVRequest* davRequest = [[DAVListingRequest alloc] initWithPath:path session:_session delegate:self];
         [_queue addOperation:davRequest];
 
-        self.completionHandler = ^(id result) {
+        self.completionHandler = ^(NSArray* items) {
             CK2WebDAVLog(@"enumerating directory results");
-
-            NSArray* items = result;
-
+            
+            // We're hunting an issue where some requests come back with no error, but no items either.
+            // For now, fail with a fairly generic error to try and dig out a little more detail
+            if (items.count == 0)
+            {
+                [client protocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                           code:NSURLErrorCannotParseResponse
+                                                                       userInfo:@{ NSURLErrorFailingURLErrorKey : request.URL }]];
+                
+                return;
+            }
+            
             // first item should always be the directory itself
-            if (result && !(mask & CK2DirectoryEnumerationIncludesDirectory))
+            if (items && !(mask & CK2DirectoryEnumerationIncludesDirectory))
             {
                 items = [items subarrayWithRange:NSMakeRange(1, [items count] - 1)];
             }
