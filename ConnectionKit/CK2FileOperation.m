@@ -325,8 +325,9 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)protocol:(CK2Protocol *)protocol didFailWithError:(NSError *)error;
 {
-    NSParameterAssert(protocol == _protocol);
     if ([self isCancelled]) return; // ignore errors once cancelled as protocol might be trying to invent its own
+    
+    NSParameterAssert(protocol == _protocol);
     
     if (!error) error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
     [self finishWithError:error];
