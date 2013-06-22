@@ -335,7 +335,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)protocolDidFinish:(CK2Protocol *)protocol;
 {
-    NSParameterAssert(protocol == _protocol);
+    if (!self.isCancelled) NSParameterAssert(protocol == _protocol);
     // Might as well report success even if cancelled
     
     [self finishWithError:nil];
