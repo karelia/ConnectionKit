@@ -60,12 +60,12 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 }
 
-- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcriptType
+- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcriptType
 {
     switch (transcriptType)
     {
-        case CKTranscriptReceived:
-        case CKTranscriptSent:
+        case CK2TranscriptHeaderIn:
+        case CK2TranscriptHeaderOut:
             LogHousekeeping(@"housekeeping %d: %@", transcriptType, info);
             break;
 
@@ -283,24 +283,24 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 }
 
-- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcriptType
+- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcriptType
 {
     NSString* prefix;
     switch (transcriptType)
     {
-        case CKTranscriptSent:
+        case CK2TranscriptHeaderOut:
             prefix = @"-->";
             break;
 
-        case CKTranscriptReceived:
+        case CK2TranscriptHeaderIn:
             prefix = @"<--";
             break;
 
-        case CKTranscriptData:
+        /*case CKTranscriptData:
             prefix = @"(d)";
             break;
-
-        case CKTranscriptInfo:
+         */
+        case CK2TranscriptText:
             prefix = @"(i)";
             break;
 

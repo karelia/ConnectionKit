@@ -91,9 +91,9 @@
 }
 
 
-- (void)uploader:(CKUploader *)uploader appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
+- (void)uploader:(CKUploader *)uploader appendString:(NSString *)string toTranscript:(CK2TranscriptType)transcript
 {
-    NSLog(@"%d: %@", transcript, string);
+    NSLog(@"%d: %@", (int)transcript, string);
 }
 
 #pragma mark - Utilities

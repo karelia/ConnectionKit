@@ -325,8 +325,9 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)protocol:(CK2Protocol *)protocol didFailWithError:(NSError *)error;
 {
-    NSParameterAssert(protocol == _protocol);
     if ([self isCancelled]) return; // ignore errors once cancelled as protocol might be trying to invent its own
+    
+    NSParameterAssert(protocol == _protocol);
     
     if (!error) error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
     [self finishWithError:error];
@@ -334,7 +335,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)protocolDidFinish:(CK2Protocol *)protocol;
 {
-    NSParameterAssert(protocol == _protocol);
+    if (!self.isCancelled) NSParameterAssert(protocol == _protocol);
     // Might as well report success even if cancelled
     
     [self finishWithError:nil];
@@ -349,7 +350,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     // TODO: Cache credentials per protection space
 }
 
-- (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
+- (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 {
     if (_protocol)  // even if cancelled, allow through since could well be valuable debugging info
     {

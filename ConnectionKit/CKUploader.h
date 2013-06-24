@@ -80,7 +80,7 @@ typedef NSUInteger CKUploadingOptions;
 @required
 - (void)uploader:(CKUploader *)uploader didBeginUploadToPath:(NSString *)path;
 
-- (void)uploader:(CKUploader *)uploader appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
+- (void)uploader:(CKUploader *)uploader appendString:(NSString *)string toTranscript:(CK2TranscriptType)transcript;
 
 @optional
 - (BOOL)uploader:(CKUploader *)uploader shouldProceedAfterError:(NSError *)error;

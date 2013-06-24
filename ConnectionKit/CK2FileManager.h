@@ -376,13 +376,12 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
 
-typedef enum {
-	CKTranscriptSent,
-	CKTranscriptReceived,
-	CKTranscriptData,
-    CKTranscriptInfo,
-} CKTranscriptType;
+typedef NS_ENUM(NSUInteger, CK2TranscriptType) {
+	CK2TranscriptText,
+	CK2TranscriptHeaderIn,
+	CK2TranscriptHeaderOut,
+};    // deliberately aligned with curl_infotype for convenience
 
-- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
+- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 
 @end
