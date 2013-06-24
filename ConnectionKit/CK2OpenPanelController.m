@@ -1257,7 +1257,7 @@
     }
 }
 
-- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
+- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 {
     id <CK2OpenPanelDelegate>        delegate;
     

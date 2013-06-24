@@ -152,6 +152,6 @@
 - (void)panelSelectionDidChange:(id)sender;
 
 - (void)panel:(id)sender didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-- (void)panel:(id)sender appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
+- (void)panel:(id)sender appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 
 @end
