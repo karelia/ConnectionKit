@@ -366,7 +366,7 @@
     });
 }
 
-- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
+- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
         [[self delegate] uploader:self appendString:info toTranscript:transcript];

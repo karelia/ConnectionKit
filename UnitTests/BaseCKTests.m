@@ -60,7 +60,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 }
 
-- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcriptType
+- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcriptType
 {
     switch (transcriptType)
     {
@@ -283,7 +283,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 }
 
-- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcriptType
+- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcriptType
 {
     NSString* prefix;
     switch (transcriptType)

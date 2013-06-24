@@ -350,7 +350,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     // TODO: Cache credentials per protection space
 }
 
-- (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
+- (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 {
     if (_protocol)  // even if cancelled, allow through since could well be valuable debugging info
     {

@@ -380,7 +380,7 @@
 {
     CK2WebDAVLog(sent ? @"--> %@ " : @"<-- %@", string);
 
-    [[self client] protocol:self appendString:string toTranscript:(sent ? CKTranscriptSent : CKTranscriptReceived)];
+    [[self client] protocol:self appendString:string toTranscript:(sent ? CK2TranscriptHeaderOut : CK2TranscriptHeaderIn)];
 }
 
 #pragma mark - Utilities

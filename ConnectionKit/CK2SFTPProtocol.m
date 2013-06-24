@@ -60,7 +60,7 @@
 
     NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
     NSString* message = [NSString stringWithFormat:@"Making directory %@\n", path];
-    [client protocol:self appendString:message toTranscript:CKTranscriptSent];
+    [client protocol:self appendString:message toTranscript:CK2TranscriptHeaderOut];
 
     NSString* command = [@"mkdir " stringByAppendingString:path];
     self = [self initWithCustomCommands:[NSArray arrayWithObject:command]
@@ -94,7 +94,7 @@
     NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
     NSString* name = [path lastPathComponent];
     NSString* message = [NSString stringWithFormat:@"Uploading %@ to %@\n", name, path];
-    [client protocol:self appendString:message toTranscript:CKTranscriptSent];
+    [client protocol:self appendString:message toTranscript:CK2TranscriptHeaderOut];
 
     self = [self initWithRequest:mutableRequest client:client progressBlock:progressBlock completionHandler:nil];
     
@@ -129,7 +129,7 @@
 {
     NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
     NSString* message = [NSString stringWithFormat:@"Removing %@\n", path];
-    [client protocol:self appendString:message toTranscript:CKTranscriptSent];
+    [client protocol:self appendString:message toTranscript:CK2TranscriptHeaderOut];
 
     return [self initWithCustomCommands:[NSArray arrayWithObjects:[@"*rm " stringByAppendingString:path], [@"rmdir " stringByAppendingString:path], nil]
                                 request:request
@@ -171,7 +171,7 @@
     {
         NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
         NSString* message = [NSString stringWithFormat:@"Changing mode on %@\n", path];
-        [client protocol:self appendString:message toTranscript:CKTranscriptSent];
+        [client protocol:self appendString:message toTranscript:CK2TranscriptHeaderOut];
 
         NSArray *commands = [NSArray arrayWithObject:[NSString stringWithFormat:
                                                       @"chmod %lo %@",
