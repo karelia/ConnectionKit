@@ -190,9 +190,7 @@
 - (void)beginWithCompletionHandler:(void (^)(NSInteger result))handler
 {
     [self willAppear];
-    
-    CFRetain(self);
-    
+        
     [self setCompletionBlock:handler];
     [self center];
     [self makeKeyAndOrderFront:self];
@@ -222,6 +220,7 @@
         if ([self isSheet])
         {
             [NSApp endSheet:self returnCode:code];
+            CFRelease(self);
         }
         else
         {
@@ -235,7 +234,6 @@
                 [self setCompletionBlock:nil];
             }
         }
-        CFRelease(self);
     }
 }
 
