@@ -241,7 +241,13 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 
 #pragma mark Moving Items
-// This is solely for renaming an item. Moving items between different directories/servers/protocols is not supported at the moment, and attempting to do so produces undefined results
+/**
+ Renames the item at the specified URL
+ 
+ @param srcURL The file or directory to rename.
+ @param newName The new name for the file. Note that some FTP servers seem to cope poorly with filenames containing a space, truncating at the first space character.
+ @param handler Called at the end of the operation. A non-nil error indicates failure.
+ */
 - (id)renameItemAtURL:(NSURL *)srcURL toFilename:(NSString *)newName completionHandler:(void (^)(NSError *error))handler;
 
 

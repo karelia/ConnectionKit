@@ -723,6 +723,7 @@
 
 #pragma mark Customization
 
-+ (BOOL)usesMultiHandle; { return YES; }
+// Much to my annoyance, async backend doesn't seem to be working right at the moment
++ (BOOL)usesMultiHandle; { return NO; }
 
 @end

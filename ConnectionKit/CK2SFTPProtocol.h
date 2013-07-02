@@ -14,5 +14,7 @@
     NSURLAuthenticationChallenge    *_fingerprintChallenge;
     enum curl_khstat                _knownHostsStat;
     dispatch_semaphore_t            _fingerprintSemaphore;
+    
+    NSString    *_transcriptMessage;
 }
 @end

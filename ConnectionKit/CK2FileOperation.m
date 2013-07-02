@@ -81,7 +81,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                             // if there is one
                             NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
                             NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info]; // TODO: what's the correct error to report here?
-                            [self finishWithError:error];
+                            [self completeWithError:error];
                             [error release];
                         }
 
@@ -93,7 +93,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             {
                 NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
                 NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info];
-                [self finishWithError:error];
+                [self completeWithError:error];
                 [error release];
             }
         }];
@@ -254,19 +254,20 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     }];
 }
 
-- (void)finishWithError:(NSError *)error;
+- (void)completeWithError:(NSError *)error;
 {
     // Run completion block on own queue so that:
     //  A) It doesn't potentially hold up the calling queue for too long
-    //  B) Serialises access, guaranteeing the block is only run once
+    //  B) Serialises access
     dispatch_async(_queue, ^{
-        if (_completionBlock)
+        
+        if (_completionBlock)   // only allow "completion" to happen the once!
         {
             _completionBlock(error);
             [_completionBlock release]; _completionBlock = nil;
 
-            // chuck the protocol now, to break retain cycle
-            [_protocol release]; _protocol = nil;
+            // Break retain cycle, but deliberately keep weak reference so we know we're associated with it
+            [_protocol release];
         }
     });
     
@@ -277,7 +278,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)dealloc
 {
-    [_protocol release];
+    //[_protocol release];  DON'T release protocol. It should be a weak reference by the time deallocation happens
     [_manager release];
     [_URL release];
     if (_queue) dispatch_release(_queue);
@@ -312,7 +313,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     // Report cancellation to completion handler. If protocol has already finished or failed, it'll go ignored
     NSError *cancellationError = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:nil];
-    [self finishWithError:cancellationError];
+    [self completeWithError:cancellationError];
     
     // Once the cancellation message is queued up, it's safe to tell the protocol as it can't misinterpret the message and issue its own cancellation error
     [_protocol stop];
@@ -325,25 +326,23 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)protocol:(CK2Protocol *)protocol didFailWithError:(NSError *)error;
 {
-    if ([self isCancelled]) return; // ignore errors once cancelled as protocol might be trying to invent its own
-    
-    NSParameterAssert(protocol == _protocol);
+    NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     
     if (!error) error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
-    [self finishWithError:error];
+    [self completeWithError:error];
 }
 
 - (void)protocolDidFinish:(CK2Protocol *)protocol;
 {
-    if (!self.isCancelled) NSParameterAssert(protocol == _protocol);
+    NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     // Might as well report success even if cancelled
     
-    [self finishWithError:nil];
+    [self completeWithError:nil];
 }
 
 - (void)protocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    NSParameterAssert(protocol == _protocol);
+    NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     if ([self isCancelled]) return; // don't care about auth once cancelled
     
     [CK2AuthenticationChallengeTrampoline handleChallenge:challenge operation:self];
@@ -352,10 +351,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 {
-    if (_protocol)  // even if cancelled, allow through since could well be valuable debugging info
-    {
-        NSParameterAssert(protocol == _protocol);
-    }
+    NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
+    
     
     // Pass straight onto delegate and trust it not to take too long handling it
     // We used to dispatch off onto one of the global queues, but that does have the nasty downside of messages sometimes arriving out-of-order or concurrently
@@ -368,7 +365,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)protocol:(CK2Protocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
 {
-    NSParameterAssert(protocol == _protocol);
+    NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     // Even if cancelled, allow through as the discovery still stands; might be useful for caching elsewhere
     
     // Provide ancestry and other fairly generic keys on-demand
@@ -457,7 +454,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (NSInputStream *)protocol:(CK2Protocol *)protocol needNewBodyStream:(NSURLRequest *)request;
 {
-    NSParameterAssert(protocol == _protocol);
+    NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     
     NSInputStream *stream = [[NSInputStream alloc] initWithURL:_localURL];
     return [stream autorelease];

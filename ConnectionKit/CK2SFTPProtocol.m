@@ -59,8 +59,6 @@
     [mutableRequest curl_setNewDirectoryPermissions:[attributes objectForKey:NSFilePosixPermissions]];
 
     NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
-    NSString* message = [NSString stringWithFormat:@"Making directory %@\n", path];
-    [client protocol:self appendString:message toTranscript:CK2TranscriptHeaderOut];
 
     NSString* command = [@"mkdir " stringByAppendingString:path];
     self = [self initWithCustomCommands:[NSArray arrayWithObject:command]
@@ -81,6 +79,8 @@
                           [self reportToProtocolWithError:error];
                       }];
     
+    _transcriptMessage = [[NSString alloc] initWithFormat:@"Making directory %@\n", path];
+    
     [mutableRequest release];
     return self;
 }
@@ -93,10 +93,10 @@
     
     NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
     NSString* name = [path lastPathComponent];
-    NSString* message = [NSString stringWithFormat:@"Uploading %@ to %@\n", name, path];
-    [client protocol:self appendString:message toTranscript:CK2TranscriptHeaderOut];
 
     self = [self initWithRequest:mutableRequest client:client progressBlock:progressBlock completionHandler:nil];
+    
+    _transcriptMessage = [[NSString alloc] initWithFormat:@"Uploading %@ to %@\n", name, path];
     
     [mutableRequest release];
     
@@ -128,10 +128,8 @@
 - (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
     NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
-    NSString* message = [NSString stringWithFormat:@"Removing %@\n", path];
-    [client protocol:self appendString:message toTranscript:CK2TranscriptHeaderOut];
-
-    return [self initWithCustomCommands:[NSArray arrayWithObjects:[@"*rm " stringByAppendingString:path], [@"rmdir " stringByAppendingString:path], nil]
+    
+    self = [self initWithCustomCommands:[NSArray arrayWithObjects:[@"*rm " stringByAppendingString:path], [@"rmdir " stringByAppendingString:path], nil]
                                 request:request
           createIntermediateDirectories:NO
                                  client:client
@@ -162,6 +160,10 @@
 
                           [self reportToProtocolWithError:error];
                       }];
+    
+    _transcriptMessage = [[NSString alloc] initWithFormat:@"Removing %@\n", path];
+    
+    return self;
 }
 
 - (id)initForSettingAttributes:(NSDictionary *)keyedValues ofItemWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
@@ -170,15 +172,13 @@
     if (permissions)
     {
         NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
-        NSString* message = [NSString stringWithFormat:@"Changing mode on %@\n", path];
-        [client protocol:self appendString:message toTranscript:CK2TranscriptHeaderOut];
 
         NSArray *commands = [NSArray arrayWithObject:[NSString stringWithFormat:
                                                       @"chmod %lo %@",
                                                       [permissions unsignedLongValue],
                                                       path]];
         
-        return [self initWithCustomCommands:commands
+        self = [self initWithCustomCommands:commands
                                     request:request
               createIntermediateDirectories:NO
                                      client:client
@@ -203,15 +203,18 @@
                               
                               [self reportToProtocolWithError:error];
                           }];
+        
+        _transcriptMessage = [[NSString alloc] initWithFormat:@"Changing mode on %@\n", path];
     }
     else
     {
         self = [self initWithRequest:nil client:client];
-        return self;
     }
+    
+    return self;
 }
 
-#pragma mark Lifecycle & Auth
+#pragma mark Lifecycle
 
 - (void)start;
 {
@@ -221,6 +224,14 @@
     {
         [[self client] protocolDidFinish:self];
         return;
+    }
+    
+    
+    // Note what we're up to
+    if (_transcriptMessage)
+    {
+        [self.client protocol:self appendString:_transcriptMessage toTranscript:CK2TranscriptHeaderOut];
+        [_transcriptMessage release]; _transcriptMessage = nil;
     }
     
     
@@ -246,6 +257,17 @@
     [[self client] protocol:self didReceiveAuthenticationChallenge:challenge];
     [challenge release];
 }
+
+- (void)dealloc;
+{
+    [_fingerprintChallenge release];
+    if (_fingerprintSemaphore) dispatch_release(_fingerprintSemaphore);
+    [_transcriptMessage release];
+    
+    [super dealloc];
+}
+
+#pragma mark Auth
 
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
@@ -363,19 +385,5 @@
     _knownHostsStat = stat;
     dispatch_semaphore_signal(_fingerprintSemaphore);   // can't dispose of yet, as might not be currently waiting on it
 }
-
-- (void)dealloc
-{
-    [_fingerprintChallenge release];
-    if (_fingerprintSemaphore) dispatch_release(_fingerprintSemaphore);
-    
-    [super dealloc];
-}
-
-#pragma mark Backend
-
-// Alas, we must go back to the "easy" synchronous API for now. Multi API has a tendency to get confused by perfectly good response codes and think they're an error
-+ (BOOL)usesMultiHandle; { return NO; }
-
 
 @end
