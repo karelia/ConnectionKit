@@ -265,8 +265,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             _completionBlock(error);
             [_completionBlock release]; _completionBlock = nil;
 
-            // chuck the protocol now, to break retain cycle
-            [_protocol release]; _protocol = nil;
+            // Break retain cycle, but deliberately keep weak reference so we know we're associated with it
+            [_protocol release];
         }
     });
     
@@ -277,7 +277,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)dealloc
 {
-    [_protocol release];
+    //[_protocol release];  DON'T release protocol. It should be a weak reference by the time deallocation happens
     [_manager release];
     [_URL release];
     if (_queue) dispatch_release(_queue);
