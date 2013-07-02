@@ -81,7 +81,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                             // if there is one
                             NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
                             NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info]; // TODO: what's the correct error to report here?
-                            [self finishWithError:error];
+                            [self completeWithError:error];
                             [error release];
                         }
 
@@ -93,7 +93,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             {
                 NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
                 NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info];
-                [self finishWithError:error];
+                [self completeWithError:error];
                 [error release];
             }
         }];
@@ -254,7 +254,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     }];
 }
 
-- (void)finishWithError:(NSError *)error;
+- (void)completeWithError:(NSError *)error;
 {
     // Run completion block on own queue so that:
     //  A) It doesn't potentially hold up the calling queue for too long
@@ -312,7 +312,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     // Report cancellation to completion handler. If protocol has already finished or failed, it'll go ignored
     NSError *cancellationError = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:nil];
-    [self finishWithError:cancellationError];
+    [self completeWithError:cancellationError];
     
     // Once the cancellation message is queued up, it's safe to tell the protocol as it can't misinterpret the message and issue its own cancellation error
     [_protocol stop];
@@ -330,7 +330,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSParameterAssert(protocol == _protocol);
     
     if (!error) error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
-    [self finishWithError:error];
+    [self completeWithError:error];
 }
 
 - (void)protocolDidFinish:(CK2Protocol *)protocol;
@@ -338,7 +338,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     if (!self.isCancelled) NSParameterAssert(protocol == _protocol);
     // Might as well report success even if cancelled
     
-    [self finishWithError:nil];
+    [self completeWithError:nil];
 }
 
 - (void)protocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
