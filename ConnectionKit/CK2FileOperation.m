@@ -258,9 +258,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     // Run completion block on own queue so that:
     //  A) It doesn't potentially hold up the calling queue for too long
-    //  B) Serialises access, guaranteeing the block is only run once
+    //  B) Serialises access
     dispatch_async(_queue, ^{
-        if (_completionBlock)
+        
+        if (_completionBlock)   // only allow "completion" to happen the once!
         {
             _completionBlock(error);
             [_completionBlock release]; _completionBlock = nil;
