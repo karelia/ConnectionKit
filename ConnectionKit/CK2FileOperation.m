@@ -326,9 +326,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)protocol:(CK2Protocol *)protocol didFailWithError:(NSError *)error;
 {
-    if ([self isCancelled]) return; // ignore errors once cancelled as protocol might be trying to invent its own
-    
-    NSParameterAssert(protocol == _protocol);
+    NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     
     if (!error) error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
     [self completeWithError:error];
@@ -336,7 +334,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)protocolDidFinish:(CK2Protocol *)protocol;
 {
-    if (!self.isCancelled) NSParameterAssert(protocol == _protocol);
+    NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     // Might as well report success even if cancelled
     
     [self completeWithError:nil];
@@ -344,7 +342,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)protocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    NSParameterAssert(protocol == _protocol);
+    NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     if ([self isCancelled]) return; // don't care about auth once cancelled
     
     [CK2AuthenticationChallengeTrampoline handleChallenge:challenge operation:self];
@@ -353,10 +351,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 {
-    if (_protocol)  // even if cancelled, allow through since could well be valuable debugging info
-    {
-        NSParameterAssert(protocol == _protocol);
-    }
+    NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
+    
     
     // Pass straight onto delegate and trust it not to take too long handling it
     // We used to dispatch off onto one of the global queues, but that does have the nasty downside of messages sometimes arriving out-of-order or concurrently
@@ -369,7 +365,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)protocol:(CK2Protocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
 {
-    NSParameterAssert(protocol == _protocol);
+    NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     // Even if cancelled, allow through as the discovery still stands; might be useful for caching elsewhere
     
     // Provide ancestry and other fairly generic keys on-demand
@@ -458,7 +454,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (NSInputStream *)protocol:(CK2Protocol *)protocol needNewBodyStream:(NSURLRequest *)request;
 {
-    NSParameterAssert(protocol == _protocol);
+    NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     
     NSInputStream *stream = [[NSInputStream alloc] initWithURL:_localURL];
     return [stream autorelease];
