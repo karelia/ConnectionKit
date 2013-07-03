@@ -70,6 +70,7 @@
 
 //TODO: Handle/display errors better
 //TODO: Localization support
+//TODO: Add save panel functionality?
 //TODO: Save window/view dimensions?
 //TODO: Autocomplete in the path field?
 

@@ -181,10 +181,6 @@
             [completionBlock release];
         }
     }
-    else
-    {
-        NSLog(@"SAY WHAT??");
-    }
 }
 
 - (void)beginWithCompletionHandler:(void (^)(NSInteger result))handler
@@ -200,7 +196,6 @@
 {
     [self willAppear];
     
-    // NSFileHandlingPanelOKButton, NSFileHandlingPanelCancelButton
     [self center];
     return [NSApp runModalForWindow:self];
 }
@@ -214,25 +209,21 @@
     {
         [NSApp stopModalWithCode:code];
     }
+    else if ([self isSheet])
+    {
+        [NSApp endSheet:self returnCode:code];
+        CFRelease(self);
+    }
     else
     {
-        //PENDING: need to test
-        if ([self isSheet])
-        {
-            [NSApp endSheet:self returnCode:code];
-            CFRelease(self);
-        }
-        else
-        {
-            void        (^block)(NSInteger);
+        void        (^block)(NSInteger);
             
-            block = [self completionBlock];
-            
-            if (block != nil)
-            {
-                block(code);
-                [self setCompletionBlock:nil];
-            }
+        block = [self completionBlock];
+        
+        if (block != nil)
+        {
+            block(code);
+            [self setCompletionBlock:nil];
         }
     }
 }

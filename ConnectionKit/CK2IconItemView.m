@@ -128,6 +128,145 @@
     return rect;
 }
 
+- (NSColor *)selectionColor
+{
+    return [NSColor colorWithCalibratedWhite:0.76 alpha:1.0];
+}
+
+- (void)drawSelectionForText:(NSString *)label inRect:(NSRect)rect
+{
+    // Draw text selection
+    NSTextView      *fieldEditor;
+    NSLayoutManager *layoutManager;
+    NSRectArray     rects;
+    NSUInteger      count;
+    CGFloat         yPos;
+    NSBezierPath    *path;
+    NSRange         range;
+    NSColor         *selectionColor;
+    
+    fieldEditor = (NSTextView *)[[self window] fieldEditor:YES forObject:self];
+    [_textCell setUpFieldEditorAttributes:fieldEditor];
+    [fieldEditor setString:label];
+    [fieldEditor setFrame:rect];
+    [fieldEditor setTextContainerInset:NSZeroSize];
+    [fieldEditor setFont:[_textCell font]];
+    
+    layoutManager = [fieldEditor layoutManager];
+    
+    range = NSMakeRange(0, [label length]);
+    rects = [layoutManager rectArrayForCharacterRange:range withinSelectedCharacterRange:range inTextContainer:[fieldEditor textContainer] rectCount:&count];
+    
+    if ([[self window] isKeyWindow])
+    {
+        selectionColor = [NSColor alternateSelectedControlColor];
+        [_textCell setTextColor:[NSColor whiteColor]];
+    }
+    else
+    {
+        selectionColor = [self selectionColor];
+    }
+    [selectionColor set];
+    
+    yPos = NSMaxY(rect) - 1.0; // A little fudge
+    count = MIN(2, count);
+    for (NSUInteger i = 0; i < count; i++)
+    {
+        // The rects aren't positioned correctly so we correct them here. Also some fudge on the height
+        rects[i].size.height += 1.0;
+        rects[i].origin.x = NSMinX(rect) + (NSWidth(rect) - NSWidth(rects[i])) / 2.0;
+        rects[i].origin.y = yPos - NSHeight(rects[i]);
+        
+        if (!NSContainsRect(rect, rects[i]) && (i != 0))
+        {
+            // We only care about the rects within the visible region. For instance, we sometimes get one rect for
+            // the two lines plus another rect out of bounds
+            count = i;
+        }
+        
+        yPos = NSMinY(rects[i]);
+    }
+    
+    path = nil;
+    if (count > 1)
+    {
+        CGFloat         diff, height;
+        
+        diff = NSWidth(rects[0]) - NSWidth(rects[1]);
+        if (diff < SELECTION_RADIUS + INNER_SELECTION_RADIUS)
+        {
+            // The two lines of text are pretty close to eachother so just construct one rect to encompass them both
+            count = 1;
+            height = NSHeight(rects[0]) + NSHeight(rects[1]);
+            rects[0] = NSMakeRect(MIN(NSMinX(rects[0]), NSMinX(rects[1])), NSMaxY(rect) - height,
+                                  MAX(NSWidth(rects[0]), NSWidth(rects[1])), height);
+            rects[0] = NSInsetRect(rects[0], -SELECTION_RADIUS, 0.0);
+            
+            path = [NSBezierPath bezierPathWithRoundedRect:rects[0] xRadius:SELECTION_RADIUS yRadius:SELECTION_RADIUS];
+        }
+        else
+        {
+            // Lines of text are varying widths. Construct a path to follow the general shape, rounding the ends/corners.
+            CGFloat radius;
+            
+            radius = NSHeight(rects[0]) / 2.0;
+            
+            path = [NSBezierPath bezierPath];
+            // Top left corner
+            [path moveToPoint:NSMakePoint(NSMinX(rects[0]), NSMaxY(rects[0]))];
+            
+            if (diff > 0.0)
+            {
+                // First line is wider than the second
+                
+                // Right cap, top rect
+                [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rects[0]), NSMinY(rects[0]) + radius) radius:radius startAngle:90 endAngle:270 clockwise:YES];
+                
+                // Upper right corner, bottom rect
+                [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rects[1]) + radius + INNER_SELECTION_RADIUS, NSMaxY(rects[1]) - INNER_SELECTION_RADIUS) radius:INNER_SELECTION_RADIUS startAngle:90 endAngle:180 clockwise:NO];
+                
+                // Lower right corner, bottom rect
+                [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rects[1]), NSMinY(rects[1]) + radius) radius:radius startAngle:0 endAngle:270 clockwise:YES];
+                
+                // Lower left corner, bottom rect
+                [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rects[1]), NSMinY(rects[1]) + radius) radius:radius startAngle:270 endAngle:180 clockwise:YES];
+                
+                // Upper left corner, bottom rect
+                [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rects[1]) - radius - INNER_SELECTION_RADIUS, NSMaxY(rects[1]) - INNER_SELECTION_RADIUS) radius:INNER_SELECTION_RADIUS startAngle:0 endAngle:90 clockwise:NO];
+                
+                // Left cap, top rect
+                [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rects[0]), NSMinY(rects[0]) + radius) radius:radius startAngle:270 endAngle:90 clockwise:YES];
+            }
+            else
+            {
+                // Upper right corner, top rect
+                [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rects[0]), NSMaxY(rects[0]) - radius) radius:radius startAngle:90 endAngle:0 clockwise:YES];
+                
+                // Lower right corner, top rect
+                [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rects[0]) + radius + INNER_SELECTION_RADIUS, NSMinY(rects[0]) + INNER_SELECTION_RADIUS) radius:INNER_SELECTION_RADIUS startAngle:180 endAngle:270 clockwise:NO];
+                
+                // Right cap, bottom rect
+                [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rects[1]), NSMinY(rects[1]) + radius) radius:radius startAngle:90 endAngle:270 clockwise:YES];
+                
+                // Left cap, bottom rect
+                [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rects[1]), NSMinY(rects[1]) + radius) radius:radius startAngle:180 endAngle:90 clockwise:YES];
+                
+                // Lower left corner, top rect
+                [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rects[0]) - radius - INNER_SELECTION_RADIUS, NSMinY(rects[0]) + INNER_SELECTION_RADIUS) radius:INNER_SELECTION_RADIUS startAngle:270 endAngle:0 clockwise:NO];
+                [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rects[0]), NSMaxY(rects[0]) - radius) radius:radius startAngle:180 endAngle:90 clockwise:YES];
+            }
+            [path closePath];
+        }
+    }
+    else
+    {
+        rects[0] = NSInsetRect(rects[0], -SELECTION_RADIUS, 0);
+        path = [NSBezierPath bezierPathWithRoundedRect:rects[0] xRadius:SELECTION_RADIUS yRadius:SELECTION_RADIUS];
+    }
+    
+    [path fill];
+}
+
 
 - (void)drawRect:(NSRect)dirtyRect
 {
@@ -179,132 +318,7 @@
     
     if ([[self item] isSelected])
     {
-        // Draw text selection
-        NSTextView      *fieldEditor;
-        NSLayoutManager *layoutManager;
-        NSRectArray     rects;
-        NSUInteger      count;
-        CGFloat         yPos;
-        NSBezierPath    *path;
-        NSRange         range;
-        
-        fieldEditor = (NSTextView *)[[self window] fieldEditor:YES forObject:self];
-        [_textCell setUpFieldEditorAttributes:fieldEditor];
-        [fieldEditor setString:label];
-        [fieldEditor setFrame:rect];
-        [fieldEditor setTextContainerInset:NSZeroSize];
-        [fieldEditor setFont:[_textCell font]];
-
-        layoutManager = [fieldEditor layoutManager];
-        
-        range = NSMakeRange(0, [label length]);
-        rects = [layoutManager rectArrayForCharacterRange:range withinSelectedCharacterRange:range inTextContainer:[fieldEditor textContainer] rectCount:&count];
-
-        if ([[self window] isKeyWindow])
-        {
-            selectionColor = [NSColor alternateSelectedControlColor];
-            [_textCell setTextColor:[NSColor whiteColor]];
-        }
-        [selectionColor set];
-        
-        yPos = NSMaxY(rect) - 1.0; // A little fudge
-        count = MIN(2, count);
-        for (NSUInteger i = 0; i < count; i++)
-        {
-            // The rects aren't positioned correctly so we correct them here. Also some fudge on the height
-            rects[i].size.height += 1.0;
-            rects[i].origin.x = NSMinX(rect) + (NSWidth(rect) - NSWidth(rects[i])) / 2.0;
-            rects[i].origin.y = yPos - NSHeight(rects[i]);
-
-            
-            if (!NSContainsRect(rect, rects[i]) && (i != 0))
-            {
-                // We only care about the rects within the visible region. For instance, we sometimes get one rect for
-                // the two lines plus another rect out of bounds
-                count = i;
-            }
-            
-            yPos = NSMinY(rects[i]);
-        }
-        
-        path = nil;
-        if (count > 1)
-        {
-            CGFloat         diff, height;
-
-            diff = NSWidth(rects[0]) - NSWidth(rects[1]);
-            if (diff < SELECTION_RADIUS + INNER_SELECTION_RADIUS)
-            {
-                // The two lines are pretty close to eachother so just construct one rect to encompass them both
-                count = 1;
-                height = NSHeight(rects[0]) + NSHeight(rects[1]);
-                rects[0] = NSMakeRect(MIN(NSMinX(rects[0]), NSMinX(rects[1])), NSMaxY(rect) - height,
-                                     MAX(NSWidth(rects[0]), NSWidth(rects[1])), height);
-                rects[0] = NSInsetRect(rects[0], -SELECTION_RADIUS, 0.0);
-                
-                path = [NSBezierPath bezierPathWithRoundedRect:rects[0] xRadius:SELECTION_RADIUS yRadius:SELECTION_RADIUS];
-            }
-            else
-            {
-                // Lines are varying widths. Construct a path to follow the general shape, rounding the ends/corners.
-                CGFloat radius;
-                
-                radius = NSHeight(rects[0]) / 2.0;
-                
-                path = [NSBezierPath bezierPath];
-                // Top left corner
-                [path moveToPoint:NSMakePoint(NSMinX(rects[0]), NSMaxY(rects[0]))];
-                
-                if (diff > 0.0)
-                {
-                    // First line is wider than the second
-                    
-                    // Right cap, top rect
-                    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rects[0]), NSMinY(rects[0]) + radius) radius:radius startAngle:90 endAngle:270 clockwise:YES];
-                    
-                    // Upper right corner, bottom rect
-                    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rects[1]) + radius + INNER_SELECTION_RADIUS, NSMaxY(rects[1]) - INNER_SELECTION_RADIUS) radius:INNER_SELECTION_RADIUS startAngle:90 endAngle:180 clockwise:NO];
-                    
-                    // Lower right corner, bottom rect
-                    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rects[1]), NSMinY(rects[1]) + radius) radius:radius startAngle:0 endAngle:270 clockwise:YES];
-                    
-                    // Lower left corner, bottom rect
-                    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rects[1]), NSMinY(rects[1]) + radius) radius:radius startAngle:270 endAngle:180 clockwise:YES];
-                    
-                    // Upper left corner, bottom rect
-                    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rects[1]) - radius - INNER_SELECTION_RADIUS, NSMaxY(rects[1]) - INNER_SELECTION_RADIUS) radius:INNER_SELECTION_RADIUS startAngle:0 endAngle:90 clockwise:NO];
-                    
-                    // Left cap, top rect
-                    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rects[0]), NSMinY(rects[0]) + radius) radius:radius startAngle:270 endAngle:90 clockwise:YES];
-                }
-                else
-                {
-                    // Upper right corner, top rect
-                    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rects[0]), NSMaxY(rects[0]) - radius) radius:radius startAngle:90 endAngle:0 clockwise:YES];
-                
-                    // Lower right corner, top rect
-                    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rects[0]) + radius + INNER_SELECTION_RADIUS, NSMinY(rects[0]) + INNER_SELECTION_RADIUS) radius:INNER_SELECTION_RADIUS startAngle:180 endAngle:270 clockwise:NO];
-                    
-                    // Right cap, bottom rect
-                    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMaxX(rects[1]), NSMinY(rects[1]) + radius) radius:radius startAngle:90 endAngle:270 clockwise:YES];
-                    
-                    // Left cap, bottom rect
-                    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rects[1]), NSMinY(rects[1]) + radius) radius:radius startAngle:180 endAngle:90 clockwise:YES];
-                    
-                    // Lower left corner, top rect
-                    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rects[0]) - radius - INNER_SELECTION_RADIUS, NSMinY(rects[0]) + INNER_SELECTION_RADIUS) radius:INNER_SELECTION_RADIUS startAngle:270 endAngle:0 clockwise:NO];
-                    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rects[0]), NSMaxY(rects[0]) - radius) radius:radius startAngle:180 endAngle:90 clockwise:YES];
-                }
-                [path closePath];
-            }
-        }
-        else
-        {
-            rects[0] = NSInsetRect(rects[0], -SELECTION_RADIUS, 0);
-            path = [NSBezierPath bezierPathWithRoundedRect:rects[0] xRadius:SELECTION_RADIUS yRadius:SELECTION_RADIUS];
-        }
-        
-        [path fill];
+        [self drawSelectionForText:label inRect:rect];
     }
     else
     {
@@ -367,7 +381,6 @@
     {        
         [self createTextField];
         [self setItem:[aDecoder decodeObjectForKey:ITEM_KEY]];
-        
     }
     return self;
 }

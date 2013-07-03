@@ -105,12 +105,6 @@
 
 @implementation NSImage (CK2OpenPanel)
 
-+ (NSImage *)ck2_homeDirectoryImage
-{
-    return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kUserFolderIcon)];
-}
-
-
 + (id)ck2_imageWithSize:(NSSize)size usingDrawBlock:(void (^)(CK2BlockImageRep *))block
 {
     return [[[[self class] alloc] initCK2WithSize:size usingDrawBlock:block] autorelease];
@@ -128,25 +122,6 @@
         [self addRepresentation:rep];
     }
     return self;
-}
-
-- (NSImage *)ck2_imageTintedWithColor:(NSColor *)color
-{
-    NSImage                 *image;
-	
-    image = [[self copy] autorelease];
-    
-    return [NSImage ck2_imageWithSize:[self size] usingDrawBlock:
-            ^(CK2BlockImageRep *blockRep)
-            {
-                NSSize      repSize;
-                
-                repSize = [blockRep size];
-                [image drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-                
-                [color set];
-                NSRectFillUsingOperation(NSMakeRect(0.0, 0.0, repSize.width, repSize.height), NSCompositeSourceAtop);
-            }];
 }
 
 - (NSImage *)ck2_imageWithBadgeImage:(NSImage *)badgeImage

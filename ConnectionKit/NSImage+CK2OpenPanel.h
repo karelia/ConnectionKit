@@ -32,9 +32,6 @@
 
 @interface NSImage (CK2OpenPanel)
 
-+ (NSImage *)ck2_homeDirectoryImage;
-
-- (NSImage *)ck2_imageTintedWithColor:(NSColor *)color;
 - (NSImage *)ck2_imageWithBadgeImage:(NSImage *)image;
 
 @end

@@ -386,14 +386,7 @@
     controller = [self controller];
     url = [browser itemAtRow:row inColumn:column];
     
-    if ([url isEqual:[controller homeURL]])
-    {
-        [cell setImage:[NSImage ck2_homeDirectoryImage]];
-    }
-    else
-    {
-        [cell setImage:[url ck2_icon]];
-    }
+    [cell setImage:[url ck2_icon]];
     
     if ([controller isURLValid:url] || [controller URLCanHazChildren:url])
     {
