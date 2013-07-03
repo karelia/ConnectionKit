@@ -429,7 +429,6 @@
     }
 
     [_urlCache removeAllObjects];
-    [_runningOperations removeAllObjects];
     [_historyManager removeAllActions];
 
     [self setURLs:nil];
