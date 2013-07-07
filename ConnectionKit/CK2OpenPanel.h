@@ -31,45 +31,11 @@
 
 
 
-// CK2OpenPanel is the equivalent of NSOpenPanel, but built on ConnectionKit so that it can allow you to browse
-// filesystems on other machines via the protocols ConnectionKit supports. The goal of this was to emulate NSOpenPanel
-// as far as it made sense. It's user and programming interfaces remain fairly close to NSOpenPanel with the following
-// exceptions:
-//
-// User Interface:
-// - Added a header to indicate the host. Should help in cases where multiple CK2OpenPanels are showing.
-// - Since this is oriented towards selecting an existing file or directory, it does not have NSSavePanel's support
-// for save operations, such as the field to enter a name for the file. Will consider adding this in if there is demand.
-// - No sidebar. Besides a home directory, there are no common standard directories. It's unclear whether users would
-// use this enough to keep around favorite directories on different servers.
-// - A home button has been added to quickly jump to the home directory.
-// - There is no search field as we cannot do anything resembling a Spotlight search over network protocols. An
-// exhaustive search would be time-consuming and probably not very friendly to the server. May consider doing search
-// just in the current directory, though.
-// - No "arrange" pull-down. Not sure if anyone would miss this and didn't seem worth the effort.
-// - No coverflow view. Not very useful (no previews) and not worth the effort.
-// - The UI operates asynchronously from any operations it performs. Since these are network operations, the UI should
-// not beachball while performing long operations. A progress indicator/reload button has been added and a loading
-// message appear in directories whose contents are being retrieved.
-// - No preview or application icons (a generic app icon is used). It's a bit resource heavy downloading application
-// icons so that currently is not being done. Previews would need server/protocol support.
-// - No QuickLook. See above about previews.
-// - Does not support drag and drop. Doesn't make sense to have the open panel navigate to a file on the server based
-// on a locally dropped file.
-//
-// API:
-// - No API's related to saving files (name field, expansion state, hide extension).
-// - -setDirectoryURL: can also take a completion block, since the operation is asynchronous.
-//
-// Despite all of the above, CK2OpenPanel should be a near-drop-in replacement for NSOpenPanel in terms of code usage
-// and user experience. The emulation of NSOpenPanel's behavior goes fairly deep and you may be
-// surprised by the features supported.
 
 #import <Cocoa/Cocoa.h>
 #import <Connection/Connection.h>
 
 //TODO: Handle/display errors better
-//TODO: Localization support
 //TODO: Add save panel functionality?
 //TODO: Save window/view dimensions?
 //TODO: Autocomplete in the path field?
@@ -77,6 +43,41 @@
 @protocol CK2OpenPanelDelegate;
 @class CK2OpenPanelController;
 
+/**
+ CK2OpenPanel is the equivalent of NSOpenPanel, but built on ConnectionKit so that it can allow you to browse
+ filesystems on other machines via the protocols ConnectionKit supports. The goal of this was to emulate NSOpenPanel
+ as far as it made sense. It's user and programming interfaces remain fairly close to NSOpenPanel with the following
+ exceptions:
+
+ User Interface:
+ - Added a header to indicate the host. Should help in cases where multiple CK2OpenPanels are showing.
+ - Since this is oriented towards selecting an existing file or directory, it does not have NSSavePanel's support
+ for save operations, such as the field to enter a name for the file. Will consider adding this in if there is demand.
+ - No sidebar. Besides a home directory, there are no common standard directories. It's unclear whether users would
+ use this enough to keep around favorite directories on different servers.
+ - A home button has been added to quickly jump to the home directory.
+ - There is no search field as we cannot do anything resembling a Spotlight search over network protocols. An
+ exhaustive search would be time-consuming and probably not very friendly to the server. May consider doing search
+ just in the current directory, though.
+ - No "arrange" pull-down. Not sure if anyone would miss this and didn't seem worth the effort.
+ - No coverflow view. Not very useful (no previews) and not worth the effort.
+ - The UI operates asynchronously from any operations it performs. Since these are network operations, the UI should
+ not beachball while performing long operations. A progress indicator/reload button has been added and a loading
+ message appears in directories whose contents are being retrieved.
+ - No preview or application icons (a generic app icon is used). It's a bit resource heavy and server-unfriendly
+ downloading application icons. Previews for other files would end up just downloading files outright.
+ - No QuickLook. See above about previews.
+ - Does not support drag and drop. Doesn't make sense to have the open panel navigate to a file on the server based
+ on a locally dropped file.
+
+ API:
+ - No API's related to saving files (name field, expansion state, hide extension).
+ - -setDirectoryURL: can also take a completion block, since the operation is asynchronous.
+
+ Despite all of the above, CK2OpenPanel should be a near-drop-in replacement for NSOpenPanel in terms of code usage
+ and user experience. The emulation of NSOpenPanel's behavior goes fairly deep and you may be
+ surprised by the features supported.
+ */
 @interface CK2OpenPanel : NSPanel
 {
     CK2OpenPanelController      *_viewController;
@@ -117,18 +118,22 @@
 - (id <CK2OpenPanelDelegate>)delegate;
 - (void)setDelegate:(id <CK2OpenPanelDelegate>)delegate;
 
-// The completion block will not be called until the given URL's contents are fully loaded. That way, if you show the
-// panel in the completion block, nothing will be "in progress". You can still show the panel beforehand but much of
-// the UI will be disabled until the URL is loaded. The UI will still be responsive in that you'll see progress
-// indicators spinning and you can still cancel the panel. The completion block is called on the main thread.
-//
-// Note that directoryURL immediately reflects the URL this method was called with but may change when the operation
-// is complete as the server may resolve the URL to something else. It's best to not rely on the directoryURL until
-// the completion block has fired.
-//
-// Most commonly, we expect you'll want to show the user's home directory. To get that URL, consult CK2FileManager like so:
-//  NSURL *homeDir = [CK2FileManager URLWithPath:@"" relativeToURL:[NSURL URLWithString:@"sftp://example.com"]];
-//
+/**
+ The completion block will not be called until the given URL's contents are fully loaded. That way, if you show the
+ panel in the completion block, nothing will be "in progress". You can still show the panel beforehand but much of
+ the UI will be disabled until the URL is loaded. The UI will still be responsive in that you'll see progress
+ indicators spinning and you can still cancel the panel. The completion block is called on the main thread.
+
+ Note that directoryURL immediately reflects the URL this method was called with but may change when the operation
+ is complete as the server may resolve the URL to something else. It's best to not rely on the directoryURL until
+ the completion block has fired.
+
+ Most commonly, we expect you'll want to show the user's home directory. To get that URL, consult CK2FileManager like so:
+  NSURL *homeDir = [CK2FileManager URLWithPath:@"" relativeToURL:[NSURL URLWithString:@"sftp://example.com"]];
+ 
+ @param directoryURL        The URL of the host/directory to connect to.
+ @param block               The completion block that is called when the operation is complete.
+*/
 - (void)setDirectoryURL:(NSURL *)directoryURL completionHandler:(void (^)(NSError *error))block;
 
 - (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;

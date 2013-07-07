@@ -57,7 +57,7 @@
     IBOutlet NSBox                  *_accessoryContainer;
     NSView                          *_initialAccessoryView;
     
-    IBOutlet CK2OpenPanel      *_openPanel;
+    IBOutlet CK2OpenPanel                        *_openPanel;
     IBOutlet CK2OpenPanelColumnViewController    *_browserController;
     IBOutlet CK2OpenPanelListViewController      *_listViewController;
     IBOutlet CK2OpenPanelIconViewController      *_iconViewController;

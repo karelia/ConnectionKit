@@ -68,7 +68,7 @@
         NSRect  rect;
         NSView  *view;
 
-        [self setTitle:@"Open"];
+        [self setTitle:NSLocalizedStringFromTableInBundle(@"Open", nil, [NSBundle bundleForClass:[self class]], @"Default open panel title")];
         [self setHidesOnDeactivate:NO];
         
         _viewController  = [[CK2OpenPanelController alloc] initWithPanel:self];

@@ -36,8 +36,10 @@
 + (NSURL *)ck2_loadingURL;
 + (NSURL *)ck2_errorURL;
 + (NSURL *)ck2_errorURLWithMessage:(NSString *)message;
-// Returns a comparator to compare URLs alphabetically. Note that this assumes that both URLs are in the same
-// directory.
+
+/**
+ @return    A comparator to compare the last component of URLs alphabetically.
+ */
 + (NSComparator)ck2_displayComparator;
 
 - (BOOL)ck2_isPlaceholder;
@@ -54,7 +56,11 @@
 - (NSURL *)ck2_root;
 - (NSURL *)ck2_parentURL;
 
-// Will return YES if receiver and given url are the same
+/**
+ Will return YES if receiver and given url are the same.
+ 
+ @return    Whether the receiver represents an ancestory directory of the given url.
+ */
 - (BOOL)ck2_isAncestorOfURL:(NSURL *)url;
 
 - (NSURL *)ck2_URLByDeletingTrailingSlash;
