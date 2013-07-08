@@ -85,7 +85,7 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
  */
 - (id)contentsOfDirectoryAtURL:(NSURL *)url
     includingPropertiesForKeys:(NSArray *)keys
-                       options:(NSDirectoryEnumerationOptions)mask
+                       options:(NSUInteger)mask
              completionHandler:(void (^)(NSArray *contents, NSError *error))block __attribute((nonnull(1,4)));
 
 /**
@@ -106,7 +106,7 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
  */
 - (id)enumerateContentsOfURL:(NSURL *)url
   includingPropertiesForKeys:(NSArray *)keys
-                     options:(NSDirectoryEnumerationOptions)mask
+                     options:(NSUInteger)mask
                   usingBlock:(void (^)(NSURL *url))block
            completionHandler:(void (^)(NSError *error))completionBlock __attribute((nonnull(1,4)));
 
