@@ -102,7 +102,7 @@
                 if (!((mask & NSDirectoryEnumerationSkipsHiddenFiles) && [name hasPrefix:@"."]))
                 {
 
-                    NSURL* url = [davRequest concatenatedURLWithPath:[item href]];
+                    NSURL* url = [[davRequest concatenatedURLWithPath:[item href]] absoluteURL];
                     [CK2FileManager setTemporaryResourceValue:[item modificationDate] forKey:NSURLContentModificationDateKey inURL:url];
                     [CK2FileManager setTemporaryResourceValue:[item creationDate] forKey:NSURLCreationDateKey inURL:url];
                     [CK2FileManager setTemporaryResourceValue:@(item.contentLength) forKey:NSURLFileSizeKey inURL:url];
