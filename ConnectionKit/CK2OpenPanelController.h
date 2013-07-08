@@ -31,7 +31,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <dispatch/dispatch.h>
-#import <Connection/CK2FileManager.h>
+#import <ConnectionKit/CK2FileManager.h>
 
 @class CK2OpenPanel, CK2BrowserPreviewController, CK2PathControl, CK2FileManager, CK2OpenPanelColumnViewController, CK2OpenPanelListViewController, CK2OpenPanelIconViewController, CK2PathFieldWindowController;
 

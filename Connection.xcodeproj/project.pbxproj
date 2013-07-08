@@ -48,12 +48,12 @@
 		22C9CFA51703327A004610FE /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 22C9CFA31703327A004610FE /* Credits.rtf */; };
 		22C9CFA81703327A004610FE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C9CFA71703327A004610FE /* AppDelegate.m */; };
 		22C9CFAB1703327A004610FE /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 22C9CFA91703327A004610FE /* MainMenu.xib */; };
-		22C9CFBA170333A2004610FE /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
+		22C9CFBA170333A2004610FE /* ConnectionKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* ConnectionKit.framework */; };
 		22CC56F91509048E00F94154 /* PathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22CC56F81509048E00F94154 /* PathTests.m */; };
-		22CC578B1509068600F94154 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
+		22CC578B1509068600F94154 /* ConnectionKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* ConnectionKit.framework */; };
 		22E67F1917131184001ECE34 /* libssl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 22407D5A166FA12500E1EAD4 /* libssl.dylib */; };
 		22E67F1A17131188001ECE34 /* libssh2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
-		22E67F1B171311C5001ECE34 /* Connection.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
+		22E67F1B171311C5001ECE34 /* ConnectionKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* ConnectionKit.framework */; };
 		22F6D112165A8A2200443CC9 /* URLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* URLTests.m */; };
 		22FEB6691680818800BB778B /* KMSTranscriptEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 22FEB6671680818800BB778B /* KMSTranscriptEntry.m */; };
 		2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
@@ -142,7 +142,7 @@
 		798313CA0B0D67E000F5078E /* CKTransferProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 798313C80B0D67E000F5078E /* CKTransferProgressCell.m */; };
 		7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */ = {isa = PBXBuildFile; fileRef = 7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7983DF8F0B0C0FAC00F5078E /* CKTransferRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */; };
-		79CFD89509F704F400172CDD /* Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD89409F704F400172CDD /* Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		79CFD89509F704F400172CDD /* ConnectionKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD89409F704F400172CDD /* ConnectionKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD92F09F7080B00172CDD /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD92D09F7080B00172CDD /* libz.dylib */; };
 		79CFD93709F7084000172CDD /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD93609F7084000172CDD /* Security.framework */; };
 		79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F9532B09FDC3A80041E345 /* ApplicationServices.framework */; };
@@ -215,7 +215,7 @@
 			remoteGlobalIDString = 22C9CFBF17035A0A004610FE;
 			remoteInfo = crashtest;
 		};
-		32B46224171DE24800FFFAAE /* PBXContainerItemProxy */ = {
+		279117E0178B5A86006BF857 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
 			proxyType = 2;
@@ -240,7 +240,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				22E67F1B171311C5001ECE34 /* Connection.framework in CopyFiles */,
+				22E67F1B171311C5001ECE34 /* ConnectionKit.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -431,8 +431,8 @@
 		798313C80B0D67E000F5078E /* CKTransferProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CKTransferProgressCell.m; path = ConnectionKit/CKTransferProgressCell.m; sourceTree = "<group>"; };
 		7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CKTransferRecord.h; path = ConnectionKit/CKTransferRecord.h; sourceTree = "<group>"; };
 		7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CKTransferRecord.m; path = ConnectionKit/CKTransferRecord.m; sourceTree = "<group>"; };
-		79CFD12609F702BE00172CDD /* Connection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Connection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		79CFD89409F704F400172CDD /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
+		79CFD12609F702BE00172CDD /* ConnectionKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ConnectionKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		79CFD89409F704F400172CDD /* ConnectionKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionKit.h; sourceTree = "<group>"; };
 		79CFD92C09F7080B00172CDD /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = /usr/lib/libcurl.dylib; sourceTree = "<absolute>"; };
 		79CFD92D09F7080B00172CDD /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
 		79CFD93609F7084000172CDD /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
@@ -455,7 +455,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				228E180C1700AD5600ACDE94 /* CURLHandle.framework in Frameworks */,
-				22CC578B1509068600F94154 /* Connection.framework in Frameworks */,
+				22CC578B1509068600F94154 /* ConnectionKit.framework in Frameworks */,
 				220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */,
 				22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */,
 				22E67F1917131184001ECE34 /* libssl.dylib in Frameworks */,
@@ -467,7 +467,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				22C9CFBA170333A2004610FE /* Connection.framework in Frameworks */,
+				22C9CFBA170333A2004610FE /* ConnectionKit.framework in Frameworks */,
 				22C9CF991703327A004610FE /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -502,7 +502,7 @@
 		080E96DDFE201D6D7F000001 /* Public */ = {
 			isa = PBXGroup;
 			children = (
-				79CFD89409F704F400172CDD /* Connection.h */,
+				79CFD89409F704F400172CDD /* ConnectionKit.h */,
 				2743E8071622E47600019979 /* CK2FileManager.h */,
 				2743E8081622E47600019979 /* CK2FileManager.m */,
 				278D8B77167FF35D00622468 /* CK2Authentication.h */,
@@ -566,7 +566,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				79CFD12609F702BE00172CDD /* Connection.framework */,
+				79CFD12609F702BE00172CDD /* ConnectionKit.framework */,
 				220AD7981509019B00748655 /* UnitTests.octest */,
 				27F3372816BC1FB100E70511 /* AuthTester.app */,
 				22C9CF981703327A004610FE /* ProfilingTester.app */,
@@ -578,7 +578,7 @@
 			isa = PBXGroup;
 			children = (
 				220526E8165E96AA00A2BBC9 /* CURLHandle.framework */,
-				220526EA165E96AA00A2BBC9 /* CURLHandleTests.octest */,
+				279117E1178B5A86006BF857 /* CURLHandleTests.octest */,
 				22C9CFFB1703AD4D004610FE /* Standalone Test */,
 			);
 			name = Products;
@@ -936,7 +936,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */,
-				79CFD89509F704F400172CDD /* Connection.h in Headers */,
+				79CFD89509F704F400172CDD /* ConnectionKit.h in Headers */,
 				7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */,
 				798313C90B0D67E000F5078E /* CKTransferProgressCell.h in Headers */,
 				27D03B421471787000FEA588 /* CKUploader.h in Headers */,
@@ -1030,9 +1030,9 @@
 			productReference = 27F3372816BC1FB100E70511 /* AuthTester.app */;
 			productType = "com.apple.product-type.application";
 		};
-		79CFD12509F702BE00172CDD /* Framework */ = {
+		79CFD12509F702BE00172CDD /* ConnectionKit */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 79CFD12809F702BF00172CDD /* Build configuration list for PBXNativeTarget "Framework" */;
+			buildConfigurationList = 79CFD12809F702BF00172CDD /* Build configuration list for PBXNativeTarget "ConnectionKit" */;
 			buildPhases = (
 				797CBBEB09F854B60063FF9B /* Generate Localizable.strings */,
 				79CFD12309F702BE00172CDD /* Sources */,
@@ -1047,9 +1047,9 @@
 			dependencies = (
 				220526FD165EA20600A2BBC9 /* PBXTargetDependency */,
 			);
-			name = Framework;
+			name = ConnectionKit;
 			productName = Framework;
-			productReference = 79CFD12609F702BE00172CDD /* Connection.framework */;
+			productReference = 79CFD12609F702BE00172CDD /* ConnectionKit.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -1091,7 +1091,7 @@
 			);
 			projectRoot = "";
 			targets = (
-				79CFD12509F702BE00172CDD /* Framework */,
+				79CFD12509F702BE00172CDD /* ConnectionKit */,
 				220AD7971509019B00748655 /* UnitTests */,
 				27F3372716BC1FB100E70511 /* AuthTester */,
 				22C9CF971703327A004610FE /* ProfilingTester */,
@@ -1142,11 +1142,11 @@
 			remoteRef = 22C9CFFA1703AD4D004610FE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		32B46225171DE24800FFFAAE /* CURLHandleTests.octest */ = {
+		279117E1178B5A86006BF857 /* CURLHandleTests.octest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = CURLHandleTests.octest;
-			remoteRef = 32B46224171DE24800FFFAAE /* PBXContainerItemProxy */;
+			remoteRef = 279117E0178B5A86006BF857 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1353,7 +1353,7 @@
 		};
 		220AD7AE1509021A00748655 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 79CFD12509F702BE00172CDD /* Framework */;
+			target = 79CFD12509F702BE00172CDD /* ConnectionKit */;
 			targetProxy = 220AD7AD1509021A00748655 /* PBXContainerItemProxy */;
 		};
 		2218212A170209D300584589 /* PBXTargetDependency */ = {
@@ -1674,7 +1674,7 @@
 					"-framework",
 					AppKit,
 				);
-				PRODUCT_NAME = Connection;
+				PRODUCT_NAME = ConnectionKit;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SKIP_INSTALL = YES;
 				WARNING_CFLAGS = "-Wdocumentation";
@@ -1714,7 +1714,7 @@
 					"-framework",
 					AppKit,
 				);
-				PRODUCT_NAME = Connection;
+				PRODUCT_NAME = ConnectionKit;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SKIP_INSTALL = YES;
 				WARNING_CFLAGS = "-Wdocumentation";
@@ -1778,7 +1778,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		79CFD12809F702BF00172CDD /* Build configuration list for PBXNativeTarget "Framework" */ = {
+		79CFD12809F702BF00172CDD /* Build configuration list for PBXNativeTarget "ConnectionKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				79CFD12909F702BF00172CDD /* Debug */,

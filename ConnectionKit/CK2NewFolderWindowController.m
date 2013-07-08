@@ -8,7 +8,7 @@
 
 #import "CK2NewFolderWindowController.h"
 #import "CK2OpenPanelController.h"
-#import <Connection/CK2FileManager.h>
+#import <ConnectionKit/CK2FileManager.h>
 
 #define DEFAULT_NAME        @"untitled folder"
 

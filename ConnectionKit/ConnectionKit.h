@@ -28,11 +28,11 @@
  */
 
 
-#import <Connection/CK2FileManager.h>
-#import <Connection/CK2Authentication.h>
+#import <ConnectionKit/CK2FileManager.h>
+#import <ConnectionKit/CK2Authentication.h>
 
 // Legacy
-#import <Connection/CKUploader.h>
-#import <Connection/CKTransferRecord.h>
-#import <Connection/CKTransferProgressCell.h>
+#import <ConnectionKit/CKUploader.h>
+#import <ConnectionKit/CKTransferRecord.h>
+#import <ConnectionKit/CKTransferProgressCell.h>
 

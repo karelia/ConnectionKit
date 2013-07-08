@@ -33,7 +33,7 @@
 
 
 #import <Cocoa/Cocoa.h>
-#import <Connection/Connection.h>
+#import <ConnectionKit/ConnectionKit.h>
 
 //TODO: Handle/display errors better
 //TODO: Add save panel functionality?
