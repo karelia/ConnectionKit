@@ -263,6 +263,9 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         
         if (_completionBlock)   // only allow "completion" to happen the once!
         {
+            // It's now safe to stop the protocol as it can't misinterpret the message and issue its own cancellation error (or at least if it does, goes ignored)
+            [_protocol stop];
+            
             _completionBlock(error);
             [_completionBlock release]; _completionBlock = nil;
 
@@ -315,8 +318,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSError *cancellationError = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:nil];
     [self completeWithError:cancellationError];
     
-    // Once the cancellation message is queued up, it's safe to tell the protocol as it can't misinterpret the message and issue its own cancellation error
-    [_protocol stop];
     [cancellationError release];
 }
 
