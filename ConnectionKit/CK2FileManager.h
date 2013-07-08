@@ -14,7 +14,7 @@ typedef void (^CK2ProgressBlock)(NSUInteger bytesWritten, NSUInteger previousAtt
 extern NSString * const CK2FileMIMEType;
 
 
-typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
+typedef NS_OPTIONS(NSInteger, CK2DirectoryEnumerationOptions) {
     CK2DirectoryEnumerationIncludesDirectory = 1L << 31,    // see directory methods below for details
 };
 
