@@ -177,6 +177,10 @@ To set the properties of an existing item, use `-[CK2FileManager setAttributes:o
 
 Many protocols do not have an efficient mechanism for retrieving the attributes of an individual item. Instead, you should get a listing of the *parent* directory, and pull out the properties of whichever resources you're interested in.
 
+## Open Panel
+
+ConnectionKit also offers a companion framework for OS X: `ConnectionKitUI`. If you build this framework into your app as well as ConnectionKit itself, it exposes `CK2OpenPanel`, an `NSOpenPanel` workalike for browsing and selecting files on remote servers.
+
 Legacy
 ======
 
