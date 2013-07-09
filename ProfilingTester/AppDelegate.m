@@ -7,7 +7,7 @@
 //
 
 #import "AppDelegate.h"
-#import <Connection/Connection.h>
+#import <ConnectionKit/Connection.h>
 
 @implementation AppDelegate
 
