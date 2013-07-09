@@ -50,6 +50,10 @@ typedef NS_OPTIONS(NSInteger, CK2DirectoryEnumerationOptions) {
  block that thread for too long, and to dispatch work over to another thread if
  required.
  
+ Note that on OS releases where `-[NSURLConnection setDelegateQueue:]` is
+ unavailable, WebDAV operations rely on the main thread running its runloop in
+ the default mode.
+ 
 */
 
 @interface CK2FileManager : NSObject
