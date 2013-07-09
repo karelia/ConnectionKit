@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "79CFD12509F702BE00172CDD"
-               BuildableName = "Connection.framework"
-               BlueprintName = "Framework"
+               BuildableName = "ConnectionKit.framework"
+               BlueprintName = "ConnectionKit"
                ReferencedContainer = "container:Connection.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

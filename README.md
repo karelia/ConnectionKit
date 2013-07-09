@@ -27,6 +27,9 @@ Questions about the code are best left as issues at https://github.com/karelia/C
 
 Big thanks to:
 
+* Paul Kim of [Noodlesoft](http://www.noodlesoft.com) for:
+	* `CK2OpenPanel`
+	* Logic for guessing icon etc. of remote files
 * [Sam Deane](http://twitter.com/samdeane) of [Elegant Chaos](http://www.elegantchaos.com) for:
 	* Sooo much testing, especially Mock Server
 	* The WebDAV protocol implementation
@@ -173,6 +176,10 @@ When creating a file or directory, *opening* attributes may be specified. Genera
 To set the properties of an existing item, use `-[CK2FileManager setAttributes:ofItemAtURL:completionHandler:]`. Again this only applies to certain protocols/servers; see `CK2FileManager.h` for up-to-date information on this.
 
 Many protocols do not have an efficient mechanism for retrieving the attributes of an individual item. Instead, you should get a listing of the *parent* directory, and pull out the properties of whichever resources you're interested in.
+
+## Open Panel
+
+ConnectionKit also offers a companion framework for OS X: `ConnectionKitUI`. If you build this framework into your app as well as ConnectionKit itself, it exposes `CK2OpenPanel`, an `NSOpenPanel` workalike for browsing and selecting files on remote servers.
 
 Legacy
 ======
