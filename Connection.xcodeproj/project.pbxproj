@@ -1487,7 +1487,7 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				INFOPLIST_FILE = "UnitTests/UnitTest-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "\"@loader_path/../Frameworks\" \"@loader_path/../Frameworks/Connection.framework/Versions/Current/Frameworks\"";
+				LD_RUNPATH_SEARCH_PATHS = "\"@loader_path/../Frameworks\" \"@loader_path/../Frameworks/ConnectionKit.framework/Versions/Current/Frameworks\"";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/CurlHandle/SFTP\"",
@@ -1515,7 +1515,7 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				INFOPLIST_FILE = "UnitTests/UnitTest-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "\"@loader_path/../Frameworks\" \"@loader_path/../Frameworks/Connection.framework/Versions/Current/Frameworks\"";
+				LD_RUNPATH_SEARCH_PATHS = "\"@loader_path/../Frameworks\" \"@loader_path/../Frameworks/ConnectionKit.framework/Versions/Current/Frameworks\"";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/CurlHandle/SFTP\"",
