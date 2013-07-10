@@ -392,6 +392,12 @@
 
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(CK2TrampolineAuthenticationChallenge *)challenge;
 {
+    NSString *user = credential.user;
+    if (user)
+    {
+        [_user release]; _user = [user copy];
+    }
+    
     NSURLAuthenticationChallenge *original = challenge.originalChallenge;
     [original.sender useCredential:credential forAuthenticationChallenge:original];
 }
