@@ -332,7 +332,7 @@ static size_t kCopyBufferSize = 4096;
 
             if (progressBlock)
             {
-                progressBlock(length, 0);
+                progressBlock(length, [[inputStream propertyForKey:NSStreamFileCurrentOffsetKey] longValue], -1);
             }
         }
         

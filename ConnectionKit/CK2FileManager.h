@@ -8,7 +8,7 @@
 #import <Foundation/Foundation.h>
 
 
-typedef void (^CK2ProgressBlock)(NSUInteger bytesWritten, NSUInteger previousAttemptCount);
+typedef void (^CK2ProgressBlock)(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend);
 
 
 extern NSString * const CK2FileMIMEType;

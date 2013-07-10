@@ -41,12 +41,12 @@
         STAssertNotNil(error, @"expecting an error");
     }];
 
-    [fm createFileAtURL:url contents:[NSData data] withIntermediateDirectories:YES openingAttributes:@{} progressBlock:^(NSUInteger bytesWritten, NSUInteger previousAttemptCount) {
+    [fm createFileAtURL:url contents:[NSData data] withIntermediateDirectories:YES openingAttributes:@{} progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
     } completionHandler:^(NSError *error) {
         STAssertNotNil(error, @"expecting an error");
     }];
 
-    [fm createFileAtURL:url withContentsOfURL:url withIntermediateDirectories:YES openingAttributes:@{} progressBlock:^(NSUInteger bytesWritten, NSUInteger previousAttemptCount) {
+    [fm createFileAtURL:url withContentsOfURL:url withIntermediateDirectories:YES openingAttributes:@{} progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
     } completionHandler:^(NSError *error) {
         STAssertNotNil(error, @"expecting an error");
     }];

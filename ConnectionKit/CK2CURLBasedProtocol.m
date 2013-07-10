@@ -605,7 +605,7 @@
 - (void)transfer:(CURLTransfer *)transfer willSendBodyDataOfLength:(NSUInteger)bytesWritten
 {
     _totalBytesWritten += bytesWritten;
-    if (_progressBlock) _progressBlock(_totalBytesWritten, 0);
+    if (_progressBlock) _progressBlock(bytesWritten, _totalBytesWritten, -1);
 }
 
 - (void)transfer:(CURLTransfer *)transfer didCompleteWithError:(NSError *)error;

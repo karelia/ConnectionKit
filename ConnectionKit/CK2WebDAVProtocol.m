@@ -14,10 +14,8 @@
 
 @interface CK2WebDAVProtocol() <NSURLAuthenticationChallengeSender>
 
-@property (assign, nonatomic) NSUInteger attempts;
 @property (copy, nonatomic) CK2WebDAVCompletionHandler completionHandler;
 @property (copy, nonatomic) CK2WebDAVErrorHandler errorHandler;
-@property (assign, nonatomic) NSUInteger expectedLength;
 @property (copy, nonatomic) CK2ProgressBlock progressHandler;
 @property (strong, nonatomic) NSOperationQueue* queue;
 
@@ -25,10 +23,8 @@
 
 @implementation CK2WebDAVProtocol
 
-@synthesize attempts = _attempts;
 @synthesize completionHandler = _completionHandler;
 @synthesize errorHandler = _errorHandler;
-@synthesize expectedLength = _expectedLength;
 @synthesize progressHandler = _progressHandler;
 @synthesize queue = _queue;
 
@@ -341,15 +337,9 @@
 {
     CK2WebDAVLog(@"webdav sent data");
 
-    if (self.expectedLength != totalBytesExpectedToWrite)
-    {
-        ++self.attempts;
-        self.expectedLength = totalBytesExpectedToWrite;
-    }
-    
     if (self.progressHandler)
     {
-        self.progressHandler(totalBytesWritten, self.attempts);
+        self.progressHandler(bytesWritten, totalBytesWritten, totalBytesExpectedToWrite);
     }
 }
 
@@ -486,14 +476,13 @@
         [_queue addOperation:davRequest];
         [davRequest release];
 
-        self.expectedLength = davRequest.expectedLength;
-        CKTransferRecord* transfer = [CKTransferRecord recordWithName:[path lastPathComponent] size:self.expectedLength];
+        CKTransferRecord* transfer = [CKTransferRecord recordWithName:[path lastPathComponent] size:davRequest.expectedLength];
 
-        self.progressHandler = ^(NSUInteger progress, NSUInteger previousAttemptsCount) {
-            [transfer setProgress:progress];
+        self.progressHandler = ^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalByesExpectedToSend) {
+            [transfer setProgress:totalBytesWritten];
             if (progressBlock)
             {
-                progressBlock(progress, previousAttemptsCount);
+                progressBlock(bytesWritten, totalBytesWritten, totalByesExpectedToSend);
             }
         };
 

@@ -116,7 +116,7 @@
         
         NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
         
-        id op = [_fileManager createFileAtURL:[self URLForPath:path] contents:data withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(NSUInteger bytesWritten, NSUInteger previousAttemptCount) {
+        id op = [_fileManager createFileAtURL:[self URLForPath:path] contents:data withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 [result transfer:result transferredDataOfLength:bytesWritten];
@@ -158,7 +158,7 @@
         
         NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
         
-        id op = [_fileManager createFileAtURL:[self URLForPath:path] withContentsOfURL:localURL withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(NSUInteger bytesWritten, NSUInteger previousAttemptCount) {
+        id op = [_fileManager createFileAtURL:[self URLForPath:path] withContentsOfURL:localURL withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 [result transfer:result transferredDataOfLength:bytesWritten];

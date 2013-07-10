@@ -123,10 +123,10 @@
     // Use our own progress block to watch for the file end being reached before passing onto the original requester
     __block BOOL atEnd = NO;
     
-    self = [self initWithRequest:request client:client progressBlock:^(NSUInteger bytesWritten, NSUInteger previousAttemptsCount) {
+    self = [self initWithRequest:request client:client progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
         
         if (bytesWritten == 0) atEnd = YES;
-        if (bytesWritten && progressBlock) progressBlock(bytesWritten, 0);
+        if (bytesWritten && progressBlock) progressBlock(bytesWritten, totalBytesWritten, totalBytesExpectedToSend);
         
     } completionHandler:^(NSError *error) {
         
