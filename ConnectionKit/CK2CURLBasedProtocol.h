@@ -21,6 +21,8 @@
     void    (^_completionHandler)(NSError *error);
     void    (^_dataBlock)(NSData *data);
     CK2ProgressBlock _progressBlock;
+    
+    NSUInteger _totalBytesWritten;
 }
 
 #pragma mark Initialisation
