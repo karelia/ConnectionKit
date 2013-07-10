@@ -574,7 +574,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSParameterAssert(challenge == _trampolineChallenge);
     
     dispatch_async(_operation->_queue, ^{
-        [[_originalChallenge sender] cancelAuthenticationChallenge:challenge];
+        [[_originalChallenge sender] cancelAuthenticationChallenge:_originalChallenge];
         [self cleanupAndRelease];
     });
 }
