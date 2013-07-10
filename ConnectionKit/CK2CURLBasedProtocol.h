@@ -42,11 +42,6 @@
 - (void)start;
 
 
-#pragma mark URLs
-// For subclasses to make use of if they wish
-+ (NSURL *)URLByReplacingUserInfoInURL:(NSURL *)aURL withUser:(NSString *)user;
-
-
 #pragma mark Customization
 + (BOOL)usesMultiHandle;    // defaults to YES. Subclasses can override to be NO and fall back to the old synchronous "easy" backend
 - (void)popCompletionHandlerByExecutingWithError:(NSError *)error;

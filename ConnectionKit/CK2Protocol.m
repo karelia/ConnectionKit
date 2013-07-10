@@ -157,6 +157,46 @@
     return result;
 }
 
++ (NSURL *)URLByReplacingUserInfoInURL:(NSURL *)aURL withUser:(NSString *)nsUser;
+{
+    // Canonicalize URLs by making sure username is included. Strip out password in the process
+    CFStringRef user = (CFStringRef)nsUser;
+    if (user)
+    {
+        // -stringByAddingPercentEscapesUsingEncoding: doesn't cover things like the @ symbol, so drop down CoreFoundation
+        user = CFURLCreateStringByAddingPercentEscapes(NULL,
+                                                       user,
+                                                       NULL,
+                                                       CFSTR(":/?#[]@!$&'()*+,;="),   // going by RFC3986
+                                                       kCFStringEncodingUTF8);
+    }
+    
+    CFIndex length = CFURLGetBytes((CFURLRef)aURL, NULL, 0);
+    NSMutableData *data = [[NSMutableData alloc] initWithLength:length];
+    CFURLGetBytes((CFURLRef)aURL, [data mutableBytes], length);
+    
+    CFRange authSeparatorsRange;
+    CFRange authRange = CFURLGetByteRangeForComponent((CFURLRef)aURL, kCFURLComponentUserInfo, &authSeparatorsRange);
+    
+    if (authRange.location == kCFNotFound)
+    {
+        NSData *replacement = [[(NSString *)user stringByAppendingString:@"@"] dataUsingEncoding:NSUTF8StringEncoding];
+        CFDataReplaceBytes((CFMutableDataRef)data, authSeparatorsRange, [replacement bytes], replacement.length);
+    }
+    else
+    {
+        NSData *replacement = [(NSString *)user dataUsingEncoding:NSUTF8StringEncoding];
+        CFDataReplaceBytes((CFMutableDataRef)data, authRange, [replacement bytes], replacement.length);
+    }
+    
+    aURL = NSMakeCollectable(CFURLCreateWithBytes(NULL, [data bytes], data.length, kCFStringEncodingUTF8, NULL));
+    
+    [data release];
+    if (user) CFRelease(user);
+    
+    return [aURL autorelease];
+}
+
 @synthesize request = _request;
 @synthesize client = _client;
 

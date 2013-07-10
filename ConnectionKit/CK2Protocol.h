@@ -109,6 +109,11 @@
 
 - (NSError*)standardAuthenticationErrorWithUnderlyingError:(NSError*)error;
 
+/**
+ Handy for subclasses to make sure the URLs they vend out refer to the correct user.
+ */
++ (NSURL *)URLByReplacingUserInfoInURL:(NSURL *)aURL withUser:(NSString *)nsUser;
+
 #pragma mark Registration
 
 /*!
