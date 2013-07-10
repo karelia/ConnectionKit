@@ -413,6 +413,8 @@
     {
         multi = [request performSelector:@selector(ck2_multi)]; // typically this is nil, meaning use the default, but we can override it for test purposes
     }
+    
+    _totalBytesWritten = 0;
 
     if ([[self class] usesMultiHandle])
     {
@@ -602,7 +604,8 @@
 
 - (void)transfer:(CURLTransfer *)transfer willSendBodyDataOfLength:(NSUInteger)bytesWritten
 {
-    if (_progressBlock) _progressBlock(bytesWritten, 0);
+    _totalBytesWritten += bytesWritten;
+    if (_progressBlock) _progressBlock(_totalBytesWritten, 0);
 }
 
 - (void)transfer:(CURLTransfer *)transfer didCompleteWithError:(NSError *)error;
