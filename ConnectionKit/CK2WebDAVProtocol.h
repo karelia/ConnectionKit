@@ -17,6 +17,7 @@ typedef void (^CK2WebDAVErrorHandler)(NSError* error);
     DAVSession*         _session;
     NSOperationQueue*   _queue;
 
+    NSString    *_user;
     NSUInteger _attempts;
     NSUInteger _expectedLength;
     CK2WebDAVCompletionHandler _completionHandler;

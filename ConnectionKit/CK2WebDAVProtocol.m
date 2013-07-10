@@ -6,12 +6,13 @@
 
 #import "CK2WebDAVProtocol.h"
 #import "CKTransferRecord.h"
+#import "CK2TrampolineAuthenticationChallenge.h"
 
 #ifndef CK2WebDAVLog
 #define CK2WebDAVLog NSLog
 #endif
 
-@interface CK2WebDAVProtocol()
+@interface CK2WebDAVProtocol() <NSURLAuthenticationChallengeSender>
 
 @property (assign, nonatomic) NSUInteger attempts;
 @property (copy, nonatomic) CK2WebDAVCompletionHandler completionHandler;
@@ -59,6 +60,7 @@
     [_progressHandler release];
     [_queue release];
     [_session release];
+    [_user release];
 
     [super dealloc];
 }
@@ -103,6 +105,8 @@
                 {
 
                     NSURL* url = [[davRequest concatenatedURLWithPath:[item href]] absoluteURL];
+                    url = [self.class URLByReplacingUserInfoInURL:url withUser:_user];
+                    
                     [CK2FileManager setTemporaryResourceValue:[item modificationDate] forKey:NSURLContentModificationDateKey inURL:url];
                     [CK2FileManager setTemporaryResourceValue:[item creationDate] forKey:NSURLCreationDateKey inURL:url];
                     [CK2FileManager setTemporaryResourceValue:@(item.contentLength) forKey:NSURLFileSizeKey inURL:url];
@@ -359,12 +363,13 @@
 
 #pragma mark WebDAV Authentication
 
-
 - (void)webDAVSession:(DAVSession *)session didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     CK2WebDAVLog(@"webdav received challenge");
-
+    
+    challenge = [[CK2TrampolineAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge sender:self];
     [[self client] protocol:self didReceiveAuthenticationChallenge:challenge];
+    [challenge release];
 }
 
 - (void)webDAVSession:(DAVSession *)session didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
@@ -381,6 +386,26 @@
     CK2WebDAVLog(sent ? @"--> %@ " : @"<-- %@", string);
 
     [[self client] protocol:self appendString:string toTranscript:(sent ? CK2TranscriptHeaderOut : CK2TranscriptHeaderIn)];
+}
+
+#pragma mark NSURLAuthenticationChallengeSender
+
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(CK2TrampolineAuthenticationChallenge *)challenge;
+{
+    NSURLAuthenticationChallenge *original = challenge.originalChallenge;
+    [original.sender useCredential:credential forAuthenticationChallenge:original];
+}
+
+- (void)continueWithoutCredentialForAuthenticationChallenge:(CK2TrampolineAuthenticationChallenge *)challenge;
+{
+    NSURLAuthenticationChallenge *original = challenge.originalChallenge;
+    [original.sender continueWithoutCredentialForAuthenticationChallenge:original];
+}
+
+- (void)cancelAuthenticationChallenge:(CK2TrampolineAuthenticationChallenge *)challenge;
+{
+    NSURLAuthenticationChallenge *original = challenge.originalChallenge;
+    [original.sender cancelAuthenticationChallenge:original];
 }
 
 #pragma mark - Utilities
