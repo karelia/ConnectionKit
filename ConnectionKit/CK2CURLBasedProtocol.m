@@ -674,7 +674,21 @@
 
 - (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    [self useCredential:nil forAuthenticationChallenge:challenge];  // libcurl will use annonymous login
+    if (challenge.previousFailureCount == 0)
+    {
+        [self useCredential:nil forAuthenticationChallenge:challenge];  // libcurl will use annonymous login
+    }
+    else
+    {
+        // Give up :)
+        NSError *error = challenge.error;
+        
+        if (!error) error = [NSError errorWithDomain:NSURLErrorDomain
+                                                code:NSURLErrorUserAuthenticationRequired
+                                            userInfo:@{ NSURLErrorFailingURLErrorKey : self.request.URL }];
+        
+        [self popCompletionHandlerByExecutingWithError:error];
+    }
 }
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
