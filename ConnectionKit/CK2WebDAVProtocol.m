@@ -101,6 +101,7 @@
                 {
 
                     NSURL* url = [[davRequest concatenatedURLWithPath:[item href]] absoluteURL];
+                    NSAssert(url, @"-concatenatedURLWithPath: returned nil URL. Shouldn't happen unless davRequest has no URL, and that shouldn't ever happen!");
                     url = [self.class URLByReplacingUserInfoInURL:url withUser:_user];
                     
                     [CK2FileManager setTemporaryResourceValue:[item modificationDate] forKey:NSURLContentModificationDateKey inURL:url];

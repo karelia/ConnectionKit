@@ -89,8 +89,14 @@
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 {
-    NSString* encodedPath = [path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSURL* result = [NSURL URLWithString:encodedPath relativeToURL:baseURL];
+    CFStringRef encodedPath = CFURLCreateStringByAddingPercentEscapes(NULL,
+                                                                      (CFStringRef)path,
+                                                                      NULL,
+                                                                      CFSTR(";?#"),
+                                                                      kCFStringEncodingUTF8);
+    
+    NSURL* result = [NSURL URLWithString:(NSString *)encodedPath relativeToURL:baseURL];
+    CFRelease(encodedPath);
 
     return result;
 }

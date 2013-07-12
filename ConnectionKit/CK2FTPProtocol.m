@@ -26,9 +26,6 @@
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 {
-    // Escape any unusual characters in the URL
-    path = [path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    
     // FTP is special. Absolute paths need to specified with an extra prepended slash <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
     // According to libcurl's docs that should be enough. But with our current build of it, it seems they've gotten stricter
     // The FTP spec could be interpreted that the only way to refer to the root directly is with the sequence @"%2F", which decodes as a slash
@@ -41,8 +38,7 @@
         return result;
     }
     
-    NSURL *result = [NSURL URLWithString:path relativeToURL:baseURL];
-    return result;
+    return [super URLWithPath:path relativeToURL:baseURL];
 }
 
 + (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
