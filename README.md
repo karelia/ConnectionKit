@@ -30,6 +30,7 @@ Big thanks to:
 * Paul Kim of [Noodlesoft](http://www.noodlesoft.com) for:
 	* `CK2OpenPanel`
 	* Logic for guessing icon etc. of remote files
+* [Fabian Jäger](https://github.com/fjaeger) for discovering and helping fix various bugs
 * [Sam Deane](http://twitter.com/samdeane) of [Elegant Chaos](http://www.elegantchaos.com) for:
 	* Sooo much testing, especially Mock Server
 	* The WebDAV protocol implementation
