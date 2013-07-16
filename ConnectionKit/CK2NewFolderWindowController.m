@@ -122,10 +122,14 @@
 - (IBAction)ok:(id)sender
 {
     NSString    *folderName;
-    NSURL       *url;
+    NSURL       *url, *parentURL;
     
     folderName = [_nameField stringValue];
-    url = [[self folderURL] URLByAppendingPathComponent:folderName isDirectory:YES];
+    parentURL = [self folderURL];
+    url = [parentURL URLByAppendingPathComponent:folderName isDirectory:YES];
+    // Need to set this since the url is not vended by CK2
+    [CK2FileManager setTemporaryResourceValue:parentURL forKey:NSURLParentDirectoryURLKey inURL:url];
+    
     [_okButton setEnabled:NO];
     
     _operation = [[[_controller fileManager] createDirectoryAtURL:url withIntermediateDirectories:NO openingAttributes:nil completionHandler:
