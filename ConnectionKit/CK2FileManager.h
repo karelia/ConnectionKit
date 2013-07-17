@@ -229,13 +229,26 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 /**
  Removes the item at the specified URL.
  
- Right now, deletion of files is fully implemented, but whether deleting a
- directory succeeds is pretty much at the mercy of the server/protocol used.
+ The handling of files versus directories is heavily at the discretion of the
+ protocol implementation at present:
  
- Note: Even though this is a "write" operation, it is still possible to get back
- something like `NSFileReadUnknownError`. In particular, FTP must traverse the
- directory hierarchy which can fail if the target directory turns out not to
- exist, or the user has insufficient permissions to access it.
+ - file:   Like NSFileManager, cheerfully deletes files or directories,
+           including contents.
+ - WebDAV: Provided the server adheres to the WebDAV spec, has the same
+           behaviour as local files.
+ - SFTP:   If the URL has `NSURLIsDirectoryKey` set to `YES`, or a trailing
+           slash, is treated as a directory. Only empty directories can be
+           deleted though, so your code is responsible for making the directory
+           (and it's subdirectories) empty first. Otherwise, the URL is treated
+           as a file. As far as I am aware, SFTP servers are quite strict on the
+           difference between files and directories.
+ - FTP:    The same as SFTP except there are definitely plenty of servers in the
+           wild which will delete empty directories when asked to delete a *file*
+           of that name. Even though this is a "write" operation, it is still
+           possible to get back something like `NSFileReadUnknownError`, as FTP
+           may require traversing the directory hierarchy which can fail if the
+           target directory turns out not to exist, or the user has insufficient
+           permissions to access it.
  
  @param url A file URL specifying the file or directory to remove.
  @param handler Called at the end of the operation. A non-nil error indicates failure.
