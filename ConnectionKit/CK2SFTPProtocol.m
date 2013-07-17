@@ -125,7 +125,7 @@
                       }];
 }
 
-- (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
+- (id)initForRemovingItemWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
     NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
     

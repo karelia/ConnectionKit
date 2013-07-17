@@ -226,7 +226,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
-        return [[protocolClass alloc] initForRemovingFileWithRequest:[self requestWithURL:url] client:self];
+        return [[protocolClass alloc] initForRemovingItemWithRequest:[self requestWithURL:url] client:self];
     }];
 }
 

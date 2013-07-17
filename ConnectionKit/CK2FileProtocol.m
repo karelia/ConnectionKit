@@ -182,7 +182,7 @@ static size_t kCopyBufferSize = 4096;
     }];
 }
 
-- (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
+- (id)initForRemovingItemWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
     return [self initWithBlock:^{
                 

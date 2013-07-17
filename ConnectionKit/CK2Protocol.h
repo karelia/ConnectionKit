@@ -46,7 +46,7 @@
                               client:(id <CK2ProtocolClient>)client
                        progressBlock:(CK2ProgressBlock)progressBlock;
 
-- (id)initForRemovingFileWithRequest:(NSURLRequest *)request
+- (id)initForRemovingItemWithRequest:(NSURLRequest *)request
                               client:(id <CK2ProtocolClient>)client;
 
 // The source and destination schemes or hosts might differ. If so, that's currently considered an error by the client, so do whatever the hell pleases you
