@@ -127,9 +127,25 @@
 
 - (id)initForRemovingItemWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
-    NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
+    NSURL *url = request.URL;
     
-    self = [self initWithCustomCommands:[NSArray arrayWithObjects:[@"*rm " stringByAppendingString:path], [@"rmdir " stringByAppendingString:path], nil]
+    // Pick an appropriate command
+    NSString *command = @"rm ";
+    
+    NSNumber *isDirectory;
+    if ([url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL] && isDirectory.boolValue)
+    {
+        command = @"rmdir ";
+    }
+    else if (CFURLHasDirectoryPath((CFURLRef)url))
+    {
+        command = @"rmdir ";
+    }
+    
+    
+    NSString* path = [self.class pathOfURLRelativeToHomeDirectory:url];
+    
+    self = [self initWithCustomCommands:[NSArray arrayWithObject:[command stringByAppendingString:path]]
                                 request:request
           createIntermediateDirectories:NO
                                  client:client
@@ -138,23 +154,8 @@
                           {
                               if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
                               {
-                                  NSUInteger sshError = [error curlResponseCode];
-                                  switch (sshError)
-                                  {
-                                      case LIBSSH2_FX_NO_SUCH_FILE:
-                                          // we can't know if it's the rm, the rmdir or both that failed
-                                          // if it's just one of them, it wasn't actually an error
-                                          // so the best we can do here is always ignore a no file error
-                                          // TODO - it would be better if either we could work out ahead of time whether it's a file or folder we're deleting, or failing that, if the deletion retrying happened at the CKFileManager level instead.
-                                          error = nil;
-                                          break;
-
-                                      default:
-                                          // our default for other failures is generic
-                                          error = [self standardCouldntWriteErrorWithUnderlyingError:error];
-                                          break;
-
-                                  }
+                                  //NSUInteger sshError = [error curlResponseCode];
+                                  error = [self standardCouldntWriteErrorWithUnderlyingError:error];
                               }
                           }
 
