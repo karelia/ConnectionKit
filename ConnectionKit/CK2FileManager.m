@@ -330,39 +330,27 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         {
             NSString        *extension;
             
+            *value = @NO;
             extension = [self pathExtension];
             
             if ([extension length] > 0)
             {
-                if ([extension isEqual:@"app"])
+                NSArray         *baseUTIs;
+                
+                baseUTIs = (NSArray *)UTTypeCreateAllIdentifiersForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, NULL);
+
+                for (NSString *uti in baseUTIs)
                 {
-                    *value = @YES;
-                    return YES;
-                }
-                else
-                {
-                    OSStatus        status;
-                    
-                    status = LSGetApplicationForInfo(kLSUnknownType, kLSUnknownCreator, (CFStringRef)extension, kLSRolesAll, NULL, NULL);
-                    
-                    if (status == kLSApplicationNotFoundErr)
-                    {
-                        *value = @NO;
-                        return YES;
-                    }
-                    else if (status != noErr)
-                    {
-                        NSLog(@"Error getting app info for extension for URL %@: %s", [self absoluteString], GetMacOSStatusCommentString(status));
-                    }
-                    else
+                    if (UTTypeConformsTo((CFStringRef)uti, CFSTR("com.apple.package")))
                     {
                         *value = @YES;
-                        return YES;
+                        break;
                     }
                 }
+                
+                [baseUTIs release];
             }
             
-            *value = @NO;
             return YES;
         }
         else
