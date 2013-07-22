@@ -330,39 +330,106 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         {
             NSString        *extension;
             
+            *value = NO;
             extension = [self pathExtension];
             
             if ([extension length] > 0)
             {
-                if ([extension isEqual:@"app"])
+                static NSMutableDictionary      *_utiCache;
+                static dispatch_once_t          onceToken;
+                
+                dispatch_once(&onceToken,
+                ^{
+                    // Caching the UTIs an particular UTI conforms to. Looking it up can be relatively expensive.
+                    _utiCache = [[NSMutableDictionary alloc] init];
+                });
+                
+                CFStringRef     baseUTI;
+                
+                baseUTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, NULL);
+
+                if (baseUTI != NULL)
                 {
-                    *value = @YES;
-                    return YES;
-                }
-                else
-                {
-                    OSStatus        status;
+                    NSMutableSet    *visitedUTIs;
+                    NSMutableArray  *utiStack;
                     
-                    status = LSGetApplicationForInfo(kLSUnknownType, kLSUnknownCreator, (CFStringRef)extension, kLSRolesAll, NULL, NULL);
+                    // Doing a traversal up the UTI tree. Using a stack here to do a depth-first search (or is it a
+                    // reverse-depth-first search since we're going up towards the root?)
+                    utiStack = [NSMutableArray arrayWithObject:(NSString *)baseUTI];
                     
-                    if (status == kLSApplicationNotFoundErr)
+                    // I don't think there are supposed to be loops in the UTI tree but defending against that possiblity
+                    // in case an app messed up the UTI declarations in its Info.plist
+                    visitedUTIs = [NSMutableSet setWithObject:(NSString *)baseUTI];
+                    
+                    while ([utiStack count] > 0)
                     {
-                        *value = @NO;
-                        return YES;
+                        NSString        *uti;
+                    
+                        uti = [[[utiStack lastObject] retain] autorelease];
+                        [utiStack removeLastObject];
+                        
+                        if ([uti isEqual:@"com.apple.package"])
+                        {
+                            *value = @YES;
+                            break;
+                        }
+                        else
+                        {
+                            NSArray                 *parentUTIs;
+                                    
+                            parentUTIs = [_utiCache objectForKey:uti];
+                            
+                            if (parentUTIs == nil)
+                            {
+                                CFDictionaryRef         utiDict;
+                                id                      value;
+                                
+                                // This can be expensive which is why we are using _utiCache
+                                utiDict = UTTypeCopyDeclaration((CFStringRef)uti);
+                                
+                                if (utiDict != NULL)
+                                {
+                                    value = (id)CFDictionaryGetValue(utiDict, kUTTypeConformsToKey);
+                                    
+                                    // Seems like it can have a single string value instead of an array. Lovely.
+                                    if ([value isKindOfClass:[NSString class]])
+                                    {
+                                        parentUTIs = @[ value ];
+                                    }
+                                    else if ([value isKindOfClass:[NSArray class]])
+                                    {
+                                        parentUTIs = value;
+                                    }
+                                    else
+                                    {
+                                        if (value != nil)
+                                        {
+                                            NSLog(@"Unexpected object type received for UTTypeConformsTo: %@", value);
+                                        }
+                                        parentUTIs = @[];
+                                    }
+                                    
+                                    [_utiCache setObject:parentUTIs forKey:uti];
+                                    
+                                    CFRelease(utiDict);
+                                }
+                            }
+                            
+                            for (uti in parentUTIs)
+                            {
+                                if (![visitedUTIs containsObject:uti])
+                                {
+                                    [visitedUTIs addObject:uti];
+                                    [utiStack addObject:uti];
+                                }
+                            }
+                        }
                     }
-                    else if (status != noErr)
-                    {
-                        NSLog(@"Error getting app info for extension for URL %@: %s", [self absoluteString], GetMacOSStatusCommentString(status));
-                    }
-                    else
-                    {
-                        *value = @YES;
-                        return YES;
-                    }
+                    
+                    CFRelease(baseUTI);
                 }
             }
             
-            *value = @NO;
             return YES;
         }
         else
