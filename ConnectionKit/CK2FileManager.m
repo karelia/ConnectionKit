@@ -340,7 +340,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                 
                 dispatch_once(&onceToken,
                 ^{
-                    // Caching the UTIs an particular UTI conforms to. Looking it up can be relatively expensive.
+                    // Caching the UTIs a particular UTI conforms to. Looking it up can be relatively expensive.
                     _utiCache = [[NSMutableDictionary alloc] init];
                 });
                 
@@ -378,42 +378,45 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                         else
                         {
                             NSArray                 *parentUTIs;
-                                    
-                            parentUTIs = [_utiCache objectForKey:uti];
-                            
-                            if (parentUTIs == nil)
+
+                            @synchronized (_utiCache)
                             {
-                                CFDictionaryRef         utiDict;
-                                id                      value;
+                                parentUTIs = [_utiCache objectForKey:uti];
                                 
-                                // This can be expensive which is why we are using _utiCache
-                                utiDict = UTTypeCopyDeclaration((CFStringRef)uti);
-                                
-                                if (utiDict != NULL)
+                                if (parentUTIs == nil)
                                 {
-                                    value = (id)CFDictionaryGetValue(utiDict, kUTTypeConformsToKey);
+                                    CFDictionaryRef         utiDict;
                                     
-                                    // Seems like it can have a single string value instead of an array. Lovely.
-                                    if ([value isKindOfClass:[NSString class]])
+                                    // This can be expensive which is why we are using _utiCache
+                                    utiDict = UTTypeCopyDeclaration((CFStringRef)uti);
+                                    
+                                    if (utiDict != NULL)
                                     {
-                                        parentUTIs = @[ value ];
-                                    }
-                                    else if ([value isKindOfClass:[NSArray class]])
-                                    {
-                                        parentUTIs = value;
-                                    }
-                                    else
-                                    {
-                                        if (value != nil)
+                                        id                      value;
+                                        
+                                        value = (id)CFDictionaryGetValue(utiDict, kUTTypeConformsToKey);
+                                        
+                                        // Seems like it can have a single string value instead of an array. Lovely.
+                                        if ([value isKindOfClass:[NSString class]])
                                         {
-                                            NSLog(@"Unexpected object type received for UTTypeConformsTo: %@", value);
+                                            parentUTIs = @[ value ];
                                         }
-                                        parentUTIs = @[];
+                                        else if ([value isKindOfClass:[NSArray class]])
+                                        {
+                                            parentUTIs = value;
+                                        }
+                                        else
+                                        {
+                                            if (value != nil)
+                                            {
+                                                NSLog(@"Unexpected object type received for UTTypeConformsTo: %@", value);
+                                            }
+                                            parentUTIs = @[];
+                                        }
+                                        
+                                        [_utiCache setObject:parentUTIs forKey:uti];
+                                        CFRelease(utiDict);
                                     }
-                                    
-                                    [_utiCache setObject:parentUTIs forKey:uti];
-                                    
-                                    CFRelease(utiDict);
                                 }
                             }
                             
