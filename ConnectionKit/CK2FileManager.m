@@ -344,22 +344,24 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                     _utiCache = [[NSMutableDictionary alloc] init];
                 });
                 
-                CFStringRef     baseUTI;
+                NSArray         *baseUTIs;
                 
-                baseUTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, NULL);
+                baseUTIs = (NSArray *)UTTypeCreateAllIdentifiersForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, NULL);
 
-                if (baseUTI != NULL)
+                if (baseUTIs != NULL)
                 {
                     NSMutableSet    *visitedUTIs;
                     NSMutableArray  *utiStack;
                     
                     // Doing a traversal up the UTI tree. Using a stack here to do a depth-first search (or is it a
                     // reverse-depth-first search since we're going up towards the root?)
-                    utiStack = [NSMutableArray arrayWithObject:(NSString *)baseUTI];
+                    utiStack = [NSMutableArray arrayWithArray:baseUTIs];
                     
                     // I don't think there are supposed to be loops in the UTI tree but defending against that possiblity
                     // in case an app messed up the UTI declarations in its Info.plist
-                    visitedUTIs = [NSMutableSet setWithObject:(NSString *)baseUTI];
+                    visitedUTIs = [NSMutableSet setWithArray:baseUTIs];
+                    
+                    [baseUTIs release];
                     
                     while ([utiStack count] > 0)
                     {
@@ -424,9 +426,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                 }
                             }
                         }
-                    }
-                    
-                    CFRelease(baseUTI);
+                    }                    
                 }
             }
             
