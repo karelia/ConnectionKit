@@ -107,9 +107,9 @@
                     [CK2FileManager setTemporaryResourceValue:[item modificationDate] forKey:NSURLContentModificationDateKey inURL:url];
                     [CK2FileManager setTemporaryResourceValue:[item creationDate] forKey:NSURLCreationDateKey inURL:url];
                     [CK2FileManager setTemporaryResourceValue:@(item.contentLength) forKey:NSURLFileSizeKey inURL:url];
-                    [item.fileAttributes enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-                        [CK2FileManager setTemporaryResourceValue:obj forKey:key inURL:url];
-                    }];
+                    
+                    BOOL isDirectory = [[item.fileAttributes objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory];
+                    [CK2FileManager setTemporaryResourceValue:@(isDirectory) forKey:NSURLIsDirectoryKey inURL:url];
                     
                     NSString *mimeType = item.contentType;
                     if (mimeType)
