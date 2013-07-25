@@ -18,6 +18,19 @@ ConnectionKit provides a Cocoa-friendly, block-based API for asynchronously work
 * FTP, SFTP and WebDAV servers
 * Local files
 
+## What's new since the original ConnectionKit?
+
+A high-level summary:
+
+* Use of blocks for simple completion and error-handling
+* URLs replace paths throughout the API
+* Management of raw connections is hidden behind the scenes, handling multiple connections and re-connections for you
+* Same authentication workflow as `NSURLConnection` and friends
+* No longer tied to the main thread
+* libcurl is used for FTP, instead of custom implementation
+* `NSURLConnection` (via DAVKit) is used for WebDAV, instead of custom HTTP stack
+* libssh2 (via libcurl) is used for SFTP, instead of calling out to the command-line `sftp` program
+
 Contributors and Contact Info
 =======
 
