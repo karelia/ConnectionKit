@@ -14,6 +14,7 @@
 + (void)load
 {
     [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:@"WebDAV" URLScheme:@"http"];
+    [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:@"HTTPS" URLScheme:@"https"];
 }
 
 + (NSArray *)URLSchemes { return [NSArray arrayWithObjects:@"http", @"https", nil]; }
