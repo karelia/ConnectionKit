@@ -40,8 +40,6 @@
 //   to the order you queued things up.
 // - The previous point is exploited to avoid race conditions. Otherwise, a semaphore (wait/signal) would have to be
 //   used in those cases.
-// - Don't do too much stuff in the file manager completion blocks. That is holding up the file manager queue and
-//   can result in deadlock if you end up calling back into the file manager.
 
 
 #import "CK2OpenPanelController.h"
@@ -107,8 +105,7 @@
 
         _historyManager = [[NSUndoManager alloc] init];
         
-        _fileManager = [[CK2FileManager alloc] init];
-        [_fileManager setDelegate:self];
+        _fileManager = [[CK2FileManager alloc] initWithDelegate:self delegateQueue:[NSOperationQueue mainQueue]];
         
         [_openPanel addObserver:self forKeyPath:@"prompt" options:NSKeyValueObservingOptionNew context:NULL];
         [_openPanel addObserver:self forKeyPath:@"message" options:NSKeyValueObservingOptionOld context:NULL];
@@ -508,8 +505,6 @@
             children = [contents subarrayWithRange:NSMakeRange(1, [contents count] - 1)];
             [self setDirectoryURL:resolvedURL];
             
-            dispatch_async(dispatch_get_main_queue(),
-            ^{
                 [self cacheChildren:children forURL:resolvedURL];
                 [self urlDidLoad:resolvedURL];
                 
@@ -523,20 +518,12 @@
                 [self validateViews];
                 
                 [resolvedURL release];
-            });
         }
         
-        // Since we are calling an arbitrary block supplied by the client, it's safer to call using
-        // -performSelectorOnMainThread:... which this method does. The reason is that if the block calls something
-        // like -runModal, it will not return for a bit thus clogging up the main GCD queue. Since we need to run
-        // blocks on the main queue during the modeal session to update the UI, this ends up locking up the UI.
-        [NSObject ck2_invokeBlockOnMainThread:
-         ^{
              if (block != NULL)
              {
                  block(blockError);
              }
-         }];
     }];
     
     // There shouldn't be a race condition with the block above since this should be on the main thread and
@@ -677,16 +664,12 @@
                         }
                     }
                     
-                    dispatch_async(dispatch_get_main_queue(),
-                    ^{
-                        
                         [self cacheChildren:value forURL:url];
 
                         [_runningOperations removeObjectForKey:url];
                         
                         [self validateProgressIndicator];
                         [self urlDidLoad:url];
-                    });
                 }];
 
                 // There shouldn't be a race condition with the block above since this should be on the main thread and
@@ -1094,8 +1077,6 @@
                 children = [contents subarrayWithRange:NSMakeRange(1, [contents count] - 1)];
             }
             
-            dispatch_async(dispatch_get_main_queue(),
-            ^{
                 [self setHomeURL:resolvedURL];
                 [self cacheChildren:children forURL:resolvedURL];
 
@@ -1108,7 +1089,6 @@
                 [self setURLs:@[ resolvedURL ] updateDirectory:YES updateRoot:YES sender:self ];
                 
                 [resolvedURL release];
-            });
         }];
         
         // There shouldn't be a race condition with the block above since this should be on the main thread and
@@ -1224,9 +1204,6 @@
 
 #pragma mark CK2FileManagerDelegate
 
-/*  These delegate methods are received on arbitrary threads, but as a UI component, be nice and deliver our equivalent on the main thread
- */
-
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
     id <CK2OpenPanelDelegate>        delegate;
@@ -1235,9 +1212,7 @@
     
     if ([delegate respondsToSelector:@selector(panel:didReceiveAuthenticationChallenge:)])
     {
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            [delegate panel:[self openPanel] didReceiveAuthenticationChallenge:challenge];
-        }];
+        [delegate panel:[self openPanel] didReceiveAuthenticationChallenge:challenge];
     }
     else
     {
@@ -1253,9 +1228,7 @@
     
     if ([delegate respondsToSelector:@selector(panel:appendString:toTranscript:)])
     {
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            [delegate panel:[self openPanel] appendString:info toTranscript:transcript];
-        }];
+        [delegate panel:[self openPanel] appendString:info toTranscript:transcript];
     }
 }
 
