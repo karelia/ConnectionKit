@@ -155,7 +155,12 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                                         withIntermediateDirectories:createIntermediates
                                                                   openingAttributes:attributes
                                                                              client:self
-                                                                      progressBlock:progressBlock];
+                                                                      progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
+                                                                          
+                                                                          [manager.delegateQueue addOperationWithBlock:^{
+                                                                              progressBlock(bytesWritten, totalBytesWritten, totalBytesExpectedToSend);
+                                                                          }];
+                                                                      }];
         
         [request release];
         return result;
@@ -213,7 +218,12 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                                         withIntermediateDirectories:createIntermediates
                                                                   openingAttributes:attributes
                                                                              client:self
-                                                                      progressBlock:progressBlock];
+                                                                      progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
+                                                                          
+                                                                          [manager.delegateQueue addOperationWithBlock:^{
+                                                                              progressBlock(bytesWritten, totalBytesWritten, totalBytesExpectedToSend);
+                                                                          }];
+                                                                      }];
         
         [request release];
         return result;
