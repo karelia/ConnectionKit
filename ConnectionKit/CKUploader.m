@@ -23,8 +23,9 @@
         
         if (!(_options & CKUploadingDryRun))
         {
-            _fileManager = [[CK2FileManager alloc] init];
-            _fileManager.delegate = self;
+            // Marshall all callbacks onto main queue, primarily for historical reasons, but also serialisation
+            _fileManager = [[CK2FileManager alloc] initWithDelegate:self
+                                                      delegateQueue:[NSOperationQueue mainQueue]];
         }
         
         _queue = [[NSMutableArray alloc] init];
@@ -118,16 +119,11 @@
         
         id op = [_fileManager createFileAtURL:[self URLForPath:path] contents:data withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
             
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [result transfer:result transferredDataOfLength:bytesWritten];
-            });
+            [result transfer:result transferredDataOfLength:bytesWritten];
             
         } completionHandler:^(NSError *error) {
             
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [result transferDidFinish:result error:error];
-            });
-            
+            [result transferDidFinish:result error:error];
             [self operationDidFinish:error];
         }];
         
@@ -160,16 +156,11 @@
         
         id op = [_fileManager createFileAtURL:[self URLForPath:path] withContentsOfURL:localURL withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
             
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [result transfer:result transferredDataOfLength:bytesWritten];
-            });
+            [result transfer:result transferredDataOfLength:bytesWritten];
             
         }  completionHandler:^(NSError *error) {
             
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [result transferDidFinish:result error:error];
-            });
-            
+            [result transferDidFinish:result error:error];
             [self operationDidFinish:error];
         }];
         
@@ -253,9 +244,6 @@
 
 - (void)operationDidFinish:(NSError *)error;
 {
-    // This method gets called on all sorts of threads, so marshall back to main queue
-    dispatch_async(dispatch_get_main_queue(), ^{
-        
         [_currentOperation release]; _currentOperation = nil;
         
         if (error)
@@ -280,7 +268,6 @@
         {
             [[_queue objectAtIndex:0] start];
         }
-    });
 }
 
 #pragma mark Transfer Records
