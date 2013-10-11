@@ -280,7 +280,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     });
     
     // These ivars are already finished with, so can ditch them early
-    [_enumerationBlock release]; _enumerationBlock = nil;
     [_manager release]; _manager = nil;
 }
 
@@ -386,7 +385,12 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     // Provide ancestry and other fairly generic keys on-demand
     [self.class setResourceValueBlocksForURL:url protocolClass:protocol.class];
     
-    if (_enumerationBlock) _enumerationBlock(url);
+    if (_enumerationBlock)
+    {
+        [self tryToMessageDelegateSelector:NULL usingBlock:^(id<CK2FileManagerDelegate> delegate) {
+            _enumerationBlock(url);
+        }];
+    }
     
     // It seems poor security to vend out passwords here, so have a quick sanity check
     if (CFURLGetByteRangeForComponent((CFURLRef)url, kCFURLComponentPassword, NULL).location != kCFNotFound)
