@@ -266,7 +266,12 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             // It's now safe to stop the protocol as it can't misinterpret the message and issue its own cancellation error (or at least if it does, goes ignored)
             [_protocol stop];
             
-            _completionBlock(error);
+            void (^block)(NSError*) = _completionBlock;
+            
+            [self tryToMessageDelegateSelector:NULL usingBlock:^(id<CK2FileManagerDelegate> delegate) {
+                block(error);
+            }];
+            
             [_completionBlock release]; _completionBlock = nil;
 
             // Break retain cycle, but deliberately keep weak reference so we know we're associated with it
