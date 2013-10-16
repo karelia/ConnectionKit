@@ -55,7 +55,6 @@
 #import "CK2IconView.h"
 #import "CK2PathFieldWindowController.h"
 #import <ConnectionKit/CK2FileManager.h>
-#import "NSObject+CK2OpenPanel.h"
 
 #define DEFAULT_OPERATION_TIMEOUT       20
 
