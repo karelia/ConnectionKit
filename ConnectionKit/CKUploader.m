@@ -81,17 +81,6 @@
 
 #pragma mark Publishing
 
-- (CKTransferRecord *)willUploadToPath:(NSString *)path size:(unsigned long long)size;
-{
-    if (_options & CKUploadingDeleteExistingFileFirst)
-	{
-        // The file might not exist, so will fail in that case. We don't really care since should a deletion fail for a good reason, that ought to then cause the actual upload to fail
-        [self removeFileAtPath:path reportError:NO];
-	}
-    
-    return [self makeTransferRecordWithPath:path size:size];
-}
-
 - (void)removeFileAtPath:(NSString *)path;
 {
     [self removeFileAtPath:path reportError:YES];
@@ -110,22 +99,20 @@
 
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
 {
-    CKTransferRecord *result = [self willUploadToPath:path size:data.length];
-    
-    [self addOperationWithBlock:^{
+    return [self uploadToPath:path size:data.length usingBlock:^id(CKTransferRecord *record) {
         
         NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
         
         id op = [_fileManager createFileAtURL:[self URLForPath:path] contents:data withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                [result transfer:result transferredDataOfLength:bytesWritten];
+                [record transfer:record transferredDataOfLength:bytesWritten];
             });
             
         } completionHandler:^(NSError *error) {
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                [result transferDidFinish:result error:error];
+                [record transferDidFinish:record error:error];
             });
             
             [self operationDidFinish:error];
@@ -135,16 +122,12 @@
         
         if (!self.isCancelled)
         {
-            [result transferDidBegin:result];
+            [record transferDidBegin:record];
             [self.delegate uploader:self didBeginUploadToPath:path];
         }
         
         return op;
     }];
-    
-    [self didAddTransferRecord:result];
-    
-    return result;
 }
 
 - (CKTransferRecord *)uploadFileAtURL:(NSURL *)localURL toPath:(NSString *)path;
@@ -152,22 +135,20 @@
     NSNumber *size;
     if (![localURL getResourceValue:&size forKey:NSURLFileSizeKey error:NULL]) size = nil;
     
-    CKTransferRecord *result = [self willUploadToPath:path size:size.unsignedLongLongValue];
-    
-    [self addOperationWithBlock:^{
+    return [self uploadToPath:path size:size.unsignedLongLongValue usingBlock:^id(CKTransferRecord *record) {
         
         NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
         
         id op = [_fileManager createFileAtURL:[self URLForPath:path] withContentsOfURL:localURL withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                [result transfer:result transferredDataOfLength:bytesWritten];
+                [record transfer:record transferredDataOfLength:bytesWritten];
             });
             
         }  completionHandler:^(NSError *error) {
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                [result transferDidFinish:result error:error];
+                [record transferDidFinish:record error:error];
             });
             
             [self operationDidFinish:error];
@@ -177,13 +158,33 @@
         
         if (!self.isCancelled)
         {
-            [result transferDidBegin:result];
+            [record transferDidBegin:record];
             [self.delegate uploader:self didBeginUploadToPath:path];
         }
         
         return op;
     }];
+}
+
+- (CKTransferRecord *)uploadToPath:(NSString *)path size:(unsigned long long)size usingBlock:(id (^)(CKTransferRecord *record))block;
+{
+    // Create transfer record
+    if (_options & CKUploadingDeleteExistingFileFirst)
+	{
+        // The file might not exist, so will fail in that case. We don't really care since should a deletion fail for a good reason, that ought to then cause the actual upload to fail
+        [self removeFileAtPath:path reportError:NO];
+	}
     
+    CKTransferRecord *result = [self makeTransferRecordWithPath:path size:size];
+    
+    
+    // Enqueue upload
+    [self addOperationWithBlock:^id{
+        return block(result);
+    }];
+    
+    
+    // Notify delegate
     [self didAddTransferRecord:result];
     
     return result;
