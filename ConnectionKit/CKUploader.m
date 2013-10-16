@@ -328,6 +328,7 @@
     {
         result = [CKTransferRecord recordWithName:[path lastPathComponent] size:0];
         [parent addContent:result];
+        [self didAddTransferRecord:result];
     }
     
     return result;
