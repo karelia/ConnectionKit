@@ -312,7 +312,7 @@
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
     [mutableRequest curl_setSSHKnownHostsFileURL:[NSURL fileURLWithPath:[@"~/.ssh/known_hosts" stringByExpandingTildeInPath] isDirectory:NO]];
     
-    self = [super initWithRequest:request client:client];
+    self = [super initWithRequest:mutableRequest client:client];
     [mutableRequest release];
     return self;
 }
