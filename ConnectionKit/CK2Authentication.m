@@ -17,18 +17,20 @@
 {
     CK2KnownHostMatch   _match;
     NSData              *_publicKey;
+    CK2KnownHostType    _publicKeyType;
 }
 @end
 
 
 @implementation CK2SSHHostFingerprintProtectionSpace
 
-- initWithHost:(NSString *)host match:(enum curl_khmatch)match publicKey:(NSData *)key;
+- initWithHost:(NSString *)host match:(enum curl_khmatch)match publicKey:(NSData *)key type:(CK2KnownHostType)keyType;
 {
     if (self = [self initWithHost:host port:0 protocol:@"ssh" realm:nil authenticationMethod:CK2AuthenticationMethodHostFingerprint])
     {
         _match = match;
         _publicKey = [key copy];
+        _publicKeyType = keyType;
     }
     return self;
 }
@@ -45,6 +47,7 @@
 
 - (CK2KnownHostMatch)ck2_knownHostMatch; { return _match; }
 - (NSData *)ck2_serverPublicKey; { return _publicKey; }
+- (CK2KnownHostType)ck2_serverKnownHostType; { return _publicKeyType; }
 
 // Make sure super doesn't create an actual copy
 - (id)copyWithZone:(NSZone *)zone; { return [self retain]; }
@@ -56,12 +59,13 @@
 
 - (CK2KnownHostMatch)ck2_knownHostMatch; { return 0; }
 - (NSData *)ck2_serverPublicKey; { return nil; }
+- (CK2KnownHostType)ck2_serverKnownHostType; { return CK2KnownHostTypeUnknown; }
 
 NSString * const CK2AuthenticationMethodHostFingerprint = @"CK2AuthenticationMethodHostFingerprint";
 
-+ (NSURLProtectionSpace *)ck2_protectionSpaceWithHost:(NSString *)host knownHostMatch:(CK2KnownHostMatch)match publicKey:(NSData *)key;
++ (NSURLProtectionSpace *)ck2_protectionSpaceWithHost:(NSString *)host knownHostMatch:(CK2KnownHostMatch)match publicKey:(NSData *)key type:(CK2KnownHostType)keyType;
 {
-    return [[[CK2SSHHostFingerprintProtectionSpace alloc] initWithHost:host match:match publicKey:key] autorelease];
+    return [[[CK2SSHHostFingerprintProtectionSpace alloc] initWithHost:host match:match publicKey:key type:keyType] autorelease];
 }
 
 @end

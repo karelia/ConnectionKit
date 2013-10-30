@@ -362,7 +362,8 @@
         
         NSURLProtectionSpace *space = [NSURLProtectionSpace ck2_protectionSpaceWithHost:self.request.URL.host
                                                                          knownHostMatch:match
-                                                                              publicKey:key];
+                                                                              publicKey:key
+                                                                                   type:foundKey->keytype];
         
         [key release];
         
