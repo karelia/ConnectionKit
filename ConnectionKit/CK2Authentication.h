@@ -36,6 +36,11 @@ typedef NS_ENUM(NSInteger, CK2KnownHostMatch) {
 - (CK2KnownHostMatch)ck2_knownHostMatch;
 
 /**
+ @result The raw data of the server's public SSH key. (`nil` if the `authenticationMethod` is not `CK2AuthenticationMethodHostFingerprint`)
+ */
+@property(readonly, copy, getter=ck2_serverPublicKey) NSData *serverPublicKey;
+
+/**
  @const CK2AuthenticationMethodHostFingerprint
  @abstract The authentication method used by SSH connections for checking a host's fingerprint
  */
@@ -51,7 +56,7 @@ extern NSString * const CK2AuthenticationMethodHostFingerprint;
  @param match is one of CK2KnownHostMatch's enumerations that declares the result of the check.
  @return a protection spaces whose `-authenticationMethod` is `CK2AuthenticationMethodHostFingerprint`.
  */
-+ (NSURLProtectionSpace *)ck2_protectionSpaceWithHost:(NSString *)host knownHostMatch:(CK2KnownHostMatch)match;
++ (NSURLProtectionSpace *)ck2_protectionSpaceWithHost:(NSString *)host knownHostMatch:(CK2KnownHostMatch)match publicKey:(NSData *)key;
 
 @end
 

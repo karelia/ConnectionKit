@@ -348,8 +348,23 @@
     if (!_fingerprintSemaphore)
     {
         // Report the key back to delegate to see how it feels about this. Unfortunately have to uglily use a semaphore to do so
+        NSData *key;
+        if (foundKey->len == 0)  // base64 encoded
+        {
+            NSString *key64 = [[NSString alloc] initWithCString:foundKey->key encoding:NSASCIIStringEncoding];
+            key = [[NSData alloc] initWithBase64Encoding:key64];
+            [key64 release];
+        }
+        else
+        {
+            key = [[NSData alloc] initWithBytes:foundKey->key length:foundKey->len];
+        }
+        
         NSURLProtectionSpace *space = [NSURLProtectionSpace ck2_protectionSpaceWithHost:self.request.URL.host
-                                                                                                    knownHostMatch:match];
+                                                                         knownHostMatch:match
+                                                                              publicKey:key];
+        
+        [key release];
         
         NSURLCredential *credential = nil;
         if (match != CURLKHMATCH_MISMATCH) credential = [NSURLCredential ck2_credentialForKnownHostWithPersistence:NSURLCredentialPersistencePermanent];
