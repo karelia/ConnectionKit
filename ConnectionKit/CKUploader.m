@@ -344,7 +344,7 @@
         id <CKUploaderDelegate> delegate = [self delegate];
         if (delegate)
         {
-            [delegate uploader:self didReceiveAuthenticationChallenge:challenge];
+            [delegate uploader:self didReceiveChallenge:challenge completionHandler:completionHandler];
         }
         else
         {
