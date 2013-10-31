@@ -12,23 +12,6 @@
 #import <AppKit/AppKit.h>   // so icon handling can use NSImage and NSWorkspace for now
 
 
-@interface CK2AuthenticationChallengeTrampoline : NSObject <NSURLAuthenticationChallengeSender>
-{
-@private
-    NSURLAuthenticationChallenge    *_originalChallenge;
-    CK2FileOperation                *_operation;
-    NSURLAuthenticationChallenge    *_trampolineChallenge;
-}
-
-+ (void)handleChallenge:(NSURLAuthenticationChallenge *)challenge operation:(CK2FileOperation *)operation;
-@property(nonatomic, readonly, retain) NSURLAuthenticationChallenge *originalChallenge;
-
-@end
-
-
-#pragma mark -
-
-
 @interface CK2Protocol (Internals)
 // Completion block is guaranteed to be called on our private serial queue
 + (void)classForURL:(NSURL *)url completionHandler:(void (^)(Class protocolClass))block;
@@ -341,13 +324,104 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     [self completeWithError:nil];
 }
 
-- (void)protocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)protocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)originalChallenge;
 {
     NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     if ([self isCancelled]) return; // don't care about auth once cancelled
     
-    [CK2AuthenticationChallengeTrampoline handleChallenge:challenge operation:self];
+    
+    // Invent a default credential if needed
+    NSURLAuthenticationChallenge *challenge = originalChallenge;
+    if (!originalChallenge.proposedCredential)
+    {
+        NSURLProtectionSpace *space = originalChallenge.protectionSpace;
+        NSString *user = self.originalURL.user;
+        NSString *password = self.originalURL.password;
+        
+        NSURLCredential *credential;
+        if (user && password)
+        {
+            credential = [NSURLCredential credentialWithUser:user password:password persistence:NSURLCredentialPersistenceNone];
+        }
+        else
+        {
+            credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:space];
+        }
+        
+        challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
+                                                               proposedCredential:credential
+                                                             previousFailureCount:originalChallenge.previousFailureCount
+                                                                  failureResponse:originalChallenge.failureResponse
+                                                                            error:originalChallenge.error
+                                                                           sender:originalChallenge.sender];
+        
+        [challenge autorelease];
+    }
+    
+    
+    // Notify the delegate
+    CK2FileManager *manager = self.fileManager;
+    id <CK2FileManagerDelegate> delegate = manager.delegate;
+    
+    if ([delegate respondsToSelector:@selector(fileManager:operation:didReceiveChallenge:completionHandler:)])
+    {
+        [delegate fileManager:manager operation:self didReceiveChallenge:challenge completionHandler:^(CK2AuthChallengeDisposition disposition, NSURLCredential *credential) {
+            
+            switch (disposition)
+            {
+                case CK2AuthChallengeUseCredential:
+                    dispatch_async(_queue, ^{
+                        [originalChallenge.sender useCredential:credential forAuthenticationChallenge:originalChallenge];
+                    });
+                    break;
+                    
+                case CK2AuthChallengePerformDefaultHandling:
+                    [self performDefaultHandlingForAuthenticationChallenge:originalChallenge proposedCredential:challenge.proposedCredential];
+                    break;
+                    
+                case CK2AuthChallengeRejectProtectionSpace:
+                    // TODO: Presumably this should move on to the next protection space if there is one, rather than cancelling
+                case CK2AuthChallengeCancelAuthenticationChallenge:
+                    dispatch_async(_queue, ^{
+                        [originalChallenge.sender cancelAuthenticationChallenge:originalChallenge];
+                    });
+                    break;
+                    
+                default:
+                    [NSException raise:NSInvalidArgumentException format:@"Unrecognised Auth Challenge Disposition"];
+            }
+        }];
+    }
+    else if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
+    {
+        NSLog(@"%@ implements the old CK2FileManager authentication delegate method instead of the new one", delegate.class);
+    }
+    else
+    {
+        [self performDefaultHandlingForAuthenticationChallenge:originalChallenge proposedCredential:challenge.proposedCredential];
+    }
+    
+    
     // TODO: Cache credentials per protection space
+}
+
+- (void)performDefaultHandlingForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge proposedCredential:(NSURLCredential *)credential;
+{
+    // TODO: Should this be forwarded straight on to the original sender if implements this method?
+    
+    dispatch_async(_queue, ^{
+        
+        if (challenge.previousFailureCount == 0)
+        {
+            if (credential)
+            {
+                [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+                return;
+            }
+        }
+        
+        [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
+    });
 }
 
 - (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
@@ -459,169 +533,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     NSInputStream *stream = [[NSInputStream alloc] initWithURL:_localURL];
     return [stream autorelease];
-}
-
-@end
-
-
-#pragma mark -
-
-
-@implementation CK2AuthenticationChallengeTrampoline
-
-+ (void)handleChallenge:(NSURLAuthenticationChallenge *)challenge operation:(CK2FileOperation *)operation;
-{
-    // Trust the trampoline to release itself when done
-    [[[self alloc] initWithChallenge:challenge operation:operation] release];
-}
-
-- (id)initWithChallenge:(NSURLAuthenticationChallenge *)challenge operation:(CK2FileOperation *)operation;
-{
-    if (self = [super init])
-    {
-        _originalChallenge = [challenge retain];
-        _operation = [operation retain];
-        
-        if ([challenge proposedCredential])
-        {
-            _trampolineChallenge = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge sender:self];
-        }
-        else
-        {
-            // Invent the best credential available
-            NSURLProtectionSpace *space = [challenge protectionSpace];
-            NSString *user = _operation.originalURL.user;
-            NSString *password = _operation.originalURL.password;
-            
-            NSURLCredential *credential;
-            if (user && password)
-            {
-                credential = [NSURLCredential credentialWithUser:user password:password persistence:NSURLCredentialPersistenceNone];
-            }
-            else
-            {
-                credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:space];
-            }
-            
-            _trampolineChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
-                                                                              proposedCredential:credential
-                                                                            previousFailureCount:[challenge previousFailureCount]
-                                                                                 failureResponse:[challenge failureResponse]
-                                                                                           error:[challenge error]
-                                                                                          sender:self];
-        }
-        
-        /*  At this point point, we are retaining _trampolineChallenge
-         *  It in turn is retaining us, as the sender. This isn't actually guaranteed by the docs, but is a fair bet rdar://problem/13602367
-         *  The cycle is broken when the challenge is replied to
-         */
-        
-        CK2FileManager *manager = operation.fileManager;
-        id <CK2FileManagerDelegate> delegate = manager.delegate;
-        
-        if ([delegate respondsToSelector:@selector(fileManager:operation:didReceiveChallenge:completionHandler:)])
-        {
-            [delegate fileManager:manager operation:operation didReceiveChallenge:_trampolineChallenge completionHandler:^(CK2AuthChallengeDisposition disposition, NSURLCredential *credential) {
-                
-                switch (disposition)
-                {
-                    case CK2AuthChallengeUseCredential:
-                        [_trampolineChallenge.sender useCredential:credential forAuthenticationChallenge:_trampolineChallenge];
-                        break;
-                    case CK2AuthChallengePerformDefaultHandling:
-                        [_trampolineChallenge.sender performDefaultHandlingForAuthenticationChallenge:_trampolineChallenge];
-                        break;
-                    case CK2AuthChallengeCancelAuthenticationChallenge:
-                        [_trampolineChallenge.sender cancelAuthenticationChallenge:_trampolineChallenge];
-                        break;
-                    case CK2AuthChallengeRejectProtectionSpace:
-                        [_trampolineChallenge.sender rejectProtectionSpaceAndContinueWithChallenge:_trampolineChallenge];
-                        break;
-                    default:
-                        [NSException raise:NSInvalidArgumentException format:@"Unrecognised Auth Challenge Disposition"];
-                }
-            }];
-        }
-        else if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
-        {
-            NSLog(@"%@ implements the old CK2FileManager authentication delegate method instead of the new one", delegate.class);
-        }
-        else
-        {
-            [[_trampolineChallenge sender] performDefaultHandlingForAuthenticationChallenge:_trampolineChallenge];
-        }
-    }
-    return self;
-}
-
-- (void)dealloc
-{
-    [_originalChallenge release];
-    [_operation release];
-    [_trampolineChallenge release];
-
-    [super dealloc];
-}
-
-- (void)cleanupAndRelease
-{
-    // release trampoline challenge now to break retain cycle
-    [_trampolineChallenge release];
-    _trampolineChallenge = nil;
-}
-
-@synthesize originalChallenge = _originalChallenge;
-
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    NSParameterAssert(challenge == _trampolineChallenge);
-    
-    dispatch_async(_operation->_queue, ^{
-        [[_originalChallenge sender] useCredential:credential forAuthenticationChallenge:_originalChallenge];
-        [self cleanupAndRelease];
-    });
-}
-
-- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    NSParameterAssert(challenge == _trampolineChallenge);
-    
-    dispatch_async(_operation->_queue, ^{
-        [[_originalChallenge sender] continueWithoutCredentialForAuthenticationChallenge:_originalChallenge];
-        [self cleanupAndRelease];
-    });
-}
-
-- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    NSParameterAssert(challenge == _trampolineChallenge);
-    
-    dispatch_async(_operation->_queue, ^{
-        [[_originalChallenge sender] cancelAuthenticationChallenge:_originalChallenge];
-        [self cleanupAndRelease];
-    });
-}
-
-- (void)performDefaultHandlingForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    // TODO: Should this be forwarded straight on to the original sender if implements this method?
-    if ([challenge previousFailureCount] == 0)
-    {
-        NSURLCredential *credential = [challenge proposedCredential];
-        if (credential)
-        {
-            [self useCredential:credential forAuthenticationChallenge:challenge];
-            return;
-        }
-    }
-    
-    [self continueWithoutCredentialForAuthenticationChallenge:challenge];
-}
-
-- (void)rejectProtectionSpaceAndContinueWithChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    // TODO: Presumably this should move on to the next protection space if there is one
-    [self cancelAuthenticationChallenge:challenge];
 }
 
 @end
