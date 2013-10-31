@@ -425,4 +425,6 @@ typedef NS_ENUM(NSUInteger, CK2TranscriptType) {
 
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 
+- (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge __attribute((deprecated("implement -fileManager:operation:didReceiveChallenge:completionHandler: instead")));
+
 @end
