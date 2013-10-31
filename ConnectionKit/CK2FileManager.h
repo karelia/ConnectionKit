@@ -392,11 +392,29 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 @end
 
 
+/**
+ * Disposition options for auth challenge delegate message
+ */
+typedef NS_ENUM(NSInteger, CK2AuthChallengeDisposition) {
+    CK2AuthChallengeUseCredential = 0,                     /* Use the specified credential, which may be `nil` */
+    CK2AuthChallengePerformDefaultHandling = 1,            /* Default handling for the challenge - as if this delegate were not implemented; the credential parameter is ignored. */
+    CK2AuthChallengeCancelAuthenticationChallenge = 2,     /* The entire request will be canceled; the credential parameter is ignored. */
+    CK2AuthChallengeRejectProtectionSpace = 3,             /* This challenge is rejected and the next authentication protection space should be tried;the credential parameter is ignored. */
+};
+
+
 @protocol CK2FileManagerDelegate <NSObject>
 @optional
 
-// If left unimplemented, -performDefaultHandlingForAuthenticationChallenge: will be called
-- (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+/**
+ The task has received an authentication challenge.
+ 
+ If this delegate is not implemented, the behavior will be the same as using the
+ default handling disposition.
+ */
+- (void)fileManager:(CK2FileManager *)manager operation:(id)operation
+                                    didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge
+                                      completionHandler:(void (^)(CK2AuthChallengeDisposition disposition, NSURLCredential *credential))completionHandler;
 
 
 typedef NS_ENUM(NSUInteger, CK2TranscriptType) {

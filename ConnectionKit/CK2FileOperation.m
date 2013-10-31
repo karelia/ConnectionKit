@@ -519,9 +519,32 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         CK2FileManager *manager = operation.fileManager;
         id <CK2FileManagerDelegate> delegate = manager.delegate;
         
-        if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
+        if ([delegate respondsToSelector:@selector(fileManager:operation:didReceiveChallenge:completionHandler:)])
         {
-            [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
+            [delegate fileManager:manager operation:operation didReceiveChallenge:_trampolineChallenge completionHandler:^(CK2AuthChallengeDisposition disposition, NSURLCredential *credential) {
+                
+                switch (disposition)
+                {
+                    case CK2AuthChallengeUseCredential:
+                        [_trampolineChallenge.sender useCredential:credential forAuthenticationChallenge:_trampolineChallenge];
+                        break;
+                    case CK2AuthChallengePerformDefaultHandling:
+                        [_trampolineChallenge.sender performDefaultHandlingForAuthenticationChallenge:_trampolineChallenge];
+                        break;
+                    case CK2AuthChallengeCancelAuthenticationChallenge:
+                        [_trampolineChallenge.sender cancelAuthenticationChallenge:_trampolineChallenge];
+                        break;
+                    case CK2AuthChallengeRejectProtectionSpace:
+                        [_trampolineChallenge.sender rejectProtectionSpaceAndContinueWithChallenge:_trampolineChallenge];
+                        break;
+                    default:
+                        [NSException raise:NSInvalidArgumentException format:@"Unrecognised Auth Challenge Disposition"];
+                }
+            }];
+        }
+        else if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
+        {
+            NSLog(@"%@ implements the old CK2FileManager authentication delegate method instead of the new one", delegate.class);
         }
         else
         {
