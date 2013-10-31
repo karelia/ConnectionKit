@@ -365,7 +365,11 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     if ([delegate respondsToSelector:@selector(fileManager:operation:didReceiveChallenge:completionHandler:)])
     {
+        __block BOOL handlerCalled = NO;
         [delegate fileManager:manager operation:self didReceiveChallenge:challenge completionHandler:^(CK2AuthChallengeDisposition disposition, NSURLCredential *credential) {
+            
+            if (handlerCalled) [NSException raise:NSInvalidArgumentException format:@"Auth Challenge completion handler block called more than once"];
+            handlerCalled = YES;
             
             switch (disposition)
             {
