@@ -1227,7 +1227,7 @@
 /*  These delegate methods are received on arbitrary threads, but as a UI component, be nice and deliver our equivalent on the main thread
  */
 
-- (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+- (void)fileManager:(CK2FileManager *)manager operation:(id)operation didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
 {
     id <CK2OpenPanelDelegate>        delegate;
     
@@ -1241,7 +1241,7 @@
     }
     else
     {
-        [[challenge sender] performDefaultHandlingForAuthenticationChallenge:challenge];
+        completionHandler(CK2AuthChallengePerformDefaultHandling, nil);
     }
 }
 
