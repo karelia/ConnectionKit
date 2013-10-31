@@ -12,12 +12,12 @@
 
 + (void)ck2_invokeBlockOnMainThread:(void (^)())block
 {
-    [[[block copy] autorelease] performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:NO modes:@[ NSRunLoopCommonModes ]];
-}
-
-- (void)ck2_invoke
-{
-    ((void (^)())self)();
+    NSOperation *op = [NSBlockOperation blockOperationWithBlock:block];
+    
+    [op performSelectorOnMainThread:@selector(start)
+                         withObject:nil
+                      waitUntilDone:NO
+                              modes:@[ NSRunLoopCommonModes ]];
 }
 
 @end
