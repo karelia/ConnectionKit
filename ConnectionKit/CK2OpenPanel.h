@@ -156,7 +156,9 @@
 - (BOOL)panel:(id)sender validateURL:(NSURL *)url error:(NSError **)outError;
 - (void)panelSelectionDidChange:(id)sender;
 
-- (void)panel:(id)sender didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)panel:(id)sender didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
 - (void)panel:(id)sender appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
+
+- (void)panel:(id)sender didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge __attribute((deprecated("implement -panel:didReceiveChallenge:completionHandler instead")));
 
 @end
