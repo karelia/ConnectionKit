@@ -180,6 +180,8 @@
             completionBlock(returnCode);
             [completionBlock release];
         }
+        
+        CFRelease(self);    // cancels out retain in -beginSheet
     }
 }
 
@@ -212,7 +214,6 @@
     else if ([self isSheet])
     {
         [NSApp endSheet:self returnCode:code];
-        CFRelease(self);
     }
     else
     {
