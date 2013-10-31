@@ -151,12 +151,12 @@
 
 @optional
 
-- (void)panel:(id)sender didChangeToDirectoryURL:(NSURL *)url;
-- (BOOL)panel:(id)sender shouldEnableURL:(NSURL *)url;
-- (BOOL)panel:(id)sender validateURL:(NSURL *)url error:(NSError **)outError;
-- (void)panelSelectionDidChange:(id)sender;
+- (void)panel:(CK2OpenPanel *)sender didChangeToDirectoryURL:(NSURL *)url;
+- (BOOL)panel:(CK2OpenPanel *)sender shouldEnableURL:(NSURL *)url;
+- (BOOL)panel:(CK2OpenPanel *)sender validateURL:(NSURL *)url error:(NSError **)outError;
+- (void)panelSelectionDidChange:(CK2OpenPanel *)sender;
 
-- (void)panel:(id)sender didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-- (void)panel:(id)sender appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
+- (void)panel:(CK2OpenPanel *)sender didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)panel:(CK2OpenPanel *)sender appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 
 @end
