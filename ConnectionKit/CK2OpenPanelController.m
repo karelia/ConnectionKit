@@ -1233,7 +1233,7 @@
     
     delegate = [[self openPanel] delegate];
     
-    if ([delegate respondsToSelector:@selector(panel:didReceiveAuthenticationChallenge:)])
+    if ([delegate respondsToSelector:@selector(panel:didReceiveChallenge:completionHandler:)])
     {
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
             [delegate panel:self.openPanel didReceiveChallenge:challenge completionHandler:completionHandler];
