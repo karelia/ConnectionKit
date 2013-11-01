@@ -456,6 +456,9 @@
 
         // Let the work commence!
         dispatch_async(queue, ^{
+            
+            if (_cancelled) return;
+            
             _transfer = [transferToUse retain];
             [_transfer sendSynchronousRequest:self.request credential:credential delegate:self];
         });
@@ -476,6 +479,8 @@
 
 - (void)stop;
 {
+    // Mark as cancelled before actually cancelling so _cancelled has to be YES for any other transfers on the queue
+    _cancelled = YES;
     [_transfer cancel];
 }
 

@@ -259,6 +259,20 @@
     [challenge release];
 }
 
+- (void)stop;
+{
+    [super stop];
+    
+    // Cancel the fingerprint semaphore
+    // TODO: I think this isn't quite threadsafe if the cancellation happened
+    // while the challenge is being set up or torn down. We ideally need a
+    // synchronization mechanism, probably around the CURLTransfer's queue
+    if (_fingerprintChallenge)
+    {
+        [self useKnownHostsStat:CURLKHSTAT_REJECT];
+    }
+}
+
 - (void)dealloc;
 {
     [_fingerprintChallenge release];
@@ -345,6 +359,13 @@
 
 - (enum curl_khstat)transfer:(CURLTransfer *)transfer didFindHostFingerprint:(const struct curl_khkey *)foundKey knownFingerprint:(const struct curl_khkey *)knownkey match:(enum curl_khmatch)match;
 {
+    // Once cancelled, we can't handle it. Perhaps CURLTransfer ought to protect against that happenstance itself; not sure
+    if (transfer.state >= CURLTransferStateCanceling)
+    {
+        return CURLKHSTAT_REJECT;
+    }
+    
+    
     if (!_fingerprintSemaphore)
     {
         // Report the key back to delegate to see how it feels about this. Unfortunately have to uglily use a semaphore to do so
