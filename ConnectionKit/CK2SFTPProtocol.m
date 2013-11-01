@@ -259,6 +259,20 @@
     [challenge release];
 }
 
+- (void)stop;
+{
+    [super stop];
+    
+    // Cancel the fingerprint semaphore
+    // TODO: I think this isn't quite threadsafe if the cancellation happened
+    // while the challenge is being set up or torn down. We ideally need a
+    // synchronization mechanism, probably around the CURLTransfer's queue
+    if (_fingerprintChallenge)
+    {
+        [self useKnownHostsStat:CURLKHSTAT_REJECT];
+    }
+}
+
 - (void)dealloc;
 {
     [_fingerprintChallenge release];
