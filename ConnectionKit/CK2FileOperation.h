@@ -14,6 +14,7 @@
 @public   // HACK so auth trampoline can get at them
     CK2FileManager  *_manager;
     NSURL           *_URL;
+    NSString        *_descriptionForErrors;
     dispatch_queue_t    _queue;
     
 @private

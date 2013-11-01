@@ -31,6 +31,7 @@
 #pragma mark Lifecycle
 
 - (id)initWithURL:(NSURL *)url
+ errorDescription:(NSString *)errorDescription
           manager:(CK2FileManager *)manager
 completionHandler:(void (^)(NSError *))completionBlock
 createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
@@ -42,6 +43,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     {
         _manager = [manager retain];
         _URL = [url copy];
+        _descriptionForErrors = [errorDescription copy];
         _completionBlock = [completionBlock copy];
         _queue = dispatch_queue_create("com.karelia.connection.file-operation", NULL);
         
@@ -92,7 +94,20 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                      enumerationBlock:(void (^)(NSURL *))enumBlock
                       completionBlock:(void (^)(NSError *))block;
 {
-    self = [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    NSString *name = url.lastPathComponent;
+    
+    NSString *description;
+    if (name.length)
+    {
+        description = [NSString stringWithFormat:NSLocalizedString(@"The folder “%@” could not be accessed.", "error descrption"),
+                       url.lastPathComponent];
+    }
+    else
+    {
+        description = NSLocalizedString(@"The server could not be accessed.", "error description");
+    }
+    
+    self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         // If we try to do this outside the block there's a risk the protocol object will be created *before* the enum block has been stored, which ends real badly
         _enumerationBlock = [enumBlock copy];
@@ -112,7 +127,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                     manager:(CK2FileManager *)manager
                             completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The folder “%@” could not be created.", "error descrption"),
+                             url.lastPathComponent];
+    
+    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForCreatingDirectoryWithRequest:[self requestWithURL:url]
                                               withIntermediateDirectories:createIntermediates
@@ -129,7 +147,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                          progressBlock:(CK2ProgressBlock)progressBlock
                        completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be uploaded.", "error descrption"),
+                             url.lastPathComponent];
+    
+    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         NSMutableURLRequest *request = [[self requestWithURL:url] mutableCopy];
         request.HTTPBody = data;
@@ -153,7 +174,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                          progressBlock:(CK2ProgressBlock)progressBlock
                        completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be uploaded.", "error descrption"),
+                             url.lastPathComponent];
+    
+    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         _localURL = [sourceURL copy];
         
@@ -207,7 +231,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                           manager:(CK2FileManager *)manager
                   completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be deleted.", "error descrption"),
+                             url.lastPathComponent];
+    
+    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForRemovingItemWithRequest:[self requestWithURL:url] client:self];
     }];
@@ -218,7 +245,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                              manager:(CK2FileManager *)manager
                      completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:srcURL manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be renamed.", "error descrption"),
+                             srcURL.lastPathComponent];
+    
+    return [self initWithURL:srcURL errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForRenamingItemWithRequest:[self requestWithURL:srcURL] newName:newName client:self];
     }];
@@ -229,7 +259,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                        manager:(CK2FileManager *)manager
                                completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be updated.", "error descrption"),
+                             url.lastPathComponent];
+    
+    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForSettingAttributes:keyedValues
                                              ofItemWithRequest:[self requestWithURL:url]
@@ -312,7 +345,25 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     
-    if (!error) error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
+    // Errors should start with our description
+    if (error)
+    {
+        if (_descriptionForErrors)
+        {
+            NSMutableDictionary *info = [error.userInfo mutableCopy];
+            NSString *description = [_descriptionForErrors stringByAppendingFormat:@" %@", error.localizedDescription];
+            [info setObject:description forKey:NSLocalizedDescriptionKey];
+            error = [NSError errorWithDomain:error.domain code:error.code userInfo:info];
+            [info release];
+        }
+    }
+    else
+    {
+        error = [NSError errorWithDomain:NSURLErrorDomain
+                                    code:NSURLErrorUnknown
+                                userInfo:@{ NSLocalizedDescriptionKey : _descriptionForErrors }];
+    }
+    
     [self completeWithError:error];
 }
 
