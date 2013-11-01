@@ -423,16 +423,24 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     dispatch_async(_queue, ^{
         
-        if (challenge.previousFailureCount == 0)
+        id <NSURLAuthenticationChallengeSender> sender = challenge.sender;
+        if ([sender respondsToSelector:@selector(performDefaultHandlingForAuthenticationChallenge:)])
         {
-            if (credential)
-            {
-                [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
-                return;
-            }
+            [sender performDefaultHandlingForAuthenticationChallenge:challenge];
         }
-        
-        [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
+        else
+        {
+            if (challenge.previousFailureCount == 0)
+            {
+                if (credential)
+                {
+                    [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+                    return;
+                }
+            }
+            
+            [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
+        }
     });
 }
 
