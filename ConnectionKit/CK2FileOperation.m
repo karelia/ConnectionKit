@@ -371,11 +371,13 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             if (handlerCalled) [NSException raise:NSInvalidArgumentException format:@"Auth Challenge completion handler block called more than once"];
             handlerCalled = YES;
             
+            id <NSURLAuthenticationChallengeSender> sender = originalChallenge.sender;
+            
             switch (disposition)
             {
                 case CK2AuthChallengeUseCredential:
                     dispatch_async(_queue, ^{
-                        [originalChallenge.sender useCredential:credential forAuthenticationChallenge:originalChallenge];
+                        [sender useCredential:credential forAuthenticationChallenge:originalChallenge];
                     });
                     break;
                     
@@ -384,10 +386,16 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                     break;
                     
                 case CK2AuthChallengeRejectProtectionSpace:
-                    // TODO: Presumably this should move on to the next protection space if there is one, rather than cancelling
+                    if ([sender respondsToSelector:@selector(rejectProtectionSpaceAndContinueWithChallenge:)])
+                    {
+                        [sender rejectProtectionSpaceAndContinueWithChallenge:originalChallenge];
+                        break;
+                    }
+                    // On 10.6, fall back to cancelling the challenge till I think of something better
+                    
                 case CK2AuthChallengeCancelAuthenticationChallenge:
                     dispatch_async(_queue, ^{
-                        [originalChallenge.sender cancelAuthenticationChallenge:originalChallenge];
+                        [sender cancelAuthenticationChallenge:originalChallenge];
                     });
                     break;
                     
