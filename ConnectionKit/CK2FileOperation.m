@@ -111,8 +111,18 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                      enumerationBlock:(void (^)(NSURL *))enumBlock
                       completionBlock:(void (^)(NSError *))block;
 {
-    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The folder “%@” could not be accessed.", "error descrption"),
-                             url.lastPathComponent];
+    NSString *name = url.lastPathComponent;
+    
+    NSString *description;
+    if (name.length)
+    {
+        description = [NSString stringWithFormat:NSLocalizedString(@"The folder “%@” could not be accessed.", "error descrption"),
+                       url.lastPathComponent];
+    }
+    else
+    {
+        description = NSLocalizedString(@"The server could not be accessed.", "error description");
+    }
     
     self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
