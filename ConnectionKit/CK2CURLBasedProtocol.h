@@ -16,6 +16,7 @@
 @interface CK2CURLBasedProtocol : CK2Protocol <CURLTransferDelegate, NSURLAuthenticationChallengeSender>
 {
     CURLTransfer    *_transfer;
+    BOOL            _cancelled;
     NSString        *_user;
     
     void    (^_completionHandler)(NSError *error);
