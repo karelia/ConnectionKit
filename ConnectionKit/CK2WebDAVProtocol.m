@@ -439,7 +439,8 @@
                 break;
 
             case 405:
-                error = [self standardCouldntWriteErrorWithUnderlyingError:error];
+                // Turned off for the moment, as also happens when trying to do a directory listing on a non-WebDAV server
+                //error = [self standardCouldntWriteErrorWithUnderlyingError:error];
                 break;
 
             default:
