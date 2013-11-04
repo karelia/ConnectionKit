@@ -490,6 +490,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                 }
             }
             
+            // Happily this performs the default handling for server trust challenges it seems
             [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
         }
     });
