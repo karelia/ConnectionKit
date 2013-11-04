@@ -470,8 +470,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)performDefaultHandlingForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge proposedCredential:(NSURLCredential *)credential;
 {
-    // TODO: Should this be forwarded straight on to the original sender if implements this method?
-    
     dispatch_async(_queue, ^{
         
         id <NSURLAuthenticationChallengeSender> sender = challenge.sender;
