@@ -32,18 +32,6 @@
 
 @implementation NSString (Connection)
 
-- (NSString *)firstPathComponent
-{
-	NSString *str = self;
-	if ([str hasPrefix:@"/"])
-		str = [str substringFromIndex:1];
-	NSMutableArray *comps = [NSMutableArray arrayWithArray:[str componentsSeparatedByString:@"/"]];
-	if ([comps count] > 0) {
-		return [comps objectAtIndex:0];
-	}
-	return @"";
-}
-
 - (NSString *)stringByDeletingFirstPathComponent
 {
 	NSString *str = self;
