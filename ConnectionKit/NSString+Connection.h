@@ -33,7 +33,6 @@
 @interface NSString (Connection)
 
 // Paths
-- (NSString *)stringByDeletingFirstPathComponent;
 - (NSString *)stringByDeletingFirstPathComponent2;
 
 @end
