@@ -567,41 +567,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
     return nil;
 }
 
-+ (CKTransferRecord *)recursiveMergeRecordWithPath:(NSString *)path root:(CKTransferRecord *)root
-{
-	NSString *first = [path firstPathComponent];
-	
-	if ([[root name] isEqualToString:first])
-	{
-		CKTransferRecord *child = nil;
-		NSEnumerator *e = [[root contents] objectEnumerator];
-		CKTransferRecord *cur;
-		path = [path stringByDeletingFirstPathComponent];
-		
-		if ([path isEqualToString:@"/"])
-			return root;
-		
-		while ((cur = [e nextObject]))
-		{
-			child = [self recursiveMergeRecordWithPath:path root:cur];
-			if (child)
-				return child;
-		}
-		
-		// if we get here we need to create the record		
-		CKTransferRecord *tmp = root;
-		while (![path isEqualToString:@"/"])
-		{
-			cur = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
-			[tmp addContent:cur];
-			tmp = cur;
-			path = [path stringByDeletingFirstPathComponent];
-		}
-		return cur;
-	}
-	return nil;
-}
-
 #pragma mark -
 #pragma mark NSTreeController support
 
