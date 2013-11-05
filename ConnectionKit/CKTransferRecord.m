@@ -602,14 +602,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	return nil;
 }
 
-+ (void)mergeTextPathRecord:(CKTransferRecord *)rec withRoot:(CKTransferRecord *)root
-{
-	CKTransferRecord *parent = [CKTransferRecord recursiveMergeRecordWithPath:[[rec name] stringByDeletingLastPathComponent]
-																		 root:root];
-	[parent addContent:rec];
-	[rec setName:[[rec name] lastPathComponent]];
-}
-
 #pragma mark -
 #pragma mark NSTreeController support
 
