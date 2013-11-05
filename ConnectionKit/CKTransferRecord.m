@@ -514,29 +514,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	return result;
 }
 
-+ (CKTransferRecord *)recursiveRecord:(CKTransferRecord *)record forFullPath:(NSString *)path
-{
-	if ([[record name] isEqualToString:[path firstPathComponent]]) 
-	{
-		NSEnumerator *e = [[record contents] objectEnumerator];
-		CKTransferRecord *cur;
-		CKTransferRecord *child;
-		
-		NSString *newPath = [path stringByDeletingFirstPathComponent2];
-		if ([newPath isEqualToString:@""]) return record; //we have our match
-		
-		while ((cur = [e nextObject])) 
-		{
-			child = [CKTransferRecord recursiveRecord:cur forFullPath:newPath];
-			if (child)
-			{
-				return child;
-			}
-		}
-	}
-	return nil;
-}
-
 - (CKTransferRecord *)recordForPath:(NSString *)path;
 {
     NSParameterAssert(path);
