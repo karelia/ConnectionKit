@@ -28,7 +28,6 @@
  */
 
 #import "CKTransferRecord.h"
-#import "NSString+Connection.h"
 
 #import <AppKit/AppKit.h>   // for NSColor
 
