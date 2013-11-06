@@ -259,6 +259,20 @@
     [challenge release];
 }
 
+- (void)stop;
+{
+    [super stop];
+    
+    // Cancel the fingerprint semaphore
+    // TODO: I think this isn't quite threadsafe if the cancellation happened
+    // while the challenge is being set up or torn down. We ideally need a
+    // synchronization mechanism, probably around the CURLTransfer's queue
+    if (_fingerprintChallenge)
+    {
+        [self useKnownHostsStat:CURLKHSTAT_REJECT];
+    }
+}
+
 - (void)dealloc;
 {
     [_fingerprintChallenge release];
@@ -312,7 +326,7 @@
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
     [mutableRequest curl_setSSHKnownHostsFileURL:[NSURL fileURLWithPath:[@"~/.ssh/known_hosts" stringByExpandingTildeInPath] isDirectory:NO]];
     
-    self = [super initWithRequest:request client:client];
+    self = [super initWithRequest:mutableRequest client:client];
     [mutableRequest release];
     return self;
 }
@@ -345,11 +359,34 @@
 
 - (enum curl_khstat)transfer:(CURLTransfer *)transfer didFindHostFingerprint:(const struct curl_khkey *)foundKey knownFingerprint:(const struct curl_khkey *)knownkey match:(enum curl_khmatch)match;
 {
+    // Once cancelled, we can't handle it. Perhaps CURLTransfer ought to protect against that happenstance itself; not sure
+    if (transfer.state >= CURLTransferStateCanceling)
+    {
+        return CURLKHSTAT_REJECT;
+    }
+    
+    
     if (!_fingerprintSemaphore)
     {
         // Report the key back to delegate to see how it feels about this. Unfortunately have to uglily use a semaphore to do so
+        NSData *key;
+        if (foundKey->len == 0)  // base64 encoded
+        {
+            NSString *key64 = [[NSString alloc] initWithCString:foundKey->key encoding:NSASCIIStringEncoding];
+            key = [[NSData alloc] initWithBase64Encoding:key64];
+            [key64 release];
+        }
+        else
+        {
+            key = [[NSData alloc] initWithBytes:foundKey->key length:foundKey->len];
+        }
+        
         NSURLProtectionSpace *space = [NSURLProtectionSpace ck2_protectionSpaceWithHost:self.request.URL.host
-                                                                                                    knownHostMatch:match];
+                                                                         knownHostMatch:match
+                                                                              publicKey:key
+                                                                                   type:foundKey->keytype];
+        
+        [key release];
         
         NSURLCredential *credential = nil;
         if (match != CURLKHMATCH_MISMATCH) credential = [NSURLCredential ck2_credentialForKnownHostWithPersistence:NSURLCredentialPersistencePermanent];

@@ -138,6 +138,7 @@
 
     if ((self = [self initWithRequest:request client:client]) != nil)
     {
+        _isWriteOp = YES;
         NSString* path = [self pathForRequest:request];
 
         // when done, we just report that we're finished
@@ -183,6 +184,7 @@
 
     if ((self = [self initWithRequest:request client:client]) != nil)
     {
+        _isWriteOp = YES;
         NSString* path = [self pathForRequest:request];
 
         CK2WebDAVCompletionHandler handleCompletion =  ^(id result) {
@@ -247,6 +249,7 @@
 
     if ((self = [self initWithRequest:request client:client]) != nil)
     {
+        _isWriteOp = YES;
         NSString* path = [self pathForRequest:request];
         DAVRequest* davRequest = [[DAVDeleteRequest alloc] initWithPath:path session:_session delegate:self];
         [_queue addOperation:davRequest];
@@ -267,6 +270,7 @@
 
     if ((self = [self initWithRequest:request client:client]) != nil)
     {
+        _isWriteOp = YES;
         [self reportFinished];
     }
 
@@ -376,6 +380,9 @@
 {
     CK2WebDAVLog(sent ? @"--> %@ " : @"<-- %@", string);
 
+    // Tack on a newline to match libcurl output
+    string = [string stringByAppendingString:@"\n"];
+    
     [[self client] protocol:self appendString:string toTranscript:(sent ? CK2TranscriptHeaderOut : CK2TranscriptHeaderIn)];
 }
 
@@ -439,7 +446,8 @@
                 break;
 
             case 405:
-                error = [self standardCouldntWriteErrorWithUnderlyingError:error];
+                // Leave as-is when trying to do a read op, like directory listing on a non-WebDAV server
+                if (_isWriteOp) error = [self standardCouldntWriteErrorWithUnderlyingError:error];
                 break;
 
             default:

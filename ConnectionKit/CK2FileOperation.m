@@ -12,23 +12,6 @@
 #import <AppKit/AppKit.h>   // so icon handling can use NSImage and NSWorkspace for now
 
 
-@interface CK2AuthenticationChallengeTrampoline : NSObject <NSURLAuthenticationChallengeSender>
-{
-@private
-    NSURLAuthenticationChallenge    *_originalChallenge;
-    CK2FileOperation                *_operation;
-    NSURLAuthenticationChallenge    *_trampolineChallenge;
-}
-
-+ (void)handleChallenge:(NSURLAuthenticationChallenge *)challenge operation:(CK2FileOperation *)operation;
-@property(nonatomic, readonly, retain) NSURLAuthenticationChallenge *originalChallenge;
-
-@end
-
-
-#pragma mark -
-
-
 @interface CK2Protocol (Internals)
 // Completion block is guaranteed to be called on our private serial queue
 + (void)classForURL:(NSURL *)url completionHandler:(void (^)(Class protocolClass))block;
@@ -48,6 +31,7 @@
 #pragma mark Lifecycle
 
 - (id)initWithURL:(NSURL *)url
+ errorDescription:(NSString *)errorDescription
           manager:(CK2FileManager *)manager
 completionHandler:(void (^)(NSError *))completionBlock
 createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
@@ -59,6 +43,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     {
         _manager = [manager retain];
         _URL = [url copy];
+        _descriptionForErrors = [errorDescription copy];
         _completionBlock = [completionBlock copy];
         _queue = dispatch_queue_create("com.karelia.connection.file-operation", NULL);
         
@@ -109,7 +94,20 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                      enumerationBlock:(void (^)(NSURL *))enumBlock
                       completionBlock:(void (^)(NSError *))block;
 {
-    self = [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    NSString *name = url.lastPathComponent;
+    
+    NSString *description;
+    if (name.length)
+    {
+        description = [NSString stringWithFormat:NSLocalizedString(@"The folder “%@” could not be accessed.", "error descrption"),
+                       url.lastPathComponent];
+    }
+    else
+    {
+        description = NSLocalizedString(@"The server could not be accessed.", "error description");
+    }
+    
+    self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         // If we try to do this outside the block there's a risk the protocol object will be created *before* the enum block has been stored, which ends real badly
         _enumerationBlock = [enumBlock copy];
@@ -129,7 +127,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                     manager:(CK2FileManager *)manager
                             completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The folder “%@” could not be created.", "error descrption"),
+                             url.lastPathComponent];
+    
+    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForCreatingDirectoryWithRequest:[self requestWithURL:url]
                                               withIntermediateDirectories:createIntermediates
@@ -146,7 +147,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                          progressBlock:(CK2ProgressBlock)progressBlock
                        completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be uploaded.", "error descrption"),
+                             url.lastPathComponent];
+    
+    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         NSMutableURLRequest *request = [[self requestWithURL:url] mutableCopy];
         request.HTTPBody = data;
@@ -175,7 +179,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                          progressBlock:(CK2ProgressBlock)progressBlock
                        completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be uploaded.", "error descrption"),
+                             url.lastPathComponent];
+    
+    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         _localURL = [sourceURL copy];
         
@@ -234,7 +241,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                           manager:(CK2FileManager *)manager
                   completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be deleted.", "error descrption"),
+                             url.lastPathComponent];
+    
+    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForRemovingItemWithRequest:[self requestWithURL:url] client:self];
     }];
@@ -245,7 +255,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                              manager:(CK2FileManager *)manager
                      completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:srcURL manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be renamed.", "error descrption"),
+                             srcURL.lastPathComponent];
+    
+    return [self initWithURL:srcURL errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForRenamingItemWithRequest:[self requestWithURL:srcURL] newName:newName client:self];
     }];
@@ -256,7 +269,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                        manager:(CK2FileManager *)manager
                                completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be updated.", "error descrption"),
+                             url.lastPathComponent];
+    
+    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForSettingAttributes:keyedValues
                                              ofItemWithRequest:[self requestWithURL:url]
@@ -354,7 +370,25 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     
-    if (!error) error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
+    // Errors should start with our description
+    if (error)
+    {
+        if (_descriptionForErrors)
+        {
+            NSMutableDictionary *info = [error.userInfo mutableCopy];
+            NSString *description = [_descriptionForErrors stringByAppendingFormat:@" %@", error.localizedDescription];
+            [info setObject:description forKey:NSLocalizedDescriptionKey];
+            error = [NSError errorWithDomain:error.domain code:error.code userInfo:info];
+            [info release];
+        }
+    }
+    else
+    {
+        error = [NSError errorWithDomain:NSURLErrorDomain
+                                    code:NSURLErrorUnknown
+                                userInfo:@{ NSLocalizedDescriptionKey : _descriptionForErrors }];
+    }
+    
     [self completeWithError:error];
 }
 
@@ -366,13 +400,127 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     [self completeWithError:nil];
 }
 
-- (void)protocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)protocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)originalChallenge;
 {
     NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     if ([self isCancelled]) return; // don't care about auth once cancelled
     
-    [CK2AuthenticationChallengeTrampoline handleChallenge:challenge operation:self];
+    
+    // Invent a default credential if needed
+    NSURLAuthenticationChallenge *challenge = originalChallenge;
+    if (!originalChallenge.proposedCredential)
+    {
+        NSURLProtectionSpace *space = originalChallenge.protectionSpace;
+        NSString *user = self.originalURL.user;
+        NSString *password = self.originalURL.password;
+        
+        NSURLCredential *credential;
+        if (user && password)
+        {
+            credential = [NSURLCredential credentialWithUser:user password:password persistence:NSURLCredentialPersistenceNone];
+        }
+        else
+        {
+            credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:space];
+        }
+        
+        challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
+                                                               proposedCredential:credential
+                                                             previousFailureCount:originalChallenge.previousFailureCount
+                                                                  failureResponse:originalChallenge.failureResponse
+                                                                            error:originalChallenge.error
+                                                                           sender:originalChallenge.sender];
+        
+        [challenge autorelease];
+    }
+    
+    
+    // Notify the delegate
+    CK2FileManager *manager = self.fileManager;
+    id <CK2FileManagerDelegate> delegate = manager.delegate;
+    
+    if ([delegate respondsToSelector:@selector(fileManager:operation:didReceiveChallenge:completionHandler:)])
+    {
+        [manager.delegateQueue addOperationWithBlock:^{
+            
+        __block BOOL handlerCalled = NO;
+        [delegate fileManager:manager operation:self didReceiveChallenge:challenge completionHandler:^(CK2AuthChallengeDisposition disposition, NSURLCredential *credential) {
+            
+            if (handlerCalled) [NSException raise:NSInvalidArgumentException format:@"Auth Challenge completion handler block called more than once"];
+            handlerCalled = YES;
+            
+            id <NSURLAuthenticationChallengeSender> sender = originalChallenge.sender;
+            
+            switch (disposition)
+            {
+                case CK2AuthChallengeUseCredential:
+                    dispatch_async(_queue, ^{
+                        [sender useCredential:credential forAuthenticationChallenge:originalChallenge];
+                    });
+                    break;
+                    
+                case CK2AuthChallengePerformDefaultHandling:
+                    [self performDefaultHandlingForAuthenticationChallenge:originalChallenge proposedCredential:challenge.proposedCredential];
+                    break;
+                    
+                case CK2AuthChallengeRejectProtectionSpace:
+                    if ([sender respondsToSelector:@selector(rejectProtectionSpaceAndContinueWithChallenge:)])
+                    {
+                        [sender rejectProtectionSpaceAndContinueWithChallenge:originalChallenge];
+                        break;
+                    }
+                    // On 10.6, fall back to cancelling the challenge till I think of something better
+                    
+                case CK2AuthChallengeCancelAuthenticationChallenge:
+                    dispatch_async(_queue, ^{
+                        [sender cancelAuthenticationChallenge:originalChallenge];
+                    });
+                    break;
+                    
+                default:
+                    [NSException raise:NSInvalidArgumentException format:@"Unrecognised Auth Challenge Disposition"];
+            }
+        }];
+            
+        }];
+    }
+    else if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
+    {
+        NSLog(@"%@ implements the old CK2FileManager authentication delegate method instead of the new one", delegate.class);
+    }
+    else
+    {
+        [self performDefaultHandlingForAuthenticationChallenge:originalChallenge proposedCredential:challenge.proposedCredential];
+    }
+    
+    
     // TODO: Cache credentials per protection space
+}
+
+- (void)performDefaultHandlingForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge proposedCredential:(NSURLCredential *)credential;
+{
+    dispatch_async(_queue, ^{
+        
+        id <NSURLAuthenticationChallengeSender> sender = challenge.sender;
+        if ([sender respondsToSelector:@selector(performDefaultHandlingForAuthenticationChallenge:)])
+        {
+            [sender performDefaultHandlingForAuthenticationChallenge:challenge];
+        }
+        else
+        {
+            if (challenge.previousFailureCount == 0)
+            {
+                if (credential)
+                {
+                    [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+                    return;
+                }
+            }
+            
+            // Happily this performs the default handling for server trust challenges it seems
+            [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
+        }
+    });
 }
 
 - (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
@@ -487,148 +635,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     NSInputStream *stream = [[NSInputStream alloc] initWithURL:_localURL];
     return [stream autorelease];
-}
-
-@end
-
-
-#pragma mark -
-
-
-@implementation CK2AuthenticationChallengeTrampoline
-
-+ (void)handleChallenge:(NSURLAuthenticationChallenge *)challenge operation:(CK2FileOperation *)operation;
-{
-    // Trust the trampoline to release itself when done
-    [[[self alloc] initWithChallenge:challenge operation:operation] release];
-}
-
-- (id)initWithChallenge:(NSURLAuthenticationChallenge *)challenge operation:(CK2FileOperation *)operation;
-{
-    if (self = [super init])
-    {
-        _originalChallenge = [challenge retain];
-        _operation = [operation retain];
-        
-        if ([challenge proposedCredential])
-        {
-            _trampolineChallenge = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge sender:self];
-        }
-        else
-        {
-            // Invent the best credential available
-            NSURLProtectionSpace *space = [challenge protectionSpace];
-            NSString *user = _operation.originalURL.user;
-            NSString *password = _operation.originalURL.password;
-            
-            NSURLCredential *credential;
-            if (user && password)
-            {
-                credential = [NSURLCredential credentialWithUser:user password:password persistence:NSURLCredentialPersistenceNone];
-            }
-            else
-            {
-                credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:space];
-            }
-            
-            _trampolineChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
-                                                                              proposedCredential:credential
-                                                                            previousFailureCount:[challenge previousFailureCount]
-                                                                                 failureResponse:[challenge failureResponse]
-                                                                                           error:[challenge error]
-                                                                                          sender:self];
-        }
-        
-        /*  At this point point, we are retaining _trampolineChallenge
-         *  It in turn is retaining us, as the sender. This isn't actually guaranteed by the docs, but is a fair bet rdar://problem/13602367
-         *  The cycle is broken when the challenge is replied to
-         */
-        
-        CK2FileManager *manager = operation.fileManager;
-        id <CK2FileManagerDelegate> delegate = manager.delegate;
-        
-        if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
-        {
-            [manager.delegateQueue addOperationWithBlock:^{
-                [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
-            }];
-        }
-        else
-        {
-            [[_trampolineChallenge sender] performDefaultHandlingForAuthenticationChallenge:_trampolineChallenge];
-        }
-    }
-    return self;
-}
-
-- (void)dealloc
-{
-    [_originalChallenge release];
-    [_operation release];
-    [_trampolineChallenge release];
-
-    [super dealloc];
-}
-
-- (void)cleanupAndRelease
-{
-    // release trampoline challenge now to break retain cycle
-    [_trampolineChallenge release];
-    _trampolineChallenge = nil;
-}
-
-@synthesize originalChallenge = _originalChallenge;
-
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    NSParameterAssert(challenge == _trampolineChallenge);
-    
-    dispatch_async(_operation->_queue, ^{
-        [[_originalChallenge sender] useCredential:credential forAuthenticationChallenge:_originalChallenge];
-        [self cleanupAndRelease];
-    });
-}
-
-- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    NSParameterAssert(challenge == _trampolineChallenge);
-    
-    dispatch_async(_operation->_queue, ^{
-        [[_originalChallenge sender] continueWithoutCredentialForAuthenticationChallenge:_originalChallenge];
-        [self cleanupAndRelease];
-    });
-}
-
-- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    NSParameterAssert(challenge == _trampolineChallenge);
-    
-    dispatch_async(_operation->_queue, ^{
-        [[_originalChallenge sender] cancelAuthenticationChallenge:_originalChallenge];
-        [self cleanupAndRelease];
-    });
-}
-
-- (void)performDefaultHandlingForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    // TODO: Should this be forwarded straight on to the original sender if implements this method?
-    if ([challenge previousFailureCount] == 0)
-    {
-        NSURLCredential *credential = [challenge proposedCredential];
-        if (credential)
-        {
-            [self useCredential:credential forAuthenticationChallenge:challenge];
-            return;
-        }
-    }
-    
-    [self continueWithoutCredentialForAuthenticationChallenge:challenge];
-}
-
-- (void)rejectProtectionSpaceAndContinueWithChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    // TODO: Presumably this should move on to the next protection space if there is one
-    [self cancelAuthenticationChallenge:challenge];
 }
 
 @end

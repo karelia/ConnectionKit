@@ -28,7 +28,6 @@
  */
 
 #import "CKTransferRecord.h"
-#import "NSString+Connection.h"
 
 #import <AppKit/AppKit.h>   // for NSColor
 
@@ -514,29 +513,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	return result;
 }
 
-+ (CKTransferRecord *)recursiveRecord:(CKTransferRecord *)record forFullPath:(NSString *)path
-{
-	if ([[record name] isEqualToString:[path firstPathComponent]]) 
-	{
-		NSEnumerator *e = [[record contents] objectEnumerator];
-		CKTransferRecord *cur;
-		CKTransferRecord *child;
-		
-		NSString *newPath = [path stringByDeletingFirstPathComponent2];
-		if ([newPath isEqualToString:@""]) return record; //we have our match
-		
-		while ((cur = [e nextObject])) 
-		{
-			child = [CKTransferRecord recursiveRecord:cur forFullPath:newPath];
-			if (child)
-			{
-				return child;
-			}
-		}
-	}
-	return nil;
-}
-
 - (CKTransferRecord *)recordForPath:(NSString *)path;
 {
     NSParameterAssert(path);
@@ -565,49 +541,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
     }
 	
     return nil;
-}
-
-+ (CKTransferRecord *)recursiveMergeRecordWithPath:(NSString *)path root:(CKTransferRecord *)root
-{
-	NSString *first = [path firstPathComponent];
-	
-	if ([[root name] isEqualToString:first])
-	{
-		CKTransferRecord *child = nil;
-		NSEnumerator *e = [[root contents] objectEnumerator];
-		CKTransferRecord *cur;
-		path = [path stringByDeletingFirstPathComponent];
-		
-		if ([path isEqualToString:@"/"])
-			return root;
-		
-		while ((cur = [e nextObject]))
-		{
-			child = [self recursiveMergeRecordWithPath:path root:cur];
-			if (child)
-				return child;
-		}
-		
-		// if we get here we need to create the record		
-		CKTransferRecord *tmp = root;
-		while (![path isEqualToString:@"/"])
-		{
-			cur = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
-			[tmp addContent:cur];
-			tmp = cur;
-			path = [path stringByDeletingFirstPathComponent];
-		}
-		return cur;
-	}
-	return nil;
-}
-
-+ (void)mergeTextPathRecord:(CKTransferRecord *)rec withRoot:(CKTransferRecord *)root
-{
-	CKTransferRecord *parent = [CKTransferRecord recursiveMergeRecordWithPath:[[rec name] stringByDeletingLastPathComponent]
-																		 root:root];
-	[parent addContent:rec];
-	[rec setName:[[rec name] lastPathComponent]];
 }
 
 #pragma mark -
