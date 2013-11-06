@@ -72,8 +72,7 @@ typedef NSUInteger CKUploadingOptions;
 - (void)uploaderDidFinishUploading:(CKUploader *)uploader;
 - (void)uploader:(CKUploader *)uploader didFailWithError:(NSError *)error;
 
-- (void)uploader:(CKUploader *)uploader didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-- (void)uploader:(CKUploader *)uploader didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)uploader:(CKUploader *)uploader didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
 
 @optional
 - (void)uploader:(CKUploader *)uploader didAddTransferRecord:(CKTransferRecord *)record;

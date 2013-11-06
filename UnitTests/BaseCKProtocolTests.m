@@ -218,9 +218,9 @@
 
             [self pause];
         }];
+        
+        [self runUntilPaused];
     }
-
-    [self runUntilPaused];
 }
 
 - (void)testCreateDirectoryAtURLBadURL
@@ -248,9 +248,9 @@
 
             [self pause];
         }];
+        
+        [self runUntilPaused];
     }
-
-    [self runUntilPaused];
 }
 
 - (void)testCreateDirectoryAtURLBadLogin
@@ -547,9 +547,9 @@
                 [self pause];
             }
         }];
+        
+        [self runUntilPaused];
     }
-
-    [self runUntilPaused];
 }
 
 - (void)testRemoveFileAtURL
@@ -562,9 +562,9 @@
             STAssertNil(error, @"got unexpected error %@", error);
             [self pause];
         }];
+        
+        [self runUntilPaused];
     }
-
-    [self runUntilPaused];
 }
 
 - (void)testRemoveFileAtURLBadURL

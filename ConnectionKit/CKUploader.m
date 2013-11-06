@@ -336,7 +336,7 @@
 
 #pragma mark CK2FileManager Delegate
 
-- (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+- (void)fileManager:(CK2FileManager *)manager operation:(id)operation didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
 {
     // Hand off to the delegate for auth, on the main queue as it expects
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -344,26 +344,11 @@
         id <CKUploaderDelegate> delegate = [self delegate];
         if (delegate)
         {
-            [delegate uploader:self didReceiveAuthenticationChallenge:challenge];
+            [delegate uploader:self didReceiveChallenge:challenge completionHandler:completionHandler];
         }
         else
         {
-            if ([challenge previousFailureCount] == 0)
-            {
-                NSURLCredential *credential = [challenge proposedCredential];
-                if (!credential)
-                {
-                    credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:[challenge protectionSpace]];
-                }
-                
-                if (credential)
-                {
-                    [[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
-                    return;
-                }
-            }
-            
-            [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
+            completionHandler(CK2AuthChallengePerformDefaultHandling, nil);
         }
     });
 }

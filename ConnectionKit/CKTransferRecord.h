@@ -95,8 +95,6 @@
 // Helper methods for working with the recursive data structure
 
 + (CKTransferRecord *)rootRecordWithPath:(NSString *)path;
-+ (CKTransferRecord *)recursiveRecord:(CKTransferRecord *)record forFullPath:(NSString *)path;
-+ (void)mergeTextPathRecord:(CKTransferRecord *)record withRoot:(CKTransferRecord *)root;
 
 // If the path is absolute, searches from root of tree, otherwise searches from receiver
 - (CKTransferRecord *)recordForPath:(NSString *)path;
