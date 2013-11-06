@@ -11,13 +11,12 @@
 
 @interface CK2FileOperation : NSObject <CK2ProtocolClient>
 {
-@public   // HACK so auth trampoline can get at them
+  @private
     CK2FileManager  *_manager;
     NSURL           *_URL;
     NSString        *_descriptionForErrors;
     dispatch_queue_t    _queue;
     
-@private
     CK2Protocol     *_protocol;
     
     void    (^_completionBlock)(NSError *);
