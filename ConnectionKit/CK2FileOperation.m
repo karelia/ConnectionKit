@@ -333,7 +333,9 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     if (!selector || [delegate respondsToSelector:selector])
     {
-        block(delegate);
+        [manager.delegateQueue addOperationWithBlock:^{
+            block(delegate);
+        }];
     }
 }
 
