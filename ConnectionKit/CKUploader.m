@@ -325,26 +325,21 @@
 
 - (void)fileManager:(CK2FileManager *)manager operation:(id)operation didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
 {
-    // Hand off to the delegate for auth, on the main queue as it expects
-    dispatch_async(dispatch_get_main_queue(), ^{
-        
-        id <CKUploaderDelegate> delegate = [self delegate];
-        if (delegate)
-        {
-            [delegate uploader:self didReceiveChallenge:challenge completionHandler:completionHandler];
-        }
-        else
-        {
-            completionHandler(CK2AuthChallengePerformDefaultHandling, nil);
-        }
-    });
+    // Hand off to the delegate for auth
+    id <CKUploaderDelegate> delegate = [self delegate];
+    if (delegate)
+    {
+        [delegate uploader:self didReceiveChallenge:challenge completionHandler:completionHandler];
+    }
+    else
+    {
+        completionHandler(CK2AuthChallengePerformDefaultHandling, nil);
+    }
 }
 
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 {
-	dispatch_async(dispatch_get_main_queue(), ^{
-        [[self delegate] uploader:self appendString:info toTranscript:transcript];
-    });
+    [[self delegate] uploader:self appendString:info toTranscript:transcript];
 }
 
 @end
