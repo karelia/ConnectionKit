@@ -61,12 +61,12 @@
 }
 
 
-- (void)uploader:(CKUploader *)uploader didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+- (void)uploader:(CKUploader *)uploader didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler
 {
     if (challenge.previousFailureCount > 0)
     {
         NSLog(@"cancelling authentication");
-        [challenge.sender cancelAuthenticationChallenge:challenge];
+        completionHandler(CK2AuthChallengeCancelAuthenticationChallenge, nil);
     }
 
     else
@@ -74,15 +74,9 @@
         NSString* user = self.failAuthentication ? @"wrong" : @"user";
         NSString* pass = self.failAuthentication ? @"wrong" : @"pass";
         NSURLCredential* credential = [NSURLCredential credentialWithUser:user password:pass persistence:NSURLCredentialPersistenceNone];
-        [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+        completionHandler(CK2AuthChallengeUseCredential, credential);
     }
 }
-
-- (void)uploader:(CKUploader *)uploader didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-    [self pause];
-}
-
 
 - (void)uploader:(CKUploader *)uploader didBeginUploadToPath:(NSString *)path
 {
