@@ -291,9 +291,14 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             // It's now safe to stop the protocol as it can't misinterpret the message and issue its own cancellation error (or at least if it does, goes ignored)
             [_protocol stop];
             
+            
+            // Store the error and notify completion handler
+            _error = [error copy];
+            
             _completionBlock(error);
             [_completionBlock release]; _completionBlock = nil;
-
+            
+            
             // Break retain cycle, but deliberately keep weak reference so we know we're associated with it
             [_protocol release];
         }
@@ -313,6 +318,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     [_completionBlock release];
     [_enumerationBlock release];
     [_localURL release];
+    [_error release];
 
     [super dealloc];
 }
@@ -347,6 +353,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 }
 
 - (BOOL)isCancelled; { return _cancelled; }
+
+#pragma mark State
+
+@synthesize error = _error;
 
 #pragma mark CK2ProtocolClient
 

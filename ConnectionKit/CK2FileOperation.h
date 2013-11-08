@@ -24,9 +24,16 @@
     void    (^_enumerationBlock)(NSURL *);
     NSURL   *_localURL;
     
-    BOOL    _cancelled;
+    BOOL        _cancelled;
+    NSError     *_error;
 }
 
 - (void)cancel;
+
+/**
+ * The error, if any. Also delivered to completion handler.
+ * This property will be `nil` in the event that no error occured.
+ */
+@property (readonly, copy) NSError *error;
 
 @end
