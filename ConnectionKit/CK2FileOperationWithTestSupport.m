@@ -10,7 +10,7 @@
 - (NSURLRequest *)requestWithURL:(NSURL *)url;
 {
     NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:60.0];
-    CK2FileManagerWithTestSupport* manager = (CK2FileManagerWithTestSupport*)_manager;
+    CK2FileManagerWithTestSupport* manager = [self valueForKey:@"_manager"];
     if (manager.dontShareConnections)
     {
         [request ck2_setMulti:manager.multi];
