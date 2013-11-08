@@ -20,6 +20,7 @@ typedef NS_OPTIONS(NSInteger, CK2DirectoryEnumerationOptions) {
 
 
 @protocol CK2FileManagerDelegate;
+@class CK2FileOperation;
 
 
 /**
@@ -85,12 +86,12 @@ typedef NS_OPTIONS(NSInteger, CK2DirectoryEnumerationOptions) {
  @param keys to try and include from the server. Pass nil to get a default set. Include NSURLParentDirectoryURLKey to get 
  @param mask of options. In addition to NSDirectoryEnumerationOptions, accepts CK2DirectoryEnumerationIncludesDirectory
  @param block called with URLs, each of which identifies a file, directory, or symbolic link. If the directory contains no entries, the array is empty. If an error occurs, contents is nil and error should be non-nil.
- @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
+ @return The new file operation.
  */
-- (id)contentsOfDirectoryAtURL:(NSURL *)url
-    includingPropertiesForKeys:(NSArray *)keys
-                       options:(NSUInteger)mask
-             completionHandler:(void (^)(NSArray *contents, NSError *error))block __attribute((nonnull(1,4)));
+- (CK2FileOperation *)contentsOfDirectoryAtURL:(NSURL *)url
+                    includingPropertiesForKeys:(NSArray *)keys
+                                       options:(NSUInteger)mask
+                             completionHandler:(void (^)(NSArray *contents, NSError *error))block __attribute((nonnull(1,4)));
 
 /**
  Block-based enumeration of directory contents
@@ -106,13 +107,13 @@ typedef NS_OPTIONS(NSInteger, CK2DirectoryEnumerationOptions) {
  @param mask of options. In addition to NSDirectoryEnumerationOptions, accepts CK2DirectoryEnumerationIncludesDirectory. Not all protocols support deep enumeration at present, so it is recommended you include NSDirectoryEnumerationSkipsSubdirectoryDescendants for now.
  @param block is called for each URL encountered.
  @param completionBlock is called once enumeration finishes or fails. A non-nil error indicates failure.
- @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
+ @return The new file operation.
  */
-- (id)enumerateContentsOfURL:(NSURL *)url
-  includingPropertiesForKeys:(NSArray *)keys
-                     options:(NSUInteger)mask
-                  usingBlock:(void (^)(NSURL *url))block
-           completionHandler:(void (^)(NSError *error))completionBlock __attribute((nonnull(1,4)));
+- (CK2FileOperation *)enumerateContentsOfURL:(NSURL *)url
+                  includingPropertiesForKeys:(NSArray *)keys
+                                     options:(NSUInteger)mask
+                                  usingBlock:(void (^)(NSURL *url))block
+                           completionHandler:(void (^)(NSError *error))completionBlock __attribute((nonnull(1,4)));
 
 extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL of a symlink
 
@@ -147,9 +148,9 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @param createIntermediates If YES, this method creates any non-existent parent directories as part of creating the directory in url. If NO, this method fails if any of the intermediate parent directories does not exist.
  @param attributes to apply *only* if the server supports supplying them at creation time. See discussion for more details.
  @param handler Called at the end of the operation. A non-nil error indicates failure.
- @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed. 
+ @return The new file operation.
  */
-- (id)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1)));
+- (CK2FileOperation *)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1)));
 
 /**
  Creates a file with the specified content at the specified URL.
@@ -181,9 +182,9 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @param attributes to apply *only* if the server supports supplying them at creation time. See discussion for more details.
  @param progressBlock Called as each "chunk" of the file is written. In some cases, uploads have to be restarted from the beginning; the previousAttemptCount argument tells you how many times that has happened so far
  @param handler Called at the end of the operation. A non-nil error indicates failure.
- @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
+ @return The new file operation.
  */
-- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
+- (CK2FileOperation *)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
 
 /**
  Creates a file by copying the content of the specified URL.
@@ -219,9 +220,9 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @param attributes to apply *only* if the server supports supplying them at creation time. See discussion for more details.
  @param progressBlock Called as each "chunk" of the file is written. In some cases, uploads have to be restarted from the beginning; the previousAttemptCount argument tells you how many times that has happened so far
  @param handler Called at the end of the operation. A non-nil error indicates failure.
- @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
+ @return The new file operation.
  */
-- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
+- (CK2FileOperation *)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
 
 
 #pragma mark Deleting Items
@@ -252,9 +253,9 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  
  @param url A file URL specifying the file or directory to remove.
  @param handler Called at the end of the operation. A non-nil error indicates failure.
- @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
+ @return The new file operation.
  */
-- (id)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1)));
+- (CK2FileOperation *)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1)));
 
 
 #pragma mark Moving Items
@@ -264,8 +265,9 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @param srcURL The file or directory to rename.
  @param newName The new name for the file. Note that some FTP servers seem to cope poorly with filenames containing a space, truncating at the first space character.
  @param handler Called at the end of the operation. A non-nil error indicates failure.
+ @return The new file operation.
  */
-- (id)renameItemAtURL:(NSURL *)srcURL toFilename:(NSString *)newName completionHandler:(void (^)(NSError *error))handler;
+- (CK2FileOperation *)renameItemAtURL:(NSURL *)srcURL toFilename:(NSString *)newName completionHandler:(void (^)(NSError *error))handler;
 
 
 #pragma mark Getting and Setting Attributes
@@ -291,9 +293,9 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @param keyedValues A dictionary containing as keys the attributes to set for path and as values the corresponding value for the attribute.
  @param url The URL of a file or directory.
  @param handler Called at the end of the operation. A non-nil error indicates failure.
- @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
+ @return The new file operation.
  */
-- (id)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
+- (CK2FileOperation *)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
 
 // To retrieve attributes, instead perform a listing of the *parent* directory, and pick out resource properties from the returned URLs that you're interested in
 
@@ -412,7 +414,7 @@ typedef NS_ENUM(NSInteger, CK2AuthChallengeDisposition) {
  If this delegate is not implemented, the behavior will be the same as using the
  default handling disposition.
  */
-- (void)fileManager:(CK2FileManager *)manager operation:(id)operation
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation
                                     didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge
                                       completionHandler:(void (^)(CK2AuthChallengeDisposition disposition, NSURLCredential *credential))completionHandler;
 
