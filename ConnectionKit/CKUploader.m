@@ -99,11 +99,11 @@
 
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
 {
-    return [self uploadToPath:path size:data.length usingBlock:^id(CKTransferRecord *record) {
+    return [self uploadToPath:path size:data.length usingBlock:^CK2FileOperation* (CKTransferRecord *record) {
         
         NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
         
-        id op = [_fileManager createFileAtURL:[self URLForPath:path] contents:data withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
+        CK2FileOperation *op = [_fileManager createFileAtURL:[self URLForPath:path] contents:data withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 [record transfer:record transferredDataOfLength:bytesWritten];
@@ -135,11 +135,11 @@
     NSNumber *size;
     if (![localURL getResourceValue:&size forKey:NSURLFileSizeKey error:NULL]) size = nil;
     
-    return [self uploadToPath:path size:size.unsignedLongLongValue usingBlock:^id(CKTransferRecord *record) {
+    return [self uploadToPath:path size:size.unsignedLongLongValue usingBlock:^CK2FileOperation* (CKTransferRecord *record) {
         
         NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
         
-        id op = [_fileManager createFileAtURL:[self URLForPath:path] withContentsOfURL:localURL withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
+        CK2FileOperation *op = [_fileManager createFileAtURL:[self URLForPath:path] withContentsOfURL:localURL withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 [record transfer:record transferredDataOfLength:bytesWritten];
@@ -166,7 +166,7 @@
     }];
 }
 
-- (CKTransferRecord *)uploadToPath:(NSString *)path size:(unsigned long long)size usingBlock:(id (^)(CKTransferRecord *record))block;
+- (CKTransferRecord *)uploadToPath:(NSString *)path size:(unsigned long long)size usingBlock:(CK2FileOperation* (^)(CKTransferRecord *record))block;
 {
     // Create transfer record
     if (_options & CKUploadingDeleteExistingFileFirst)
@@ -179,7 +179,7 @@
     
     
     // Enqueue upload
-    [self addOperationWithBlock:^id{
+    [self addOperationWithBlock:^CK2FileOperation* {
         return block(result);
     }];
     
@@ -206,7 +206,7 @@
 
 - (void)finishUploading;
 {
-    [self addOperationWithBlock:^id{
+    [self addOperationWithBlock:^CK2FileOperation* {
         
         NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
         [[self delegate] uploaderDidFinishUploading:self];
@@ -222,17 +222,16 @@
 - (void)cancel;
 {
     _isCancelled = YES;
-    [_fileManager cancelOperation:self.currentOperation];
+    [self.currentOperation cancel];
     [_queue makeObjectsPerformSelector:_cmd];
     [_queue release]; _queue = nil;
 }
 
 - (BOOL)isCancelled; { return _isCancelled; }
 
-- (id)currentOperation; { return _currentOperation; }
+- (CK2FileOperation *)currentOperation; { return _currentOperation; }
 
-// The block must return the operation vended to it by CK2FileManager
-- (void)addOperationWithBlock:(id (^)(void))block;
+- (void)addOperationWithBlock:(CK2FileOperation* (^)(void))block;
 {
     NSAssert([NSThread isMainThread], @"-addOperation: is only safe to call on the main thread");
     
@@ -336,7 +335,7 @@
 
 #pragma mark CK2FileManager Delegate
 
-- (void)fileManager:(CK2FileManager *)manager operation:(id)operation didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
 {
     // Hand off to the delegate for auth, on the main queue as it expects
     dispatch_async(dispatch_get_main_queue(), ^{
