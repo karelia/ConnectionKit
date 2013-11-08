@@ -28,6 +28,13 @@
     NSError     *_error;
 }
 
+/**
+ * `-cancel` returns immediately, but marks an operation as being canceled.
+ * The operation will signal its completion handler with an
+ * error value of `{ NSURLErrorDomain, NSURLErrorCancelled }`.  In some
+ * cases, the operation may signal other work before it acknowledges the
+ * cancelation.
+ */
 - (void)cancel;
 
 /**
