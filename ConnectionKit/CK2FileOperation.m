@@ -12,6 +12,15 @@
 #import <AppKit/AppKit.h>   // so icon handling can use NSImage and NSWorkspace for now
 
 
+@interface CK2FileOperation () <CK2ProtocolClient>
+@property(readonly) CK2FileManager *fileManager;    // goes to nil once finished/failed
+@property(readonly) NSURL *originalURL;
+@end
+
+
+#pragma mark -
+
+
 @interface CK2Protocol (Internals)
 // Completion block is guaranteed to be called on our private serial queue
 + (void)classForURL:(NSURL *)url completionHandler:(void (^)(Class protocolClass))block;

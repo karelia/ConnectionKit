@@ -19,6 +19,54 @@ NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
 #pragma mark -
 
 
+@interface CK2FileOperation (Private) <CK2ProtocolClient>
+
+- (id)initEnumerationOperationWithURL:(NSURL *)url
+           includingPropertiesForKeys:(NSArray *)keys
+                              options:(NSDirectoryEnumerationOptions)mask
+                              manager:(CK2FileManager *)manager
+                     enumerationBlock:(void (^)(NSURL *))enumBlock
+                      completionBlock:(void (^)(NSError *))block;
+
+- (id)initDirectoryCreationOperationWithURL:(NSURL *)url
+                withIntermediateDirectories:(BOOL)createIntermediates
+                          openingAttributes:(NSDictionary *)attributes
+                                    manager:(CK2FileManager *)manager
+                            completionBlock:(void (^)(NSError *))block;
+
+- (id)initFileCreationOperationWithURL:(NSURL *)url
+                                  data:(NSData *)data
+           withIntermediateDirectories:(BOOL)createIntermediates
+                     openingAttributes:(NSDictionary *)attributes
+                               manager:(CK2FileManager *)manager
+                         progressBlock:(CK2ProgressBlock)progressBlock
+                       completionBlock:(void (^)(NSError *))block;
+
+- (id)initFileCreationOperationWithURL:(NSURL *)remoteURL
+                                  file:(NSURL *)localURL
+           withIntermediateDirectories:(BOOL)createIntermediates
+                     openingAttributes:(NSDictionary *)attributes
+                               manager:(CK2FileManager *)manager
+                         progressBlock:(CK2ProgressBlock)progressBlock
+                       completionBlock:(void (^)(NSError *))block;
+
+- (id)initRemovalOperationWithURL:(NSURL *)url
+                          manager:(CK2FileManager *)manager
+                  completionBlock:(void (^)(NSError *))block;
+
+- (id)initRenameOperationWithSourceURL:(NSURL *)srcURL
+                               newName:(NSString *)newName
+                               manager:(CK2FileManager *)manager
+                       completionBlock:(void (^)(NSError *))block;
+
+- (id)initResourceValueSettingOperationWithURL:(NSURL *)url
+                                        values:(NSDictionary *)keyedValues
+                                       manager:(CK2FileManager *)manager
+                               completionBlock:(void (^)(NSError *))block;
+
+@end
+
+
 @interface CK2Protocol (Internals)
 + (Class)classForURL:(NSURL *)url;    // only suitable for stateless calls to the protocol class
 @end
