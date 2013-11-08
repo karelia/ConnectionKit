@@ -300,20 +300,6 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 // To retrieve attributes, instead perform a listing of the *parent* directory, and pick out resource properties from the returned URLs that you're interested in
 
 
-#pragma mark Cancelling Operations
-
-/**
- Cancels an operation.
- 
- If an operation is cancelled before it finishes, its completion handler is
- called with an `NSURLErrorCancelled` error to indicate the failure can be
- ignored.
- 
- @param operation An opaque token object representing the operation, as returned by any of `CK2FileManager`'s worker methods.
- */
-- (void)cancelOperation:(id)operation __attribute((nonnull(1)));
-
-
 #pragma mark Delegate
 
 /**
@@ -435,5 +421,12 @@ typedef NS_ENUM(NSUInteger, CK2TranscriptType) {
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge __attribute((deprecated("implement -fileManager:operation:didReceiveChallenge:completionHandler: instead")));
+
+@end
+
+
+@interface CK2FileManager (Deprecated)
+
+- (void)cancelOperation:(CK2FileOperation *)operation __attribute((nonnull(1), deprecated("Use -[CK2FileOperation cancel] instead")));
 
 @end
