@@ -63,7 +63,34 @@
 @synthesize delegate = _delegate;
 
 @synthesize options = _options;
+
 @synthesize maxConcurrentOperationCount = _maxConcurrentOperationCount;
+- (NSUInteger)effectiveConcurrentOperationCount;
+{
+    NSUInteger result = self.maxConcurrentOperationCount;
+    
+    // Reign in count when:
+    // * Using CURLHandle sync backend
+    // * Deleting files before uploading; have no dependency system to handle that
+    if (result > 1)
+    {
+        if (self.options & CKUploadingDeleteExistingFileFirst)
+        {
+            result = 1;
+        }
+        else
+        {
+            NSString *scheme = _request.URL.scheme;
+            if ([scheme caseInsensitiveCompare:@"ftp"] == NSOrderedSame || [scheme caseInsensitiveCompare:@"sftp"] == NSOrderedSame)
+            {
+                result = 1;
+            }
+        }
+    }
+    
+    return result;
+}
+
 @synthesize rootTransferRecord = _rootRecord;
 @synthesize baseTransferRecord = _baseRecord;
 
