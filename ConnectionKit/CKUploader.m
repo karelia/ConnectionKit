@@ -19,6 +19,7 @@
     {
         _request = [request copy];
         _permissions = customPermissions;
+        _maxConcurrentOperationCount = 1;
         _options = options;
         
         if (!(_options & CKUploadingDryRun))
@@ -62,6 +63,7 @@
 @synthesize delegate = _delegate;
 
 @synthesize options = _options;
+@synthesize maxConcurrentOperationCount = _maxConcurrentOperationCount;
 @synthesize rootTransferRecord = _rootRecord;
 @synthesize baseTransferRecord = _baseRecord;
 

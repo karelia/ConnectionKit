@@ -27,6 +27,7 @@ typedef NSUInteger CKUploadingOptions;
   @private
 	NSURLRequest        *_request;
     unsigned long       _permissions;
+    NSUInteger          _maxConcurrentOperationCount;
     CKUploadingOptions  _options;
     
     CK2FileManager      *_fileManager;
@@ -47,6 +48,7 @@ typedef NSUInteger CKUploadingOptions;
                filePosixPermissions:(NSNumber *)customPermissions
                             options:(CKUploadingOptions)options;
 
+@property (nonatomic) NSUInteger maxConcurrentOperationCount;   // defaults to 1
 @property (nonatomic, assign, readonly) CKUploadingOptions options;
 @property (nonatomic, assign) id <CKUploaderDelegate> delegate;
 
