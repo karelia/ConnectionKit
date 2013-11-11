@@ -9,6 +9,14 @@
 #import "CK2FileManager.h"
 
 
+typedef NS_ENUM(NSInteger, CK2FileOperationState) {
+    CK2FileOperationStateRunning = 0,                     /* The operation is currently being serviced by the file manager */
+    //CK2FileOperationStateSuspended = 1,
+    CK2FileOperationStateCanceling = 2,                   /* The operation has been told to cancel and will complete shortly. */
+    CK2FileOperationStateCompleted = 3,                   /* The operation has completed and the file manager will receive no more delegate notifications */
+};
+
+
 @class CK2Protocol;
 @interface CK2FileOperation : NSObject
 {
@@ -24,8 +32,8 @@
     void    (^_enumerationBlock)(NSURL *);
     NSURL   *_localURL;
     
-    BOOL        _cancelled;
-    NSError     *_error;
+    CK2FileOperationState   _state;
+    NSError                 *_error;
 }
 
 /**
@@ -36,6 +44,11 @@
  * cancelation.
  */
 - (void)cancel;
+
+/**
+ * The current state of the operation.
+ */
+@property (readonly) CK2FileOperationState state;
 
 /**
  * The error, if any. Also delivered to completion handler.
