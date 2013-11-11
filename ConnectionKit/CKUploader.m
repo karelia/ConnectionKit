@@ -258,7 +258,7 @@
 
 - (void)finishUploading;
 {
-    if (_isFinishing) return;
+    if (_isFinishing || _isCancelled) return;
     
     _isFinishing = YES;
     if (_queue.count == 0)
@@ -439,6 +439,7 @@
 
 - (void)main;
 {
+    if (self.isCancelled) return;
     _fileOp = [_block() retain];
 }
 
