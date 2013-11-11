@@ -258,15 +258,14 @@
 
 - (void)finishUploading;
 {
-    [self addOperationWithBlock:^id{
-        
-        NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
-        [[self delegate] uploaderDidFinishUploading:self];
-        [self operation:nil didFinish:nil];
-        return nil;
-    }];
+    if (_isFinishing) return;
     
     _isFinishing = YES;
+    if (_queue.count == 0)
+    {
+        NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
+        [[self delegate] uploaderDidFinishUploading:self];
+    }
 }
 
 #pragma mark Queue
@@ -335,6 +334,11 @@
         if (_queue.count >= maxOps)
         {
             [[_queue objectAtIndex:(maxOps - 1)] start];
+        }
+        else if (_isFinishing && _queue.count == 0)
+        {
+            NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
+            [[self delegate] uploaderDidFinishUploading:self];
         }
     });
 }
