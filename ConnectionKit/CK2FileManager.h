@@ -92,28 +92,6 @@ typedef NS_OPTIONS(NSInteger, CK2DirectoryEnumerationOptions) {
                        options:(NSUInteger)mask
              completionHandler:(void (^)(NSArray *contents, NSError *error))block __attribute((nonnull(1,4)));
 
-/**
- Block-based enumeration of directory contents
- 
- If possible, listing results are delivered as they arrive over the wire. This
- makes it possible that the operation fails mid-way, having received only some
- of the total directory contents.
- 
- All docs for -contentsOfDirectoryAtURL:… should apply here too
-  
- @param url for the directory whose contents you want to enumerate.
- @param keys to try and include from the server. Pass nil to get a default set. Include NSURLParentDirectoryURLKey to get
- @param mask of options. In addition to NSDirectoryEnumerationOptions, accepts CK2DirectoryEnumerationIncludesDirectory. Not all protocols support deep enumeration at present, so it is recommended you include NSDirectoryEnumerationSkipsSubdirectoryDescendants for now.
- @param block is called for each URL encountered.
- @param completionBlock is called once enumeration finishes or fails. A non-nil error indicates failure.
- @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
- */
-- (id)enumerateContentsOfURL:(NSURL *)url
-  includingPropertiesForKeys:(NSArray *)keys
-                     options:(NSUInteger)mask
-                  usingBlock:(void (^)(NSURL *url))block
-           completionHandler:(void (^)(NSError *error))completionBlock __attribute((nonnull(1,4)));
-
 extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL of a symlink
 
 
