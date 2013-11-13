@@ -12,6 +12,16 @@
 #import <AppKit/AppKit.h>   // so icon handling can use NSImage and NSWorkspace for now
 
 
+@interface CK2FileOperation () <CK2ProtocolClient>
+@property(readonly) CK2FileManager *fileManager;    // goes to nil once finished/failed
+@property(readonly) NSURL *originalURL;
+@property(readwrite) CK2FileOperationState state;
+@end
+
+
+#pragma mark -
+
+
 @interface CK2Protocol (Internals)
 // Completion block is guaranteed to be called on our private serial queue
 + (void)classForURL:(NSURL *)url completionHandler:(void (^)(Class protocolClass))block;
@@ -55,7 +65,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                 // Keep an eye out for early opportunity to bail out if get cancelled
                 dispatch_async(_queue, ^{
                     
-                    if (![self isCancelled])
+                    if (self.state == CK2FileOperationStateRunning)
                     {
                         _protocol = createBlock(protocolClass);
                         if (!_protocol)
@@ -70,7 +80,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                             [error release];
                         }
 
-                        if (![self isCancelled]) [_protocol start];
+                        if (self.state == CK2FileOperationStateRunning) [_protocol start];
                     }
                 });
             }
@@ -282,9 +292,15 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             // It's now safe to stop the protocol as it can't misinterpret the message and issue its own cancellation error (or at least if it does, goes ignored)
             [_protocol stop];
             
+            
+            // Store the error and notify completion handler
+            _error = [error copy];
+            _state = CK2FileOperationStateCompleted;
+            
             _completionBlock(error);
             [_completionBlock release]; _completionBlock = nil;
-
+            
+            
             // Break retain cycle, but deliberately keep weak reference so we know we're associated with it
             [_protocol release];
         }
@@ -304,6 +320,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     [_completionBlock release];
     [_enumerationBlock release];
     [_localURL release];
+    [_error release];
 
     [super dealloc];
 }
@@ -325,10 +342,12 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)cancel;
 {
+    if (_state >= CK2FileOperationStateCanceling) return;
+    
     /*  Any already-enqueued delegate messages will likely still run. That's fine as it seems we might as well report things that are already known to have happened
      */
     
-    _cancelled = YES;
+    _state = CK2FileOperationStateCanceling;
     
     // Report cancellation to completion handler. If protocol has already finished or failed, it'll go ignored
     NSError *cancellationError = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:nil];
@@ -337,7 +356,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     [cancellationError release];
 }
 
-- (BOOL)isCancelled; { return _cancelled; }
+#pragma mark State
+
+@synthesize state = _state;
+@synthesize error = _error;
 
 #pragma mark CK2ProtocolClient
 
@@ -378,7 +400,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 - (void)protocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)originalChallenge;
 {
     NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
-    if ([self isCancelled]) return; // don't care about auth once cancelled
+    if (self.state >= CK2FileOperationStateCanceling) return; // don't care about auth once cancelled
     
     
     // Invent a default credential if needed
