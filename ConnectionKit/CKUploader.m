@@ -107,13 +107,7 @@
         
         NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
         
-        CK2FileOperation *op = [_fileManager createFileAtURL:[self URLForPath:path] contents:data withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [record transfer:record transferredDataOfLength:bytesWritten];
-            });
-            
-        } completionHandler:^(NSError *error) {
+        CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path] contents:data withIntermediateDirectories:YES openingAttributes:attributes completionHandler:^(NSError *error) {
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 [record transferDidFinish:record error:error];
@@ -135,13 +129,7 @@
         
         NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
         
-        CK2FileOperation *op = [_fileManager createFileAtURL:[self URLForPath:path] withContentsOfURL:localURL withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [record transfer:record transferredDataOfLength:bytesWritten];
-            });
-            
-        }  completionHandler:^(NSError *error) {
+        CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path] withContentsOfURL:localURL withIntermediateDirectories:YES openingAttributes:attributes completionHandler:^(NSError *error) {
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 [record transferDidFinish:record error:error];
@@ -175,6 +163,7 @@
         
         if (!self.isCancelled)
         {
+            [op resume];
             [result transferDidBegin:result];
             [self.delegate uploader:self didBeginUploadToPath:path];
         }
@@ -348,6 +337,15 @@
         {
             completionHandler(CK2AuthChallengePerformDefaultHandling, nil);
         }
+    });
+}
+
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation didWriteBodyData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesSent totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToSend;
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
+        NSAssert(record, @"Unknown operation");
+        [record transfer:record transferredDataOfLength:bytesWritten];
     });
 }
 
