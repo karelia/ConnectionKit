@@ -29,6 +29,8 @@
 
 #import "CKTransferRecord.h"
 
+#import "CK2FileOperation.h"
+
 #import <AppKit/AppKit.h>   // for NSColor
 
 
@@ -51,6 +53,8 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 		[self didChangeValueForKey:@"name"];
 	}
 }
+
+@synthesize uploadOperation = _operation;
 
 - (NSError *)error { return _error; }
 
@@ -78,6 +82,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 - (void)dealloc
 {
 	[_name release];
+    [_operation release];
 	[_contents makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
 	[_contents release];
 	[_properties release];

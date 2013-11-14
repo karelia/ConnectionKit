@@ -31,9 +31,11 @@
 #import <Foundation/Foundation.h>
 
 
+@class CK2FileOperation;
 @interface CKTransferRecord : NSObject
 {
 	NSString *_name;
+    CK2FileOperation    *_operation;
 	unsigned long long _size;
 	unsigned long long _sizeWithChildren;
 	unsigned long long _transferred;
@@ -69,6 +71,8 @@
 
 + (instancetype)recordWithName:(NSString *)name size:(unsigned long long)size;
 - (id)initWithName:(NSString *)name size:(unsigned long long)size;
+
+@property(nonatomic, retain) CK2FileOperation *uploadOperation;
 
 - (BOOL)isDirectory;
 - (unsigned long long)transferred;
