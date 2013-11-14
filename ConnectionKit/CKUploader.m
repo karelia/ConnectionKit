@@ -103,7 +103,7 @@
 
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
 {
-    return [self uploadToPath:path size:data.length usingBlock:^CK2FileOperation* (CKTransferRecord *record) {
+    return [self uploadToPath:path size:data.length usingBlock:^(CKTransferRecord *record) {
         
         NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
         
@@ -137,7 +137,7 @@
     NSNumber *size;
     if (![localURL getResourceValue:&size forKey:NSURLFileSizeKey error:NULL]) size = nil;
     
-    return [self uploadToPath:path size:size.unsignedLongLongValue usingBlock:^CK2FileOperation* (CKTransferRecord *record) {
+    return [self uploadToPath:path size:size.unsignedLongLongValue usingBlock:^(CKTransferRecord *record) {
         
         NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
         
