@@ -656,4 +656,12 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     return [stream autorelease];
 }
 
+#pragma mark NSCopying
+
+- (id)copyWithZone:(NSZone *)zone;
+{
+    // For easy stashing in dictionaries
+    return [self retain];
+}
+
 @end

@@ -18,7 +18,7 @@ typedef NS_ENUM(NSInteger, CK2FileOperationState) {
 
 
 @class CK2Protocol;
-@interface CK2FileOperation : NSObject
+@interface CK2FileOperation : NSObject <NSCopying>  // retains self when copying
 {
   @private
     CK2FileManager  *_manager;
