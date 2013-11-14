@@ -319,9 +319,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             [_protocol release];
         }
     });
-    
-    // These ivars are already finished with, so can ditch them early
-    [_manager release]; _manager = nil;
 }
 
 - (void)dealloc
