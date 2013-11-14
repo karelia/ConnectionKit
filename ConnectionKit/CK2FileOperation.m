@@ -126,7 +126,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be uploaded.", "error descrption"),
                              url.lastPathComponent];
     
-    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         NSMutableURLRequest *request = [[self requestWithURL:url] mutableCopy];
         request.HTTPBody = data;
@@ -146,6 +146,9 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         [request release];
         return result;
     }];
+    
+    _bytesExpectedToWrite = data.length;
+    return self;
 }
 
 - (id)initFileCreationOperationWithURL:(NSURL *)url
@@ -159,15 +162,17 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be uploaded.", "error descrption"),
                              url.lastPathComponent];
     
-    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    NSNumber *fileSize;
+    if (![sourceURL getResourceValue:&fileSize forKey:NSURLFileSizeKey error:NULL]) fileSize = nil;;
+    
+    self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         _localURL = [sourceURL copy];
         
         NSMutableURLRequest *request = [[self requestWithURL:url] mutableCopy];
         
         // Read the data using an input stream if possible, and know file size
-        NSNumber *fileSize;
-        if ([sourceURL getResourceValue:&fileSize forKey:NSURLFileSizeKey error:NULL] && fileSize)
+        if (fileSize)
         {
             NSString *length = [NSString stringWithFormat:@"%llu", fileSize.unsignedLongLongValue];
             
@@ -213,6 +218,9 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         [request release];
         return result;
     }];
+    
+    _bytesExpectedToWrite = fileSize.longLongValue;
+    return self;
 }
 
 - (id)initRemovalOperationWithURL:(NSURL *)url
