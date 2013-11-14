@@ -124,7 +124,7 @@
 		27911839178B5D79006BF857 /* CK2PathFieldWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 323B735C170E256000219F9A /* CK2PathFieldWindow.xib */; };
 		2791183A178B5E12006BF857 /* ConnectionKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* ConnectionKit.framework */; };
 		2791188D178B6782006BF857 /* ConnectionKitUI.h in Headers */ = {isa = PBXBuildFile; fileRef = 279117F4178B5C64006BF857 /* ConnectionKitUI.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		27993E8416FCB30D008DC1B0 /* CK2FileOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 27993E8216FCB30D008DC1B0 /* CK2FileOperation.h */; };
+		27993E8416FCB30D008DC1B0 /* CK2FileOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 27993E8216FCB30D008DC1B0 /* CK2FileOperation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27993E8516FCB30D008DC1B0 /* CK2FileOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 27993E8316FCB30D008DC1B0 /* CK2FileOperation.m */; };
 		27999BAB170B4B9800A54BEE /* CK2FileOperationWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C9CFEE1703AD4D004610FE /* CK2FileOperationWithTestSupport.m */; };
 		27999BB7170B4BA200A54BEE /* CK2FileManagerWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */; };
@@ -547,6 +547,8 @@
 				2743E8081622E47600019979 /* CK2FileManager.m */,
 				278D8B77167FF35D00622468 /* CK2Authentication.h */,
 				278D8B78167FF35D00622468 /* CK2Authentication.m */,
+				27993E8216FCB30D008DC1B0 /* CK2FileOperation.h */,
+				27993E8316FCB30D008DC1B0 /* CK2FileOperation.m */,
 			);
 			name = Public;
 			path = ConnectionKit;
@@ -955,8 +957,6 @@
 		79CFD8A009F705B400172CDD /* Private */ = {
 			isa = PBXGroup;
 			children = (
-				27993E8216FCB30D008DC1B0 /* CK2FileOperation.h */,
-				27993E8316FCB30D008DC1B0 /* CK2FileOperation.m */,
 				278CA747178DDAA3000A4F19 /* CK2TrampolineAuthenticationChallenge.h */,
 				278CA748178DDAA3000A4F19 /* CK2TrampolineAuthenticationChallenge.m */,
 				273F0E13164E8D3E00588885 /* Protocols */,
