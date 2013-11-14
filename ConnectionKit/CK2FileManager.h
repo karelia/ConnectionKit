@@ -164,6 +164,12 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  */
 - (CK2FileOperation *)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
 
+- (CK2FileOperation *)createFileOperationWithURL:(NSURL *)url
+                                        contents:(NSData *)data
+                     withIntermediateDirectories:(BOOL)createIntermediates
+                               openingAttributes:(NSDictionary *)attributes
+                               completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
+
 /**
  Creates a file by copying the content of the specified URL.
  
@@ -202,6 +208,12 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  */
 - (CK2FileOperation *)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
 
+- (CK2FileOperation *)createFileOperationWithURL:(NSURL *)destinationURL
+                               withContentsOfURL:(NSURL *)sourceURL
+                     withIntermediateDirectories:(BOOL)createIntermediates
+                               openingAttributes:(NSDictionary *)attributes
+                               completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
+
 
 #pragma mark Deleting Items
 
@@ -234,6 +246,8 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @return The new file operation.
  */
 - (CK2FileOperation *)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1)));
+
+- (CK2FileOperation *)removeOperationWithURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1)));
 
 
 #pragma mark Moving Items

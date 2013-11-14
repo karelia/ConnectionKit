@@ -140,6 +140,29 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 - (CK2FileOperation *)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 {
+    CK2FileOperation *result = [self createFileOperationWithURL:url
+                                                       contents:data
+                                    withIntermediateDirectories:createIntermediates
+                                              openingAttributes:attributes
+                                                  progressBlock:progressBlock
+                                              completionHandler:handler];
+    
+    [result resume];
+    return result;
+}
+
+- (CK2FileOperation *)createFileOperationWithURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
+{
+    return [self createFileOperationWithURL:url
+                                   contents:data
+                withIntermediateDirectories:createIntermediates
+                          openingAttributes:attributes
+                              progressBlock:NULL
+                          completionHandler:handler];
+}
+
+- (CK2FileOperation *)createFileOperationWithURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *))handler;
+{
     CK2FileOperation *operation = [[[self classForOperation] alloc] initFileCreationOperationWithURL:url
                                                                                         data:data
                                                                  withIntermediateDirectories:createIntermediates
@@ -148,12 +171,33 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                                                                progressBlock:progressBlock
                                                                              completionBlock:handler];
     
-    [operation resume];
-    
     return [operation autorelease];
 }
 
 - (CK2FileOperation *)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
+{
+    CK2FileOperation *result = [self createFileOperationWithURL:destinationURL
+                                              withContentsOfURL:sourceURL
+                                    withIntermediateDirectories:createIntermediates
+                                              openingAttributes:attributes
+                                                  progressBlock:progressBlock
+                                              completionHandler:handler];
+    
+    [result resume];
+    return result;
+}
+
+- (CK2FileOperation *)createFileOperationWithURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
+{
+    return [self createFileOperationWithURL:destinationURL
+                          withContentsOfURL:sourceURL
+                withIntermediateDirectories:createIntermediates
+                          openingAttributes:attributes
+                              progressBlock:NULL
+                          completionHandler:handler];
+}
+
+- (CK2FileOperation *)createFileOperationWithURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 {
     CK2FileOperation *operation = [[[self classForOperation] alloc] initFileCreationOperationWithURL:destinationURL
                                                                                         file:sourceURL
@@ -163,15 +207,19 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                                                                progressBlock:progressBlock
                                                                              completionBlock:handler];
     
-    [operation resume];
-    
     return [operation autorelease];
 }
 
 - (CK2FileOperation *)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 {
-    CK2FileOperation *operation = [[[self classForOperation] alloc] initRemovalOperationWithURL:url manager:self completionBlock:handler];
+    CK2FileOperation *operation = [self removeOperationWithURL:url completionHandler:handler];
     [operation resume];
+    return operation;
+}
+
+- (CK2FileOperation *)removeOperationWithURL:(NSURL *)url completionHandler:(void (^)(NSError *))handler;
+{
+    CK2FileOperation *operation = [[[self classForOperation] alloc] initRemovalOperationWithURL:url manager:self completionBlock:handler];
     return [operation autorelease];
 }
 
