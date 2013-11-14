@@ -9,6 +9,20 @@
 #import "CKUploader.h"
 
 
+@interface CKUploaderOperation : NSOperation
+{
+    CK2FileOperation*   (^_block)(void);
+    CK2FileOperation    *_fileOp;
+}
+
+- initWithBlock:(CK2FileOperation* (^)(void))block __attribute((nonnull));
+
+@end
+
+
+#pragma mark -
+
+
 @implementation CKUploader
 
 #pragma mark Lifecycle
@@ -19,6 +33,7 @@
     {
         _request = [request copy];
         _permissions = customPermissions;
+        _maxConcurrentOperationCount = 1;
         _options = options;
         
         if (!(_options & CKUploadingDryRun))
@@ -62,6 +77,34 @@
 @synthesize delegate = _delegate;
 
 @synthesize options = _options;
+
+@synthesize maxConcurrentOperationCount = _maxConcurrentOperationCount;
+- (NSUInteger)effectiveConcurrentOperationCount;
+{
+    NSUInteger result = self.maxConcurrentOperationCount;
+    
+    // Reign in count when:
+    // * Using CURLHandle sync backend
+    // * Deleting files before uploading; have no dependency system to handle that
+    if (result > 1)
+    {
+        if (self.options & CKUploadingDeleteExistingFileFirst)
+        {
+            result = 1;
+        }
+        else
+        {
+            NSString *scheme = _request.URL.scheme;
+            if ([scheme caseInsensitiveCompare:@"ftp"] == NSOrderedSame || [scheme caseInsensitiveCompare:@"sftp"] == NSOrderedSame)
+            {
+                result = 1;
+            }
+        }
+    }
+    
+    return result;
+}
+
 @synthesize rootTransferRecord = _rootRecord;
 @synthesize baseTransferRecord = _baseRecord;
 
@@ -88,18 +131,21 @@
 
 - (void)removeFileAtPath:(NSString *)path reportError:(BOOL)reportError;
 {
-    [self addOperationWithBlock:^{
-                
+    __block CKUploaderOperation *op = [[CKUploaderOperation alloc] initWithBlock:^{
+        
         return [_fileManager removeItemAtURL:[self URLForPath:path] completionHandler:^(NSError *error) {
             
-            [self operationDidFinish:(reportError ? error : nil)];
+            [self operation:op didFinish:(reportError ? error : nil)];
         }];
     }];
+    
+    [self addOperation:op];
+    [op release];
 }
 
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
 {
-    return [self uploadToPath:path size:data.length usingBlock:^CK2FileOperation* (CKTransferRecord *record) {
+    __block CKTransferRecord *record = [self transferRecordWithPath:path size:data.length usingBlock:^{
         
         NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
         
@@ -115,7 +161,7 @@
                 [record transferDidFinish:record error:error];
             });
             
-            [self operationDidFinish:error];
+            [self operation:[record propertyForKey:@"uploadOperation"] didFinish:error];
         }];
         
         NSAssert(op, @"Failed to create upload operation");
@@ -128,6 +174,9 @@
         
         return op;
     }];
+    
+    [self addOperation:[record propertyForKey:@"uploadOperation"]];
+    return record;
 }
 
 - (CKTransferRecord *)uploadFileAtURL:(NSURL *)localURL toPath:(NSString *)path;
@@ -135,7 +184,7 @@
     NSNumber *size;
     if (![localURL getResourceValue:&size forKey:NSURLFileSizeKey error:NULL]) size = nil;
     
-    return [self uploadToPath:path size:size.unsignedLongLongValue usingBlock:^CK2FileOperation* (CKTransferRecord *record) {
+    __block CKTransferRecord *record = [self transferRecordWithPath:path size:size.unsignedLongLongValue usingBlock:^{
         
         NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
         
@@ -151,7 +200,7 @@
                 [record transferDidFinish:record error:error];
             });
             
-            [self operationDidFinish:error];
+            [self operation:[record propertyForKey:@"uploadOperation"] didFinish:error];
         }];
         
         NSAssert(op, @"Failed to create upload operation");
@@ -164,9 +213,12 @@
         
         return op;
     }];
+    
+    [self addOperation:[record propertyForKey:@"uploadOperation"]];
+    return record;
 }
 
-- (CKTransferRecord *)uploadToPath:(NSString *)path size:(unsigned long long)size usingBlock:(CK2FileOperation* (^)(CKTransferRecord *record))block;
+- (CKTransferRecord *)transferRecordWithPath:(NSString *)path size:(unsigned long long)size usingBlock:(CK2FileOperation* (^)(void))block;
 {
     // Create transfer record
     if (_options & CKUploadingDeleteExistingFileFirst)
@@ -179,9 +231,9 @@
     
     
     // Enqueue upload
-    [self addOperationWithBlock:^CK2FileOperation* {
-        return block(result);
-    }];
+    CKUploaderOperation *op = [[CKUploaderOperation alloc] initWithBlock:block];
+    [result setProperty:op forKey:@"uploadOperation"];
+    [op release];
     
     
     // Notify delegate
@@ -206,15 +258,14 @@
 
 - (void)finishUploading;
 {
-    [self addOperationWithBlock:^CK2FileOperation* {
-        
-        NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
-        [[self delegate] uploaderDidFinishUploading:self];
-        [self operationDidFinish:nil];
-        return nil;
-    }];
+    if (_isFinishing || _isCancelled) return;
     
     _isFinishing = YES;
+    if (_queue.count == 0)
+    {
+        NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
+        [[self delegate] uploaderDidFinishUploading:self];
+    }
 }
 
 #pragma mark Queue
@@ -222,41 +273,38 @@
 - (void)cancel;
 {
     _isCancelled = YES;
-    [self.currentOperation cancel];
     [_queue makeObjectsPerformSelector:_cmd];
     [_queue release]; _queue = nil;
 }
 
 - (BOOL)isCancelled; { return _isCancelled; }
 
-- (CK2FileOperation *)currentOperation; { return _currentOperation; }
-
 - (void)addOperationWithBlock:(CK2FileOperation* (^)(void))block;
+{
+    CKUploaderOperation *operation = [[CKUploaderOperation alloc] initWithBlock:block];
+    [self addOperation:operation];
+    [operation release];
+}
+
+- (void)addOperation:(CKUploaderOperation *)operation;
 {
     NSAssert([NSThread isMainThread], @"-addOperation: is only safe to call on the main thread");
     
     // No more operations can go on once finishing up
     if (_isFinishing) return;
     
-    NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
-        
-        NSAssert(_currentOperation == nil, @"Seems like an op is starting before another has finished");
-        _currentOperation = [block() retain];
-    }];
-    
     [_queue addObject:operation];
-    if ([_queue count] == 1)
+    
+    if ([_queue count] <= self.effectiveConcurrentOperationCount)
     {
         [operation start];
     }
 }
 
-- (void)operationDidFinish:(NSError *)error;
+- (void)operation:(CKUploaderOperation *)operation didFinish:(NSError *)error;
 {
     // This method gets called on all sorts of threads, so marshall back to main queue
     dispatch_async(dispatch_get_main_queue(), ^{
-        
-        [_currentOperation release]; _currentOperation = nil;
         
         if (error)
         {
@@ -275,10 +323,21 @@
             }
         }
         
-        [_queue removeObjectAtIndex:0];
-        if ([_queue count])
+        NSUInteger index = [_queue indexOfObject:operation];
+        NSAssert(index != NSNotFound, @"Finished operation should be in the queue");
+        [_queue removeObjectAtIndex:index];
+        
+        // Dequeue next op
+        // TODO: Check for ops which should have been started but haven't?
+        NSUInteger maxOps = self.effectiveConcurrentOperationCount;
+        if (_queue.count >= maxOps)
         {
-            [[_queue objectAtIndex:0] start];
+            [[_queue objectAtIndex:(maxOps - 1)] start];
+        }
+        else if (_isFinishing && _queue.count == 0)
+        {
+            NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
+            [[self delegate] uploaderDidFinishUploading:self];
         }
     });
 }
@@ -361,3 +420,40 @@
 
 @end
 
+
+#pragma mark -
+
+
+@implementation CKUploaderOperation
+
+- initWithBlock:(CK2FileOperation* (^)(void))block;
+{
+    NSParameterAssert(block);
+    if (self = [self init])
+    {
+        _block = [block copy];
+    }
+    return self;
+}
+
+- (void)main;
+{
+    if (self.isCancelled) return;
+    _fileOp = [_block() retain];
+}
+
+- (void)cancel;
+{
+    [super cancel];
+    [_fileOp cancel];
+}
+
+- (void)dealloc;
+{
+    [_block release];
+    [_fileOp release];
+    
+    [super dealloc];
+}
+
+@end
