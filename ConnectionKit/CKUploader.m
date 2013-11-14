@@ -8,6 +8,8 @@
 
 #import "CKUploader.h"
 
+#import "CK2FileOperation.h"
+
 
 @implementation CKUploader
 
@@ -28,6 +30,7 @@
         }
         
         _queue = [[NSMutableArray alloc] init];
+        _recordsByOperation = [[NSMutableDictionary alloc] init];
         _rootRecord = [[CKTransferRecord rootRecordWithPath:[[request URL] path]] retain];
         _baseRecord = [_rootRecord retain];
     }
@@ -53,6 +56,7 @@
     [_fileManager release];
     [_rootRecord release];
     [_baseRecord release];
+    [_recordsByOperation release];
     
     [super dealloc];
 }
@@ -179,8 +183,11 @@
     
     
     // Enqueue upload
-    [self addOperationWithBlock:^CK2FileOperation* {
-        return block(result);
+    [self addOperationWithBlock:^{
+        
+        CK2FileOperation *op = block(result);
+        [_recordsByOperation setObject:result forKey:op];
+        return op;
     }];
     
     
