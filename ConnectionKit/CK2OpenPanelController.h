@@ -73,7 +73,7 @@
     NSUndoManager                   *_historyManager;
     NSTabViewItem                   *_lastTab;
     
-    id                              _currentLoadingOperation;
+    CK2FileOperation                *_currentLoadingOperation;
     
     CK2PathFieldWindowController    *_pathFieldController;
 }

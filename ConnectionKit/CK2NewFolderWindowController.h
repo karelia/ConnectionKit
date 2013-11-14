@@ -6,7 +6,7 @@
 //
 //
 
-#import <Cocoa/Cocoa.h>
+#import <ConnectionKit/ConnectionKit.h>
 
 @class CK2OpenPanelController;
 
@@ -20,7 +20,7 @@
     CK2OpenPanelController              *_controller;
     NSURL                               *_folderURL;
     NSArray                             *_existingNames;
-    id                                  _operation;
+    CK2FileOperation                    *_operation;
     NSError                             *_error;
 }
 

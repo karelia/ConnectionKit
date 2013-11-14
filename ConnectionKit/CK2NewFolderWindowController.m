@@ -36,10 +36,7 @@
 
 - (void)dealloc
 {
-    if (_operation != nil)
-    {
-        [[_controller fileManager] cancelOperation:_operation];
-    }
+    [_operation cancel];
     [_operation release];
     [_folderURL release];
     [_error release];
@@ -155,10 +152,7 @@
 
 - (IBAction)cancel:(id)sender
 {
-    if (_operation != nil)
-    {
-        [[_controller fileManager] cancelOperation:_operation];
-    }
+    [_operation cancel];
     [self endWithCode:NSCancelButton];
 }
 

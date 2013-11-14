@@ -144,14 +144,14 @@
 - (void)dealloc
 {
     [_initialAccessoryView release];
-    for (id operation in [_runningOperations allValues])
+    for (CK2FileOperation *operation in [_runningOperations allValues])
     {
-        [_fileManager cancelOperation:operation];
+        [operation cancel];
     }
     
     if (_currentLoadingOperation != nil)
     {
-        [_fileManager cancelOperation:_currentLoadingOperation];
+        [_currentLoadingOperation cancel];
         [_currentLoadingOperation release];
     }
     
@@ -411,15 +411,15 @@
 
 - (void)resetSession
 {
-    for (id operation in [_runningOperations allValues])
+    for (CK2FileOperation *operation in [_runningOperations allValues])
     {
-        [_fileManager cancelOperation:operation];
+        [operation cancel];
     }
     [_runningOperations removeAllObjects];
     
     if (_currentLoadingOperation != nil)
     {
-        [_fileManager cancelOperation:_currentLoadingOperation];
+        [_currentLoadingOperation cancel];
         [_currentLoadingOperation release];
         _currentLoadingOperation = nil;
     }
@@ -481,7 +481,7 @@
     //PENDING: compare url
     if (_currentLoadingOperation != nil)
     {
-        [_fileManager cancelOperation:_currentLoadingOperation];
+        [_currentLoadingOperation cancel];
         [_currentLoadingOperation release];
     }
     
@@ -627,7 +627,7 @@
         
         if (children == nil)
         {
-            id                              operation;
+            CK2FileOperation *operation;
             
             // Placeholder while children are being fetched
             children = @[ [NSURL ck2_loadingURL] ];
@@ -1048,7 +1048,7 @@
     {
         if (_currentLoadingOperation != nil)
         {
-            [_fileManager cancelOperation:_currentLoadingOperation];
+            [_currentLoadingOperation cancel];
             [_currentLoadingOperation release];
         }
 
@@ -1203,7 +1203,7 @@
 
 #pragma mark CK2FileManagerDelegate
 
-- (void)fileManager:(CK2FileManager *)manager operation:(id)operation didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
 {
     id <CK2OpenPanelDelegate>        delegate;
     

@@ -6,73 +6,54 @@
 //
 //
 
-#import "CK2Protocol.h"
+#import "CK2FileManager.h"
 
 
-@interface CK2FileOperation : NSObject <CK2ProtocolClient>
+typedef NS_ENUM(NSInteger, CK2FileOperationState) {
+    CK2FileOperationStateRunning = 0,                     /* The operation is currently being serviced by the file manager */
+    //CK2FileOperationStateSuspended = 1,
+    CK2FileOperationStateCanceling = 2,                   /* The operation has been told to cancel and will complete shortly. */
+    CK2FileOperationStateCompleted = 3,                   /* The operation has completed and the file manager will receive no more delegate notifications */
+};
+
+
+@class CK2Protocol;
+@interface CK2FileOperation : NSObject
 {
-@public   // HACK so auth trampoline can get at them
+  @private
     CK2FileManager  *_manager;
     NSURL           *_URL;
     NSString        *_descriptionForErrors;
     dispatch_queue_t    _queue;
     
-@private
     CK2Protocol     *_protocol;
     
     void    (^_completionBlock)(NSError *);
     void    (^_enumerationBlock)(NSURL *);
     NSURL   *_localURL;
     
-    BOOL    _cancelled;
+    CK2FileOperationState   _state;
+    NSError                 *_error;
 }
 
-- (id)initEnumerationOperationWithURL:(NSURL *)url
-           includingPropertiesForKeys:(NSArray *)keys
-                              options:(NSDirectoryEnumerationOptions)mask
-                              manager:(CK2FileManager *)manager
-                     enumerationBlock:(void (^)(NSURL *))enumBlock
-                      completionBlock:(void (^)(NSError *))block;
-
-- (id)initDirectoryCreationOperationWithURL:(NSURL *)url
-                withIntermediateDirectories:(BOOL)createIntermediates
-                          openingAttributes:(NSDictionary *)attributes
-                                    manager:(CK2FileManager *)manager
-                            completionBlock:(void (^)(NSError *))block;
-
-- (id)initFileCreationOperationWithURL:(NSURL *)url
-                                  data:(NSData *)data
-           withIntermediateDirectories:(BOOL)createIntermediates
-                     openingAttributes:(NSDictionary *)attributes
-                               manager:(CK2FileManager *)manager
-                         progressBlock:(CK2ProgressBlock)progressBlock
-                       completionBlock:(void (^)(NSError *))block;
-
-- (id)initFileCreationOperationWithURL:(NSURL *)remoteURL
-                                  file:(NSURL *)localURL
-           withIntermediateDirectories:(BOOL)createIntermediates
-                     openingAttributes:(NSDictionary *)attributes
-                               manager:(CK2FileManager *)manager
-                         progressBlock:(CK2ProgressBlock)progressBlock
-                       completionBlock:(void (^)(NSError *))block;
-
-- (id)initRemovalOperationWithURL:(NSURL *)url
-                          manager:(CK2FileManager *)manager
-                  completionBlock:(void (^)(NSError *))block;
-
-- (id)initRenameOperationWithSourceURL:(NSURL *)srcURL
-                      newName:(NSString *)newName
-                             manager:(CK2FileManager *)manager
-                     completionBlock:(void (^)(NSError *))block;
-
-- (id)initResourceValueSettingOperationWithURL:(NSURL *)url
-                                        values:(NSDictionary *)keyedValues
-                                       manager:(CK2FileManager *)manager
-                               completionBlock:(void (^)(NSError *))block;
-
-@property(readonly) CK2FileManager *fileManager;    // goes to nil once finished/failed
-@property(readonly) NSURL *originalURL;
-
+/**
+ * `-cancel` returns immediately, but marks an operation as being canceled.
+ * The operation will signal its completion handler with an
+ * error value of `{ NSURLErrorDomain, NSURLErrorCancelled }`.  In some
+ * cases, the operation may signal other work before it acknowledges the
+ * cancelation.
+ */
 - (void)cancel;
+
+/**
+ * The current state of the operation.
+ */
+@property (readonly) CK2FileOperationState state;
+
+/**
+ * The error, if any. Also delivered to completion handler.
+ * This property will be `nil` in the event that no error occured.
+ */
+@property (readonly, copy) NSError *error;
 
 @end

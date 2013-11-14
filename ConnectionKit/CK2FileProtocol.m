@@ -135,7 +135,7 @@ static size_t kCopyBufferSize = 4096;
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
             if (![[NSFileManager defaultManager] createDirectoryAtURL:intermediates withIntermediateDirectories:YES attributes:nil error:&error])
 #else
-            if (![[NSFileManager defaultManager] createDirectoryAtPath:[intermediates path] withIntermediateDirectories:createIntermediates attributes:attributes error:&error])
+            if (![[NSFileManager defaultManager] createDirectoryAtPath:[intermediates path] withIntermediateDirectories:YES attributes:nil error:&error])
 #endif
             {
                 [client protocol:self didFailWithError:error];
