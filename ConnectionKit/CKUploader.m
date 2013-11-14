@@ -159,6 +159,8 @@
         
         CK2FileOperation *op = block(result);
         NSAssert(op, @"Failed to create upload operation");
+        
+        result.uploadOperation = op;
         [_recordsByOperation setObject:result forKey:op];
         
         if (!self.isCancelled)
