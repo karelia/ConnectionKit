@@ -396,6 +396,15 @@ typedef NS_ENUM(NSInteger, CK2AuthChallengeDisposition) {
                                     didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge
                                       completionHandler:(void (^)(CK2AuthChallengeDisposition disposition, NSURLCredential *credential))completionHandler;
 
+/**
+ * Sent periodically to notify the delegate of upload progress. This
+ * information is also available as properties of the operation.
+ */
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation
+                                       didWriteBodyData:(int64_t)bytesSent
+                                      totalBytesWritten:(int64_t)totalBytesSent
+                              totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToSend;
+
 
 typedef NS_ENUM(NSUInteger, CK2TranscriptType) {
 	CK2TranscriptText,

@@ -153,12 +153,24 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 - (CK2FileOperation *)createFileOperationWithURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
 {
-    return [self createFileOperationWithURL:url
-                                   contents:data
-                withIntermediateDirectories:createIntermediates
-                          openingAttributes:attributes
-                              progressBlock:NULL
-                          completionHandler:handler];
+    __block CK2FileOperation *result = [self createFileOperationWithURL:url
+                                                               contents:data
+                                            withIntermediateDirectories:createIntermediates
+                                                      openingAttributes:attributes
+                                                          progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
+                                                              
+                                                              id <CK2FileManagerDelegate> delegate = self.delegate;
+                                                              if ([delegate respondsToSelector:@selector(fileManager:operation:didWriteBodyData:totalBytesWritten:totalBytesExpectedToWrite:)])
+                                                              {
+                                                                  [delegate fileManager:self
+                                                                              operation:result
+                                                                       didWriteBodyData:bytesWritten
+                                                                      totalBytesWritten:totalBytesWritten
+                                                              totalBytesExpectedToWrite:totalBytesExpectedToSend];
+                                                              }
+                                                          }
+                                                      completionHandler:handler];
+    return result;
 }
 
 - (CK2FileOperation *)createFileOperationWithURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *))handler;
@@ -189,12 +201,24 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 - (CK2FileOperation *)createFileOperationWithURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
 {
-    return [self createFileOperationWithURL:destinationURL
-                          withContentsOfURL:sourceURL
-                withIntermediateDirectories:createIntermediates
-                          openingAttributes:attributes
-                              progressBlock:NULL
-                          completionHandler:handler];
+    __block CK2FileOperation *result = [self createFileOperationWithURL:destinationURL
+                                                      withContentsOfURL:sourceURL
+                                            withIntermediateDirectories:createIntermediates
+                                                      openingAttributes:attributes
+                                                          progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
+                                                              
+                                                              id <CK2FileManagerDelegate> delegate = self.delegate;
+                                                              if ([delegate respondsToSelector:@selector(fileManager:operation:didWriteBodyData:totalBytesWritten:totalBytesExpectedToWrite:)])
+                                                              {
+                                                                  [delegate fileManager:self
+                                                                              operation:result
+                                                                       didWriteBodyData:bytesWritten
+                                                                      totalBytesWritten:totalBytesWritten
+                                                              totalBytesExpectedToWrite:totalBytesExpectedToSend];
+                                                              }
+                                                          }
+                                                      completionHandler:handler];
+    return result;
 }
 
 - (CK2FileOperation *)createFileOperationWithURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
