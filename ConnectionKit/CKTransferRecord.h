@@ -36,8 +36,6 @@
 {
 	NSString *_name;
     CK2FileOperation    *_operation;
-	unsigned long long _size;
-	unsigned long long _sizeWithChildren;
 	unsigned long long _transferred;
 	unsigned long long _intermediateTransferred;
 	NSTimeInterval _lastTransferTime;
@@ -58,7 +56,6 @@
 - (void)setName:(NSString *)name;
 
 - (unsigned long long)size;
-- (void)setSize:(unsigned long long)size;
 
 - (CGFloat)speed;
 - (void)setSpeed:(CGFloat)speed;	// TODO: Switch to CGFloat
@@ -69,8 +66,8 @@
 - (void)setParent:(CKTransferRecord *)parent;	// Weak ref
 
 
-+ (instancetype)recordWithName:(NSString *)name size:(unsigned long long)size;
-- (id)initWithName:(NSString *)name size:(unsigned long long)size;
++ (instancetype)recordWithName:(NSString *)name;
+- (id)initWithName:(NSString *)name;
 
 @property(nonatomic, retain) CK2FileOperation *uploadOperation;
 
@@ -133,5 +130,4 @@ extern NSString *CKTransferRecordTransferDidFinishNotification;
 - (void)setUpload:(BOOL)flag;
 - (void)setSize:(unsigned long long)size;
 - (BOOL)isLeaf;
-- (void)_sizeWithChildrenChangedBy:(unsigned long long)sizeDelta;
 @end

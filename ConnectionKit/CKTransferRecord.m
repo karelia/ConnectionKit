@@ -60,17 +60,16 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (CKTransferRecord *)parent { return _parent; }
 
-+ (instancetype)recordWithName:(NSString *)name size:(unsigned long long)size
++ (instancetype)recordWithName:(NSString *)name;
 {
-	return [[[CKTransferRecord alloc] initWithName:name size:size] autorelease];
+	return [[[CKTransferRecord alloc] initWithName:name] autorelease];
 }
 
-- (id)initWithName:(NSString *)name size:(unsigned long long)size
+- (id)initWithName:(NSString *)name;
 {
 	if ((self = [super init])) 
 	{
 		_name = [name copy];
-		_size = size;
 		_contents = [[NSMutableArray array] retain];
 		_properties = [[NSMutableDictionary dictionary] retain];
 		_error = nil;
@@ -92,12 +91,8 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (unsigned long long)size
 {
-	//Have we already calculated our size with children?
-	if (_sizeWithChildren != 0)
-		return _sizeWithChildren;
-	
 	//Calculate our size including our children
-	unsigned long long size = _size;
+	unsigned long long size = self.uploadOperation.countOfBytesExpectedToWrite;
 	NSEnumerator *e = [[self contents] objectEnumerator];
 	CKTransferRecord *cur;
 	
@@ -112,29 +107,8 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 			NSLog(@"CKTransferRecord content object does not have 'size'");		// work around bogus children?
 		}
 	}
-	_sizeWithChildren = size;
 	
 	return size;
-}
-
-- (void)setSize:(unsigned long long)size
-{
-	[self willChangeValueForKey:@"progress"];
-	if (_size != 0)
-	{
-		//We're updating our size. We need to update our parents' sizes too.
-		unsigned long long sizeDelta = size - _size;
-		[self _sizeWithChildrenChangedBy:sizeDelta];
-	}
-	_size = size;
-	[self didChangeValueForKey:@"progress"];
-}
-
-- (void)_sizeWithChildrenChangedBy:(unsigned long long)sizeDelta
-{
-	_sizeWithChildren += sizeDelta;
-	if ([self parent])
-		[[self parent] _sizeWithChildrenChangedBy:sizeDelta];
 }
 
 - (unsigned long long)transferred
@@ -147,10 +121,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 			rem += [aRecord transferred];
 		}
 		return rem;
-	}
-	if (_progress == -1) //if we have an error return it as if we transferred the lot of it
-	{
-		return _size;
 	}
 	return _transferred;
 }
@@ -303,8 +273,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 - (void)setParent:(CKTransferRecord *)parent
 {
 	_parent = parent;
-	if (_parent)
-		[_parent _sizeWithChildrenChangedBy:_size];
 }
 
 - (BOOL)isDirectory
@@ -448,10 +416,10 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
 	NSTimeInterval difference = now - _lastTransferTime;
 	
-	if (difference > 2.0 || _transferred == _size)
+	if (difference > 2.0 || _transferred == self.size)
 	{
 		[self willChangeValueForKey:@"speed"];
-		if (_transferred == _size)
+		if (_transferred == self.size)
 		{
 			[self setSpeed:0.0];
 		}
@@ -481,8 +449,8 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 - (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error
 {
 	[self setError:error];
-	_intermediateTransferred = (_size - _transferred);
-	_transferred = _size;
+	_intermediateTransferred = (self.size - _transferred);
+	_transferred = self.size;
 	_lastTransferTime = [NSDate timeIntervalSinceReferenceDate];
 	[self setProgress:100];
 
@@ -499,7 +467,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 + (CKTransferRecord *)rootRecordWithPath:(NSString *)path
 {
-	CKTransferRecord *result = [CKTransferRecord recordWithName:@"" size:0];
+	CKTransferRecord *result = [CKTransferRecord recordWithName:@""];
     
 	NSArray *pathComponents = [path pathComponents];
 	if ([pathComponents count] > 0)
@@ -509,7 +477,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
         
         for (NSUInteger i = 1; i < [pathComponents count]; i++)
         {
-            thisNode = [CKTransferRecord recordWithName:[pathComponents objectAtIndex:i] size:0];
+            thisNode = [CKTransferRecord recordWithName:[pathComponents objectAtIndex:i]];
             [subNode addContent:thisNode];
             subNode = thisNode;
         }
@@ -586,7 +554,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
     NSDictionary *result = [self nameWithProgress];
     
     // Directories should not display their size info
-    if (_size > 0 && [[self contents] count] == 0)  // Use _size to ignore children's sizes
+    if (self.uploadOperation.countOfBytesExpectedToWrite > 0 && [[self contents] count] == 0)  // Use countOfBytesExpectedToWrite to ignore children's sizes
     {
         // Calculate the size of the transfer in a user-friendly manner
         NSString *fileSize = [self.class formattedFileSize:(double)[self size]];

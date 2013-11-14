@@ -277,7 +277,7 @@
 
 - (CKTransferRecord *)makeTransferRecordWithPath:(NSString *)path size:(unsigned long long)size
 {
-    CKTransferRecord *result = [CKTransferRecord recordWithName:[path lastPathComponent] size:size];
+    CKTransferRecord *result = [CKTransferRecord recordWithName:[path lastPathComponent]];
     
     CKTransferRecord *parent = [self directoryTransferRecordWithPath:[path stringByDeletingLastPathComponent]];
     [parent addContent:result];
@@ -315,7 +315,7 @@
     
     if (!result)
     {
-        result = [CKTransferRecord recordWithName:[path lastPathComponent] size:0];
+        result = [CKTransferRecord recordWithName:[path lastPathComponent]];
         [parent addContent:result];
         [self didAddTransferRecord:result];
     }
