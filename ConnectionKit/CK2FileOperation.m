@@ -135,7 +135,13 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                                         withIntermediateDirectories:createIntermediates
                                                                   openingAttributes:attributes
                                                                              client:self
-                                                                      progressBlock:progressBlock];
+                                                                      progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
+                                                                          
+                                                                          _bytesWritten = totalBytesWritten;
+                                                                          _bytesExpectedToWrite = totalBytesExpectedToSend;
+                                                                          
+                                                                          progressBlock(bytesWritten, totalBytesWritten, totalBytesExpectedToSend);
+                                                                      }];
         
         [request release];
         return result;
@@ -196,7 +202,13 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                                         withIntermediateDirectories:createIntermediates
                                                                   openingAttributes:attributes
                                                                              client:self
-                                                                      progressBlock:progressBlock];
+                                                                      progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
+                                                                          
+                                                                          _bytesWritten = totalBytesWritten;
+                                                                          _bytesExpectedToWrite = totalBytesExpectedToSend;
+                                                                          
+                                                                          progressBlock(bytesWritten, totalBytesWritten, totalBytesExpectedToSend);
+                                                                      }];
         
         [request release];
         return result;
@@ -304,6 +316,11 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     return [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:60.0];
 }
+
+#pragma mark Body Data
+
+@synthesize countOfBytesWritten = _bytesWritten;
+@synthesize countOfBytesExpectedToWrite = _bytesExpectedToWrite;
 
 #pragma mark Cancellation
 

@@ -33,9 +33,26 @@ typedef NS_ENUM(NSInteger, CK2FileOperationState) {
     void    (^_enumerationBlock)(NSURL *);
     NSURL   *_localURL;
     
+    int64_t _bytesWritten;
+    int64_t _bytesExpectedToWrite;
+    
     CK2FileOperationState   _state;
     NSError                 *_error;
 }
+
+/**
+ * Number of body bytes already written.
+ *
+ * Excludes any headers, such as in HTTP messages, or FTP control connection.
+ */
+@property (readonly) int64_t countOfBytesWritten;
+
+/**
+ * Number of body bytes we expect to write.
+ *
+ * Excludes any headers, such as in HTTP messages, or FTP control connection.
+ */
+@property (readonly) int64_t countOfBytesExpectedToWrite;
 
 /**
  * `-cancel` returns immediately, but marks an operation as being canceled.
