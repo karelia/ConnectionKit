@@ -345,6 +345,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 - (void)tryToMessageDelegateSelector:(SEL)selector usingBlock:(void (^)(id <CK2FileManagerDelegate> delegate))block;
 {
     CK2FileManager *manager = self.fileManager;
+    NSAssert(manager, @"%@ disconnected from its manager too early", self.class);
     id <CK2FileManagerDelegate> delegate = manager.delegate;
     
     if (!selector || [delegate respondsToSelector:selector])
