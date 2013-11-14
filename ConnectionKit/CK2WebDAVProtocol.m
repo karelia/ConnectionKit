@@ -5,7 +5,6 @@
 //
 
 #import "CK2WebDAVProtocol.h"
-#import "CKTransferRecord.h"
 #import "CK2TrampolineAuthenticationChallenge.h"
 
 #ifndef CK2WebDAVLog
@@ -485,10 +484,7 @@
         [_queue addOperation:davRequest];
         [davRequest release];
 
-        CKTransferRecord* transfer = [CKTransferRecord recordWithName:[path lastPathComponent] size:davRequest.expectedLength];
-
         self.progressHandler = ^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalByesExpectedToSend) {
-            [transfer setProgress:totalBytesWritten];
             if (progressBlock)
             {
                 progressBlock(bytesWritten, totalBytesWritten, totalByesExpectedToSend);
