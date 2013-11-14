@@ -11,7 +11,7 @@
 
 typedef NS_ENUM(NSInteger, CK2FileOperationState) {
     CK2FileOperationStateRunning = 0,                     /* The operation is currently being serviced by the file manager */
-    //CK2FileOperationStateSuspended = 1,
+    CK2FileOperationStateSuspended = 1,                   /* The operation is yet to start. */
     CK2FileOperationStateCanceling = 2,                   /* The operation has been told to cancel and will complete shortly. */
     CK2FileOperationStateCompleted = 3,                   /* The operation has completed and the file manager will receive no more delegate notifications */
 };
@@ -26,7 +26,8 @@ typedef NS_ENUM(NSInteger, CK2FileOperationState) {
     NSString        *_descriptionForErrors;
     dispatch_queue_t    _queue;
     
-    CK2Protocol     *_protocol;
+    CK2Protocol *_protocol;
+    CK2Protocol *(^_createProtocolBlock)(Class);
     
     void    (^_completionBlock)(NSError *);
     void    (^_enumerationBlock)(NSURL *);
@@ -55,5 +56,10 @@ typedef NS_ENUM(NSInteger, CK2FileOperationState) {
  * This property will be `nil` in the event that no error occured.
  */
 @property (readonly, copy) NSError *error;
+
+/**
+ Sets an operation going if it hasn't already.
+ */
+- (void)resume;
 
 @end

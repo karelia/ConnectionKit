@@ -117,6 +117,8 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                                                                     manager:self
                                                                            enumerationBlock:block
                                                                             completionBlock:completionBlock];
+    
+    [operation resume];
     return [operation autorelease];
 }
 
@@ -131,6 +133,8 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                                                                 openingAttributes:attributes
                                                                                           manager:self
                                                                                   completionBlock:handler];
+    
+    [operation resume];
     return [operation autorelease];
 }
 
@@ -143,6 +147,8 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                                                                      manager:self
                                                                                progressBlock:progressBlock
                                                                              completionBlock:handler];
+    
+    [operation resume];
     
     return [operation autorelease];
 }
@@ -157,12 +163,15 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                                                                progressBlock:progressBlock
                                                                              completionBlock:handler];
     
+    [operation resume];
+    
     return [operation autorelease];
 }
 
 - (CK2FileOperation *)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 {
     CK2FileOperation *operation = [[[self classForOperation] alloc] initRemovalOperationWithURL:url manager:self completionBlock:handler];
+    [operation resume];
     return [operation autorelease];
 }
 
@@ -175,6 +184,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                                                                            manager:self
                                                                                    completionBlock:handler];
     
+    [operation resume];
     return [operation autorelease];
 }
 

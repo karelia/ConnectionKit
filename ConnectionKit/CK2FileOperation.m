@@ -51,47 +51,13 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     if (self = [self init])
     {
+        _state = CK2FileOperationStateSuspended;
         _manager = [manager retain];
         _URL = [url copy];
         _descriptionForErrors = [errorDescription copy];
         _completionBlock = [completionBlock copy];
+        _createProtocolBlock = [createBlock copy];
         _queue = dispatch_queue_create("com.karelia.connection.file-operation", NULL);
-        
-        [CK2Protocol classForURL:url completionHandler:^(Class protocolClass) {
-            
-            if (protocolClass)
-            {
-                // Bounce over to operation's own queue for kicking off the real work
-                // Keep an eye out for early opportunity to bail out if get cancelled
-                dispatch_async(_queue, ^{
-                    
-                    if (self.state == CK2FileOperationStateRunning)
-                    {
-                        _protocol = createBlock(protocolClass);
-                        if (!_protocol)
-                        {
-                            // it's likely that the protocol has already called protocol:didFailWithError:, which will have called finishWithError:, which means that a call to the completion
-                            // block is queue up already with an error in it
-                            // just in case though, we can report a more generic error here - once the completion block is called once it will be cleared out, the protocol's error will win
-                            // if there is one
-                            NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
-                            NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info]; // TODO: what's the correct error to report here?
-                            [self completeWithError:error];
-                            [error release];
-                        }
-
-                        if (self.state == CK2FileOperationStateRunning) [_protocol start];
-                    }
-                });
-            }
-            else
-            {
-                NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
-                NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info];
-                [self completeWithError:error];
-                [error release];
-            }
-        }];
     }
     
     return self;
@@ -319,6 +285,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     if (_queue) dispatch_release(_queue);
     [_completionBlock release];
     [_enumerationBlock release];
+    [_createProtocolBlock release];
     [_localURL release];
     [_error release];
 
@@ -360,6 +327,51 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 @synthesize state = _state;
 @synthesize error = _error;
+
+- (void)resume;
+{
+    if (_state == CK2FileOperationStateSuspended)
+    {
+        _state = CK2FileOperationStateRunning;
+        NSURL *url = self.originalURL;
+        
+        [CK2Protocol classForURL:url completionHandler:^(Class protocolClass) {
+            
+            if (protocolClass)
+            {
+                // Bounce over to operation's own queue for kicking off the real work
+                // Keep an eye out for early opportunity to bail out if get cancelled
+                dispatch_async(_queue, ^{
+                    
+                    if (self.state == CK2FileOperationStateRunning)
+                    {
+                        _protocol = _createProtocolBlock(protocolClass);
+                        if (!_protocol)
+                        {
+                            // it's likely that the protocol has already called protocol:didFailWithError:, which will have called finishWithError:, which means that a call to the completion
+                            // block is queue up already with an error in it
+                            // just in case though, we can report a more generic error here - once the completion block is called once it will be cleared out, the protocol's error will win
+                            // if there is one
+                            NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
+                            NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info]; // TODO: what's the correct error to report here?
+                            [self completeWithError:error];
+                            [error release];
+                        }
+                        
+                        if (self.state == CK2FileOperationStateRunning) [_protocol start];
+                    }
+                });
+            }
+            else
+            {
+                NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
+                NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info];
+                [self completeWithError:error];
+                [error release];
+            }
+        }];
+    }
+}
 
 #pragma mark CK2ProtocolClient
 
