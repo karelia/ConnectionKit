@@ -122,12 +122,6 @@
             [self operationDidFinish:error];
         }];
         
-        if (!self.isCancelled)
-        {
-            [record transferDidBegin:record];
-            [self.delegate uploader:self didBeginUploadToPath:path];
-        }
-        
         return op;
     }];
 }
@@ -156,12 +150,6 @@
             [self operationDidFinish:error];
         }];
         
-        if (!self.isCancelled)
-        {
-            [record transferDidBegin:record];
-            [self.delegate uploader:self didBeginUploadToPath:path];
-        }
-        
         return op;
     }];
 }
@@ -184,6 +172,13 @@
         CK2FileOperation *op = block(result);
         NSAssert(op, @"Failed to create upload operation");
         [_recordsByOperation setObject:result forKey:op];
+        
+        if (!self.isCancelled)
+        {
+            [result transferDidBegin:result];
+            [self.delegate uploader:self didBeginUploadToPath:path];
+        }
+        
         return op;
     }];
     
