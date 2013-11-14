@@ -122,8 +122,6 @@
             [self operationDidFinish:error];
         }];
         
-        NSAssert(op, @"Failed to create upload operation");
-        
         if (!self.isCancelled)
         {
             [record transferDidBegin:record];
@@ -158,8 +156,6 @@
             [self operationDidFinish:error];
         }];
         
-        NSAssert(op, @"Failed to create upload operation");
-        
         if (!self.isCancelled)
         {
             [record transferDidBegin:record];
@@ -186,6 +182,7 @@
     [self addOperationWithBlock:^{
         
         CK2FileOperation *op = block(result);
+        NSAssert(op, @"Failed to create upload operation");
         [_recordsByOperation setObject:result forKey:op];
         return op;
     }];
