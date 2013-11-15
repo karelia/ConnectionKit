@@ -46,9 +46,7 @@
 	NSMutableArray *_contents;
 	CKTransferRecord *_parent; //not retained
 	NSMutableDictionary *_properties;
-	
-	NSError *_error;
-    
+	    
     void *_observationInfo;
 }
 
@@ -80,8 +78,6 @@
 
 - (void)addContent:(CKTransferRecord *)record;
 - (NSArray *)contents;
-
-- (BOOL)hasError;
 
 - (CKTransferRecord *)root;
 - (NSString *)path; 
@@ -126,7 +122,6 @@ extern NSString *CKTransferRecordTransferDidFinishNotification;
 
 @interface CKTransferRecord (Private)
 - (void)setSpeed:(double)bps;
-- (void)setError:(NSError *)error;
 - (void)setUpload:(BOOL)flag;
 - (void)setSize:(unsigned long long)size;
 - (BOOL)isLeaf;

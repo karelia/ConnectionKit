@@ -56,7 +56,20 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 @synthesize uploadOperation = _operation;
 
-- (NSError *)error { return _error; }
+- (NSError *)error
+{
+    CK2FileOperation *operation = self.uploadOperation;
+    if (operation) return operation.error;
+    
+    NSError *result = nil;
+    for (CKTransferRecord *aRecord in self.contents)
+    {
+        result = aRecord.error;
+        if (result) break;
+    }
+    
+    return result;
+}
 
 - (CKTransferRecord *)parent { return _parent; }
 
@@ -73,7 +86,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
         _operation = [operation retain];
 		_contents = [[NSMutableArray array] retain];
 		_properties = [[NSMutableDictionary dictionary] retain];
-		_error = nil;
 		_progress = 0;
 	}
 	return self;
@@ -86,7 +98,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	[_contents makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
 	[_contents release];
 	[_properties release];
-	[_error release];
+
 	[super dealloc];
 }
 
@@ -202,7 +214,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 - (NSInteger)progress
 {
 	// Check if self of descendents have an error, so we can show that error.
-	if ([self hasError])
+	if (self.error)
 	{
 		return -1;
 	}
@@ -223,7 +235,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 {
 	if ([self isLeaf])
 	{
-		if (_error != nil)
+		if (self.error)
 		{
 			(*outErrors)++;
 		}
@@ -244,31 +256,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 		}
 	}
 	return (*outErrors > 0);	// return if there were any problems
-}
-
-- (BOOL)hasError
-{
-	return (_error != nil);
-}
-
-- (void)setError:(NSError *)error
-{
-	[self retain];  // seeing some baffling crashes which suggest self gets deallocated during this routine
-    
-    if (error != _error)
-	{
-		[self willChangeValueForKey:@"progress"]; // we use this because we return -1 on an error
-		[_error autorelease];
-		_error = [error retain];
-		[self didChangeValueForKey:@"progress"];
-		[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification object:self];
-	}
-	
-	//Set the error on all parents, too.
-	if ([self parent])
-		[[self parent] setError:error];
-    
-    [self release];
 }
 
 - (void)setParent:(CKTransferRecord *)parent
@@ -449,7 +436,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error
 {
-	[self setError:error];
 	_intermediateTransferred = (self.size - _transferred);
 	_transferred = self.size;
 	_lastTransferTime = [NSDate timeIntervalSinceReferenceDate];
@@ -528,7 +514,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 - (NSDictionary *)nameWithProgress
 {
 	NSNumber *progress = nil;
-	if ([self hasError])
+	if (self.error)
 	{
 		progress = [NSNumber numberWithInt:-1];
 	}
