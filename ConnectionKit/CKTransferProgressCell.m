@@ -61,6 +61,9 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, CGFloat toMaxDimension);
 	if ([value isKindOfClass:[NSDictionary class]])
 	{
 		myProgress = [[value objectForKey:@"progress"] intValue];
+        if ([[value objectForKey:@"finished"] boolValue]) myProgress = 100;
+        if ([value objectForKey:@"error"]) myProgress = -1;
+        
 		[super setObjectValue:[value objectForKey:@"name"]];
 	}
 	else if ([value isKindOfClass:[NSNumber class]])

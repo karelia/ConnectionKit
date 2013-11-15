@@ -482,16 +482,12 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (NSDictionary *)nameWithProgress
 {
-	NSNumber *progress = nil;
-	if (self.error)
-	{
-		progress = [NSNumber numberWithInt:-1];
-	}
-	else
-	{
-		progress = [NSNumber numberWithInt:[self progress]];
-	}
-	return [NSDictionary dictionaryWithObjectsAndKeys:progress, @"progress", [self name], @"name", nil];
+	return [NSDictionary dictionaryWithObjectsAndKeys:
+            @(self.progress), @"progress",
+            self.name, @"name",
+            @(self.isFinished), @"finished",
+            self.error, @"error",
+            nil];
 }
 + (NSSet *)keyPathsForValuesAffectingNameWithProgress;
 {
