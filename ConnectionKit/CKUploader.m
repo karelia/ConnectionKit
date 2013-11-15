@@ -266,8 +266,7 @@
 
 - (CKTransferRecord *)makeTransferRecordWithPath:(NSString *)path operation:(CK2FileOperation *)operation;
 {
-    CKTransferRecord *result = [CKTransferRecord recordWithName:[path lastPathComponent]];
-    result.uploadOperation = operation;
+    CKTransferRecord *result = [CKTransferRecord recordWithName:[path lastPathComponent] uploadOperation:operation];
     
     CKTransferRecord *parent = [self directoryTransferRecordWithPath:[path stringByDeletingLastPathComponent]];
     [parent addContent:result];
@@ -305,7 +304,7 @@
     
     if (!result)
     {
-        result = [CKTransferRecord recordWithName:[path lastPathComponent]];
+        result = [CKTransferRecord recordWithName:[path lastPathComponent] uploadOperation:nil];
         [parent addContent:result];
         [self didAddTransferRecord:result];
     }

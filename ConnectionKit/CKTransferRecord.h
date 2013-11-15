@@ -66,10 +66,10 @@
 - (void)setParent:(CKTransferRecord *)parent;	// Weak ref
 
 
-+ (instancetype)recordWithName:(NSString *)name;
-- (id)initWithName:(NSString *)name;
++ (instancetype)recordWithName:(NSString *)name uploadOperation:(CK2FileOperation *)operation;
+- (id)initWithName:(NSString *)name uploadOperation:(CK2FileOperation *)operation;
 
-@property(nonatomic, retain) CK2FileOperation *uploadOperation;
+@property(nonatomic, retain, readonly) CK2FileOperation *uploadOperation;
 
 - (BOOL)isDirectory;
 - (unsigned long long)transferred;

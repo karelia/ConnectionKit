@@ -60,16 +60,17 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (CKTransferRecord *)parent { return _parent; }
 
-+ (instancetype)recordWithName:(NSString *)name;
++ (instancetype)recordWithName:(NSString *)name uploadOperation:(CK2FileOperation *)operation;
 {
-	return [[[CKTransferRecord alloc] initWithName:name] autorelease];
+	return [[[CKTransferRecord alloc] initWithName:name uploadOperation:operation] autorelease];
 }
 
-- (id)initWithName:(NSString *)name;
+- (id)initWithName:(NSString *)name uploadOperation:(CK2FileOperation *)operation;
 {
 	if ((self = [super init])) 
 	{
 		_name = [name copy];
+        _operation = [operation retain];
 		_contents = [[NSMutableArray array] retain];
 		_properties = [[NSMutableDictionary dictionary] retain];
 		_error = nil;
@@ -467,7 +468,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 + (CKTransferRecord *)rootRecordWithPath:(NSString *)path
 {
-	CKTransferRecord *result = [CKTransferRecord recordWithName:@""];
+	CKTransferRecord *result = [CKTransferRecord recordWithName:@"" uploadOperation:nil];
     
 	NSArray *pathComponents = [path pathComponents];
 	if ([pathComponents count] > 0)
@@ -477,7 +478,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
         
         for (NSUInteger i = 1; i < [pathComponents count]; i++)
         {
-            thisNode = [CKTransferRecord recordWithName:[pathComponents objectAtIndex:i]];
+            thisNode = [CKTransferRecord recordWithName:[pathComponents objectAtIndex:i] uploadOperation:nil];
             [subNode addContent:thisNode];
             subNode = thisNode;
         }
