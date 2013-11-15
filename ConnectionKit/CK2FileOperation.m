@@ -221,7 +221,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             {
                 [request release];
                 if (!error) error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil];
-                [self protocol:nil didFailWithError:error];
+                [self protocol:nil didCompleteWithError:error];
                 return nil;
             }
         }
@@ -363,7 +363,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 #pragma mark CK2ProtocolClient
 
-- (void)protocol:(CK2Protocol *)protocol didFailWithError:(NSError *)error;
+- (void)protocol:(CK2Protocol *)protocol didCompleteWithError:(NSError *)error;
 {
     NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     
@@ -379,22 +379,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             [info release];
         }
     }
-    else
-    {
-        error = [NSError errorWithDomain:NSURLErrorDomain
-                                    code:NSURLErrorUnknown
-                                userInfo:@{ NSLocalizedDescriptionKey : _descriptionForErrors }];
-    }
     
     [self completeWithError:error];
-}
-
-- (void)protocolDidFinish:(CK2Protocol *)protocol;
-{
-    NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
-    // Might as well report success even if cancelled
-    
-    [self completeWithError:nil];
 }
 
 - (void)protocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)originalChallenge;

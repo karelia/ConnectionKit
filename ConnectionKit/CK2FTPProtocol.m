@@ -132,14 +132,7 @@
             error = nil;
         }
         
-        if (error)
-        {
-            [client protocol:self didFailWithError:error];
-        }
-        else
-        {
-            [client protocolDidFinish:self];
-        }
+        [client protocol:self didCompleteWithError:error];
     }];
     
     return self;
@@ -284,7 +277,7 @@
     // So jump straight to completion
     if (![self request])
     {
-        [[self client] protocolDidFinish:self];
+        [[self client] protocol:self didCompleteWithError:nil];
         return;
     }
 

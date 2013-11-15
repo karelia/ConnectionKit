@@ -81,7 +81,7 @@
             // For now, fail with a fairly generic error to try and dig out a little more detail
             if (items.count == 0)
             {
-                [client protocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain
+                [client protocol:self didCompleteWithError:[NSError errorWithDomain:NSURLErrorDomain
                                                                            code:NSURLErrorCannotParseResponse
                                                                        userInfo:@{ NSURLErrorFailingURLErrorKey : request.URL }]];
                 
@@ -371,9 +371,9 @@
 {
     CK2WebDAVLog(@"webdav cancelled challenge");
     
-    [[self client] protocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain
-                                                                      code:NSURLErrorUserCancelledAuthentication
-                                                                  userInfo:nil]];
+    [self.client protocol:self didCompleteWithError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                        code:NSURLErrorUserCancelledAuthentication
+                                                                    userInfo:nil]];
 }
 
 - (void)webDAVSession:(DAVSession *)session appendStringToTranscript:(NSString *)string sent:(BOOL)sent;
@@ -427,7 +427,7 @@
 - (void)reportFinished
 {
     [self.queue addOperationWithBlock:^{
-        [self.client protocolDidFinish:self];
+        [self.client protocol:self didCompleteWithError:nil];
     }];
 }
 
@@ -455,8 +455,10 @@
         }
     }
     
+    NSAssert(error, @"%@ called with nil error", NSStringFromSelector(_cmd));
+    
     [self.queue addOperationWithBlock:^{
-        [self.client protocol:self didFailWithError:error];
+        [self.client protocol:self didCompleteWithError:error];
     }];
 }
 

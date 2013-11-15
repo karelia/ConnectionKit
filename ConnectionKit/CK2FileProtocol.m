@@ -63,7 +63,7 @@ static size_t kCopyBufferSize = 4096;
             NSURL *directory = [request.URL URLByStandardizingPath];
             if (!directory)
             {
-                [client protocol:self didFailWithError:[NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil]];
+                [client protocol:self didCompleteWithError:[NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil]];
                 return;
             }
             
@@ -92,10 +92,7 @@ static size_t kCopyBufferSize = 4096;
 
         if (_cancelled) return; // bail should we be cancelled
 
-        if (enumerationError)
-            [client protocol:self didFailWithError:enumerationError];
-        else
-            [client protocolDidFinish:self];
+        [client protocol:self didCompleteWithError:enumerationError];
     }];
 }
 
@@ -112,11 +109,12 @@ static size_t kCopyBufferSize = 4096;
         if ([[NSFileManager defaultManager] createDirectoryAtPath:[url path] withIntermediateDirectories:createIntermediates attributes:attributes error:&error])
 #endif
         {
-            [client protocolDidFinish:self];
+            [client protocol:self didCompleteWithError:nil];
         }
         else
         {
-            [client protocol:self didFailWithError:error];
+            NSAssert(error, @"-[NSFileManager createDirectory…] failed to vend out error upon failure");
+            [client protocol:self didCompleteWithError:error];
         }
     }];
 }
@@ -138,7 +136,8 @@ static size_t kCopyBufferSize = 4096;
             if (![[NSFileManager defaultManager] createDirectoryAtPath:[intermediates path] withIntermediateDirectories:YES attributes:nil error:&error])
 #endif
             {
-                [client protocol:self didFailWithError:error];
+                NSAssert(error, @"-[NSFileManager createDirectory…] failed to vend out error upon failure");
+                [client protocol:self didCompleteWithError:error];
                 return;
             }
         }
@@ -173,11 +172,12 @@ static size_t kCopyBufferSize = 4096;
         NSURL* dstURL = [[srcURL URLByDeletingLastPathComponent] URLByAppendingPathComponent:newName];
         if ([[NSFileManager defaultManager] moveItemAtURL:srcURL toURL:dstURL error:&error])
         {
-            [client protocolDidFinish:self];
+            [client protocol:self didCompleteWithError:nil];
         }
         else
         {
-            [client protocol:self didFailWithError:error];
+            NSAssert(error, @"-[NSFileManager moveItemAtURL…] failed to vend out error upon failure");
+            [client protocol:self didCompleteWithError:error];
         }
     }];
 }
@@ -189,11 +189,12 @@ static size_t kCopyBufferSize = 4096;
         NSError *error;
         if ([[NSFileManager defaultManager] removeItemAtURL:[request URL] error:&error])
         {
-            [client protocolDidFinish:self];
+            [client protocol:self didCompleteWithError:nil];
         }
         else
         {
-            [client protocol:self didFailWithError:error];
+            NSAssert(error, @"-[NSFileManager removeItemAtURL…] failed to vend out error upon failure");
+            [client protocol:self didCompleteWithError:error];
         }
     }];
 }
@@ -205,11 +206,12 @@ static size_t kCopyBufferSize = 4096;
         NSError *error;
         if ([[NSFileManager defaultManager] setAttributes:keyedValues ofItemAtPath:[[request URL] path] error:&error])
         {
-            [client protocolDidFinish:self];
+            [client protocol:self didCompleteWithError:nil];
         }
         else
         {
-            [client protocol:self didFailWithError:error];
+            NSAssert(error, @"-[NSFileManager setAttributes…] failed to vend out error upon failure");
+            [client protocol:self didCompleteWithError:error];
         }
     }];
 }
@@ -283,15 +285,7 @@ static size_t kCopyBufferSize = 4096;
     // Hand off to CURLTransfer to create the file
     __block CK2CURLBasedProtocol *curlProtocol = [[CK2CURLBasedProtocol alloc] initWithRequest:request client:nil progressBlock:progressBlock completionHandler:^(NSError *error) {
 
-        if (error)
-        {
-            [client protocol:self didFailWithError:error];
-        }
-        else
-        {
-            [client protocolDidFinish:self];
-        }
-
+        [client protocol:self didCompleteWithError:error];
         [curlProtocol autorelease];
     }];
 
@@ -345,14 +339,7 @@ static size_t kCopyBufferSize = 4096;
         error = [self noInputStreamError];
     }
 
-    if (error)
-    {
-        [client protocol:self didFailWithError:[self modifiedErrorForFileError:error]];
-    }
-    else
-    {
-        [client protocolDidFinish:self];
-    }
+    [client protocol:self didCompleteWithError:[self modifiedErrorForFileError:error]];
 }
 
 /**
@@ -391,22 +378,17 @@ static size_t kCopyBufferSize = 4096;
             dispatch_source_set_event_handler(source, ^{
                 uint8_t buffer[kCopyBufferSize];
                 NSInteger length = [inputStream read:buffer maxLength:kCopyBufferSize];
-                if (length < 0)
+                if (length <= 0)
                 {
                     dispatch_source_cancel(source);
-                    [client protocol:self didFailWithError:[self modifiedErrorForFileError:[inputStream streamError]]];
-                }
-                else if (length == 0)
-                {
-                    dispatch_source_cancel(source);
-                    [client protocolDidFinish:self];
+                    [client protocol:self didCompleteWithError:[self modifiedErrorForFileError:[inputStream streamError]]];
                 }
                 else
                 {
                     ssize_t written = write(outfile, buffer, length);
                     if (written != length)
                     {
-                        [client protocol:self didFailWithError:[self currentPOSIXError]];
+                        [client protocol:self didCompleteWithError:[self currentPOSIXError]];
                     }
                 }
             });
@@ -431,7 +413,7 @@ static size_t kCopyBufferSize = 4096;
 
     if (error)
     {
-        [client protocol:self didFailWithError:error];
+        [client protocol:self didCompleteWithError:error];
     }
 }
 
