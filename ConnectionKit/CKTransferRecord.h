@@ -55,6 +55,7 @@
 - (CGFloat)speed;
 - (void)setSpeed:(CGFloat)speed;	// TODO: Switch to CGFloat
 
+- (BOOL)isFinished;
 - (NSError *)error;
 
 - (CKTransferRecord *)parent;

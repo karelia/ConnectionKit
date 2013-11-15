@@ -56,6 +56,19 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 @synthesize uploadOperation = _operation;
 
+- (BOOL)isFinished;
+{
+    CK2FileOperation *operation = self.uploadOperation;
+    if (operation) return (operation.state == CK2FileOperationStateCompleted);
+    
+    for (CKTransferRecord *aRecord in self.contents)
+    {
+        if (!aRecord.isFinished) return NO;
+    }
+    
+    return YES;
+}
+
 - (NSError *)error
 {
     CK2FileOperation *operation = self.uploadOperation;
