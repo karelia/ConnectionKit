@@ -20,7 +20,6 @@ typedef void (^CK2WebDAVErrorHandler)(NSError* error);
     NSString    *_user;
     CK2WebDAVCompletionHandler _completionHandler;
     CK2WebDAVErrorHandler _errorHandler;
-    CK2ProgressBlock _progressHandler;
     
     BOOL    _isWriteOp; // minor hack for now
 }

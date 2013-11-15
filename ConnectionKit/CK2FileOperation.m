@@ -134,20 +134,15 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         CK2Protocol *result = [[protocolClass alloc] initForCreatingFileWithRequest:request
                                                         withIntermediateDirectories:createIntermediates
                                                                   openingAttributes:attributes
-                                                                             client:self
-                                                                      progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
-                                                                          
-                                                                          _bytesWritten = totalBytesWritten;
-                                                                          _bytesExpectedToWrite = totalBytesExpectedToSend;
-                                                                          
-                                                                          progressBlock(bytesWritten, totalBytesWritten, totalBytesExpectedToSend);
-                                                                      }];
+                                                                             client:self];
         
         [request release];
         return result;
     }];
     
     _bytesExpectedToWrite = data.length;
+    _progressBlock = [progressBlock copy];
+
     return self;
 }
 
@@ -206,20 +201,15 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         CK2Protocol *result = [[protocolClass alloc] initForCreatingFileWithRequest:request
                                                         withIntermediateDirectories:createIntermediates
                                                                   openingAttributes:attributes
-                                                                             client:self
-                                                                      progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
-                                                                          
-                                                                          _bytesWritten = totalBytesWritten;
-                                                                          _bytesExpectedToWrite = totalBytesExpectedToSend;
-                                                                          
-                                                                          progressBlock(bytesWritten, totalBytesWritten, totalBytesExpectedToSend);
-                                                                      }];
+                                                                             client:self];
         
         [request release];
         return result;
     }];
     
     _bytesExpectedToWrite = fileSize.longLongValue;
+    _progressBlock = [progressBlock copy];
+    
     return self;
 }
 
@@ -306,6 +296,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     [_completionBlock release];
     [_enumerationBlock release];
     [_createProtocolBlock release];
+    [_progressBlock release];
     [_localURL release];
     [_error release];
 
@@ -654,6 +645,14 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             }];
         }
     }
+}
+
+- (void)protocol:(CK2Protocol *)protocol didSendBodyData:(int64_t)bytesSent totalBytesSent:(int64_t)totalBytesSent totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend;
+{
+    _bytesWritten = totalBytesSent;
+    _bytesExpectedToWrite = totalBytesExpectedToSend;
+    
+    _progressBlock(bytesSent, totalBytesSent, totalBytesExpectedToSend);
 }
 
 - (NSInputStream *)protocol:(CK2Protocol *)protocol needNewBodyStream:(NSURLRequest *)request;

@@ -85,7 +85,7 @@
     return self;
 }
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
 {
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
     [mutableRequest curl_setCreateIntermediateDirectories:createIntermediates];
@@ -94,7 +94,7 @@
     NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
     NSString* name = [path lastPathComponent];
 
-    self = [self initWithRequest:mutableRequest client:client progressBlock:progressBlock completionHandler:nil];
+    self = [self initWithRequest:mutableRequest client:client completionHandler:nil];
     
     _transcriptMessage = [[NSString alloc] initWithFormat:@"Uploading %@ to %@\n", name, path];
     

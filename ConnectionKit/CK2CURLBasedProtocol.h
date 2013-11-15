@@ -21,7 +21,6 @@
     
     void    (^_completionHandler)(NSError *error);
     void    (^_dataBlock)(NSData *data);
-    CK2ProgressBlock _progressBlock;
     
     NSUInteger _totalBytesWritten;
 }
@@ -31,7 +30,6 @@
 
 - (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *))handler;
 - (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client dataHandler:(void (^)(NSData *))dataBlock completionHandler:(void (^)(NSError *))handler;
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *))handler;
 
 - (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)request createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *error))handler;
 

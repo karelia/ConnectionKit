@@ -35,6 +35,7 @@ typedef NS_ENUM(NSInteger, CK2FileOperationState) {
     
     int64_t _bytesWritten;
     int64_t _bytesExpectedToWrite;
+    CK2ProgressBlock    _progressBlock;
     
     CK2FileOperationState   _state;
     NSError                 *_error;

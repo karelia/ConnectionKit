@@ -122,7 +122,7 @@ static size_t kCopyBufferSize = 4096;
 }
 
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
 {
     return [self initWithBlock:^{
         
@@ -148,18 +148,18 @@ static size_t kCopyBufferSize = 4096;
         {
             case kCreateWithCURL:
             {
-                [self createFileWithCURLForRequest:request openingAttributes:attributes client:client progressBlock:progressBlock];
+                [self createFileWithCURLForRequest:request openingAttributes:attributes client:client];
                 break;
             }
 
             case kCreateWithStreams:
             {
-                [self createFileSyncForRequest:request openingAttributes:attributes client:client progressBlock:progressBlock];
+                [self createFileSyncForRequest:request openingAttributes:attributes client:client];
                 break;
             }
 
             default:
-                [self createFileAsyncForRequest:request openingAttributes:attributes client:client progressBlock:progressBlock];
+                [self createFileAsyncForRequest:request openingAttributes:attributes client:client];
         }
     }];
 }
@@ -278,10 +278,10 @@ static size_t kCopyBufferSize = 4096;
  The main problem with this is that CURLTransfer doesn't return very good error information.
  */
 
-- (void)createFileWithCURLForRequest:(NSURLRequest*)request openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock
+- (void)createFileWithCURLForRequest:(NSURLRequest*)request openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
 {
     // Hand off to CURLTransfer to create the file
-    __block CK2CURLBasedProtocol *curlProtocol = [[CK2CURLBasedProtocol alloc] initWithRequest:request client:nil progressBlock:progressBlock completionHandler:^(NSError *error) {
+    __block CK2CURLBasedProtocol *curlProtocol = [[CK2CURLBasedProtocol alloc] initWithRequest:request client:nil completionHandler:^(NSError *error) {
 
         if (error)
         {
@@ -302,7 +302,7 @@ static size_t kCopyBufferSize = 4096;
  Simple file creation implementation which just works synchronously, copying between two streams.
  */
 
-- (void)createFileSyncForRequest:(NSURLRequest*)request openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock
+- (void)createFileSyncForRequest:(NSURLRequest*)request openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
 {
     NSInputStream *inputStream = [self inputStreamForRequest:request];
     [inputStream open];
@@ -329,11 +329,11 @@ static size_t kCopyBufferSize = 4096;
                 error = [outputStream streamError];
                 break;
             }
-
-            if (progressBlock)
-            {
-                progressBlock(length, [[inputStream propertyForKey:NSStreamFileCurrentOffsetKey] longValue], -1);
-            }
+            
+            [self.client protocol:self
+                  didSendBodyData:length
+                   totalBytesSent:[[inputStream propertyForKey:NSStreamFileCurrentOffsetKey] longValue]
+         totalBytesExpectedToSend:-1];
         }
         
         [inputStream close];
@@ -365,7 +365,7 @@ static size_t kCopyBufferSize = 4096;
  it only lives for the duration of the operation.
  */
 
-- (void)createFileAsyncForRequest:(NSURLRequest*)request openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock
+- (void)createFileAsyncForRequest:(NSURLRequest*)request openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
 {
     NSInputStream *inputStream = [self inputStreamForRequest:request];
     NSError* error = nil;

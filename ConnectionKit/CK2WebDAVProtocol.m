@@ -15,7 +15,6 @@
 
 @property (copy, nonatomic) CK2WebDAVCompletionHandler completionHandler;
 @property (copy, nonatomic) CK2WebDAVErrorHandler errorHandler;
-@property (copy, nonatomic) CK2ProgressBlock progressHandler;
 @property (strong, nonatomic) NSOperationQueue* queue;
 
 @end
@@ -24,7 +23,6 @@
 
 @synthesize completionHandler = _completionHandler;
 @synthesize errorHandler = _errorHandler;
-@synthesize progressHandler = _progressHandler;
 @synthesize queue = _queue;
 
 + (BOOL)canHandleURL:(NSURL *)url;
@@ -52,7 +50,6 @@
     
     [_completionHandler release];
     [_errorHandler release];
-    [_progressHandler release];
     [_queue release];
     [_session release];
     [_user release];
@@ -177,7 +174,7 @@
     return self;
 }
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
 {
     CK2WebDAVLog(@"creating file");
 
@@ -204,7 +201,7 @@
             if (createIntermediates && [error.domain isEqualToString:DAVClientErrorDomain] && ((error.code == 409) || (error.code == 404)))
             {
                 CK2WebDAVLog(@"making directory failed, retrying making each intermediate %@", path);
-                [self addCreateFileRequestForPath:path originalRequest:request withIntermediateDirectories:YES errorHandler:handleRealError completionHandler:handleCompletion progressBlock:progressBlock];
+                [self addCreateFileRequestForPath:path originalRequest:request withIntermediateDirectories:YES errorHandler:handleRealError completionHandler:handleCompletion];
             }
             else
             {
@@ -214,7 +211,7 @@
 
         // for the sake of efficiency, the first time we always try the creation without making intermediates
         // if that fails, and if we were asked to make intermediates, we try again
-        [self addCreateFileRequestForPath:path originalRequest:request withIntermediateDirectories:NO errorHandler:handleFirstError completionHandler:handleCompletion progressBlock:progressBlock];
+        [self addCreateFileRequestForPath:path originalRequest:request withIntermediateDirectories:NO errorHandler:handleFirstError completionHandler:handleCompletion];
 
     }
 
@@ -341,10 +338,10 @@
 {
     CK2WebDAVLog(@"webdav sent data");
 
-    if (self.progressHandler)
-    {
-        self.progressHandler(bytesWritten, totalBytesWritten, totalBytesExpectedToWrite);
-    }
+    [self.client protocol:self
+          didSendBodyData:bytesWritten
+           totalBytesSent:totalBytesExpectedToWrite
+ totalBytesExpectedToSend:totalBytesExpectedToWrite];
 }
 
 - (NSInputStream*)webDAVRequest:(DAVRequest *)request needNewBodyStream:(NSURLRequest *)urlRequest
@@ -472,9 +469,7 @@
                     originalRequest:(NSURLRequest*)request
              withIntermediateDirectories:(BOOL)createIntermediates
                        errorHandler:(CK2WebDAVErrorHandler)errorHandler
-                       completionHandler:(CK2WebDAVCompletionHandler)completionHandler
-                      progressBlock:(CK2ProgressBlock)progressBlock
-
+                  completionHandler:(CK2WebDAVCompletionHandler)completionHandler;
 {
     CK2WebDAVLog(@"adding create file request for %@", path);
 
@@ -483,13 +478,6 @@
         DAVPutRequest* davRequest = [[DAVPutRequest alloc] initWithPath:path originalRequest:request session:_session delegate:self];
         [_queue addOperation:davRequest];
         [davRequest release];
-
-        self.progressHandler = ^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalByesExpectedToSend) {
-            if (progressBlock)
-            {
-                progressBlock(bytesWritten, totalBytesWritten, totalByesExpectedToSend);
-            }
-        };
 
         self.completionHandler = completionHandler;
         self.errorHandler = errorHandler;

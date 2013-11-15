@@ -60,15 +60,6 @@
     return self;
 }
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *))handler
-{
-    if (self = [self initWithRequest:request client:client completionHandler:handler])
-    {
-        _progressBlock = [progressBlock copy];
-    }
-    return self;
-}
-
 - (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)sourceRequest createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *error))handler;
 {
     // Navigate to the directory
@@ -394,7 +385,6 @@
     [_user release];
     [_completionHandler release];
     [_dataBlock release];
-    [_progressBlock release];
     
     [super dealloc];
 }
@@ -610,7 +600,11 @@
 - (void)transfer:(CURLTransfer *)transfer willSendBodyDataOfLength:(NSUInteger)bytesWritten
 {
     _totalBytesWritten += bytesWritten;
-    if (_progressBlock) _progressBlock(bytesWritten, _totalBytesWritten, -1);
+    
+    [self.client protocol:self
+          didSendBodyData:bytesWritten
+           totalBytesSent:_totalBytesWritten
+ totalBytesExpectedToSend:-1];
 }
 
 - (void)transfer:(CURLTransfer *)transfer didCompleteWithError:(NSError *)error;
