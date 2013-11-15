@@ -86,7 +86,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
         _operation = [operation retain];
 		_contents = [[NSMutableArray array] retain];
 		_properties = [[NSMutableDictionary dictionary] retain];
-		_progress = 0;
 	}
 	return self;
 }
@@ -183,29 +182,10 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	for (i = 1; i <= 4; i++)
 	{
 		[self willChangeValueForKey:@"progress"];
-		_progress = i * 25;
+		//_progress = i * 25;
 		[self didChangeValueForKey:@"progress"];
 		[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification
 															object:self];
-	}
-}
-
-- (void)setProgress:(NSInteger)progress
-{
-	if (_progress != progress || progress == 100)
-	{
-		if (progress == 100 && _progress == 1)
-		{
-			[self forceAnimationUpdate];
-			return;
-		}
-		
-		[self willChangeValueForKey:@"progress"];
-		_progress = progress;
-		[self didChangeValueForKey:@"progress"];
-		
-		
-		[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification object:self];
 	}
 }
 
@@ -217,16 +197,11 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 		return -1;
 	}
 	
-	if ([self isDirectory]) 
-	{
-		//get the real transfer progress of the whole directory
 		unsigned long long size = [self size];
 		unsigned long long transferred = [self transferred];
 		if (size == 0) size = 1;
 		NSInteger percent = (NSInteger)((transferred / (size * 1.0)) * 100);
 		return percent;
-	}
-	return _progress;
 }
 
 - (BOOL)problemsTransferringCountingErrors:(NSInteger *)outErrors successes:(NSInteger *)outSuccesses
@@ -389,7 +364,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 {
 	_intermediateTransferred = 0;
 	_lastTransferTime = [NSDate timeIntervalSinceReferenceDate];
-	[self setProgress:0];
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordTransferDidBeginNotification object:self];
 }
 
@@ -415,13 +389,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 		_lastTransferTime = now;
 		[self didChangeValueForKey:@"speed"];
 	}
-    
-    if ([self size]) [self setProgress:(100 * [self transferred] / [self size])];
-}
-
-- (void)transfer:(CKTransferRecord *)transfer progressedTo:(NSNumber *)percent
-{
-	[self setProgress:[percent intValue]];
 }
 
 - (void)transfer:(CKTransferRecord *)transfer receivedError:(NSError *)error
@@ -434,7 +401,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 {
 	_intermediateTransferred = (self.size - self.transferred);
 	_lastTransferTime = [NSDate timeIntervalSinceReferenceDate];
-	[self setProgress:100];
 
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordTransferDidFinishNotification object:self];
 	

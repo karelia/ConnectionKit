@@ -41,7 +41,6 @@
 	NSTimeInterval _transferStartTime;
 	NSTimeInterval _lastDirectorySpeedUpdate;
 	CGFloat _speed;
-	NSUInteger _progress;
 	NSMutableArray *_contents;
 	CKTransferRecord *_parent; //not retained
 	NSMutableDictionary *_properties;
@@ -71,7 +70,6 @@
 - (BOOL)isDirectory;
 - (unsigned long long)transferred;
 - (NSInteger)progress;
-- (void)setProgress:(NSInteger)progress;
 
 - (NSDictionary *)nameWithProgressAndFileSize;
 
@@ -110,7 +108,6 @@ extern NSString *CKTransferRecordTransferDidFinishNotification;
 @interface NSObject (CKConnectionTransferDelegate)
 - (void)transferDidBegin:(CKTransferRecord *)transfer;
 - (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length;
-- (void)transfer:(CKTransferRecord *)transfer progressedTo:(NSNumber *)percent;
 - (void)transfer:(CKTransferRecord *)transfer receivedError:(NSError *)error;
 - (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error;
 @end
