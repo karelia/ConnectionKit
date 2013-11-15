@@ -362,15 +362,12 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (void)transferDidBegin:(CKTransferRecord *)transfer
 {
-	_intermediateTransferred = 0;
 	_lastTransferTime = [NSDate timeIntervalSinceReferenceDate];
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordTransferDidBeginNotification object:self];
 }
 
 - (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length
 {
-	_intermediateTransferred += length;
-	
 	NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
 	NSTimeInterval difference = now - _lastTransferTime;
 	
@@ -383,9 +380,8 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 		}
 		else
 		{
-			[self setSpeed:((double)_intermediateTransferred) / difference];
+			[self setSpeed:((double)self.transferred) / difference];
 		}
-		_intermediateTransferred = 0;
 		_lastTransferTime = now;
 		[self didChangeValueForKey:@"speed"];
 	}
@@ -399,7 +395,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error
 {
-	_intermediateTransferred = (self.size - self.transferred);
 	_lastTransferTime = [NSDate timeIntervalSinceReferenceDate];
 
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordTransferDidFinishNotification object:self];
