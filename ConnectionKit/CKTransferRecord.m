@@ -126,16 +126,14 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (unsigned long long)transferred
 {
-	if ([self isDirectory]) 
-	{
-		unsigned long long rem = 0;
-        for (CKTransferRecord *aRecord in _contents)    // -contents is too slow as copies the internal storage
-		{
-			rem += [aRecord transferred];
-		}
-		return rem;
-	}
-	return _transferred;
+	int64_t result = self.uploadOperation.countOfBytesWritten;
+    
+    for (CKTransferRecord *aRecord in _contents)    // -contents is too slow as copies the internal storage
+    {
+        result += aRecord.transferred;
+    }
+    
+	return result;
 }
 
 - (CGFloat)speed
@@ -389,7 +387,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (void)transferDidBegin:(CKTransferRecord *)transfer
 {
-	_transferred = 0;
 	_intermediateTransferred = 0;
 	_lastTransferTime = [NSDate timeIntervalSinceReferenceDate];
 	[self setProgress:0];
@@ -398,16 +395,15 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length
 {
-	_transferred += length;
 	_intermediateTransferred += length;
 	
 	NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
 	NSTimeInterval difference = now - _lastTransferTime;
 	
-	if (difference > 2.0 || _transferred == self.size)
+	if (difference > 2.0 || self.transferred == self.size)
 	{
 		[self willChangeValueForKey:@"speed"];
-		if (_transferred == self.size)
+		if (self.transferred == self.size)
 		{
 			[self setSpeed:0.0];
 		}
@@ -436,8 +432,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error
 {
-	_intermediateTransferred = (self.size - _transferred);
-	_transferred = self.size;
+	_intermediateTransferred = (self.size - self.transferred);
 	_lastTransferTime = [NSDate timeIntervalSinceReferenceDate];
 	[self setProgress:100];
 
