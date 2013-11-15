@@ -601,10 +601,24 @@
 {
     _totalBytesWritten += bytesWritten;
     
+    NSURLRequest *request = self.request;
+    NSData *data = request.HTTPBody;
+    
+    int64_t totalBytesExpected;
+    if (data)
+    {
+        totalBytesExpected = data.length;
+    }
+    else
+    {
+        NSString *lengthString = [self.request valueForHTTPHeaderField:@"Content-Length"];
+        totalBytesExpected = (lengthString ? lengthString.longLongValue : -1);
+    }
+    
     [self.client protocol:self
           didSendBodyData:bytesWritten
            totalBytesSent:_totalBytesWritten
- totalBytesExpectedToSend:-1];
+ totalBytesExpectedToSend:totalBytesExpected];
 }
 
 - (void)transfer:(CURLTransfer *)transfer didCompleteWithError:(NSError *)error;
