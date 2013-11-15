@@ -96,7 +96,7 @@
                 
         return [_fileManager removeItemAtURL:[self URLForPath:path] completionHandler:^(NSError *error) {
             
-            [self operationDidFinish:(reportError ? error : nil)];
+            [self operation:nil didFinish:(reportError ? error : nil)];
         }];
     }];
 }
@@ -107,13 +107,8 @@
         
         NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
         
-        CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path] contents:data withIntermediateDirectories:YES openingAttributes:attributes completionHandler:^(NSError *error) {
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [record transferDidFinish:record error:error];
-            });
-            
-            [self operationDidFinish:error];
+        __block CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path] contents:data withIntermediateDirectories:YES openingAttributes:attributes completionHandler:^(NSError *error) {
+            [self operation:op didFinish:error];
         }];
         
         return op;
@@ -129,13 +124,8 @@
         
         NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
         
-        CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path] withContentsOfURL:localURL withIntermediateDirectories:YES openingAttributes:attributes completionHandler:^(NSError *error) {
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [record transferDidFinish:record error:error];
-            });
-            
-            [self operationDidFinish:error];
+        __block CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path] withContentsOfURL:localURL withIntermediateDirectories:YES openingAttributes:attributes completionHandler:^(NSError *error) {
+            [self operation:op didFinish:error];
         }];
         
         return op;
@@ -200,7 +190,7 @@
         
         NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
         [[self delegate] uploaderDidFinishUploading:self];
-        [self operationDidFinish:nil];
+        [self operation:nil didFinish:nil];
         return nil;
     }];
     
@@ -241,10 +231,18 @@
     }
 }
 
-- (void)operationDidFinish:(NSError *)error;
+- (void)operation:(CK2FileOperation *)operation didFinish:(NSError *)error;
 {
     // This method gets called on all sorts of threads, so marshall back to main queue
     dispatch_async(dispatch_get_main_queue(), ^{
+        
+        // Tell the record it's finished
+        if (operation)
+        {
+            CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
+            [record transferDidFinish:record error:error];
+        }
+        
         
         [_currentOperation release]; _currentOperation = nil;
         
