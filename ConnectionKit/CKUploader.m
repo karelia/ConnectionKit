@@ -103,16 +103,13 @@
 
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
 {
-    return [self uploadToPath:path size:data.length usingBlock:^(CKTransferRecord *record) {
-        
-        NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
-        
-        __block CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path] contents:data withIntermediateDirectories:YES openingAttributes:attributes completionHandler:^(NSError *error) {
-            [self operation:op didFinish:error];
-        }];
-        
-        return op;
+    NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
+    
+    __block CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path] contents:data withIntermediateDirectories:YES openingAttributes:attributes completionHandler:^(NSError *error) {
+        [self operation:op didFinish:error];
     }];
+    
+    return [self uploadToPath:path usingOperation:op];
 }
 
 - (CKTransferRecord *)uploadFileAtURL:(NSURL *)localURL toPath:(NSString *)path;
@@ -120,20 +117,19 @@
     NSNumber *size;
     if (![localURL getResourceValue:&size forKey:NSURLFileSizeKey error:NULL]) size = nil;
     
-    return [self uploadToPath:path size:size.unsignedLongLongValue usingBlock:^(CKTransferRecord *record) {
-        
-        NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
-        
-        __block CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path] withContentsOfURL:localURL withIntermediateDirectories:YES openingAttributes:attributes completionHandler:^(NSError *error) {
-            [self operation:op didFinish:error];
-        }];
-        
-        return op;
+    NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
+    
+    __block CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path] withContentsOfURL:localURL withIntermediateDirectories:YES openingAttributes:attributes completionHandler:^(NSError *error) {
+        [self operation:op didFinish:error];
     }];
+    
+    return [self uploadToPath:path usingOperation:op];
 }
 
-- (CKTransferRecord *)uploadToPath:(NSString *)path size:(unsigned long long)size usingBlock:(CK2FileOperation* (^)(CKTransferRecord *record))block;
+- (CKTransferRecord *)uploadToPath:(NSString *)path usingOperation:(CK2FileOperation *)operation;
 {
+    NSParameterAssert(operation);
+    
     // Create transfer record
     if (_options & CKUploadingDeleteExistingFileFirst)
 	{
@@ -141,26 +137,21 @@
         [self removeFileAtPath:path reportError:NO];
 	}
     
-    CKTransferRecord *result = [self makeTransferRecordWithPath:path size:size];
+    CKTransferRecord *result = [self makeTransferRecordWithPath:path operation:operation];
+    [_recordsByOperation setObject:result forKey:operation];
     
     
     // Enqueue upload
     [self addOperationWithBlock:^{
         
-        CK2FileOperation *op = block(result);
-        NSAssert(op, @"Failed to create upload operation");
-        
-        result.uploadOperation = op;
-        [_recordsByOperation setObject:result forKey:op];
-        
         if (!self.isCancelled)
         {
-            [op resume];
+            [operation resume];
             [result transferDidBegin:result];
             [self.delegate uploader:self didBeginUploadToPath:path];
         }
         
-        return op;
+        return operation;
     }];
     
     
@@ -273,9 +264,10 @@
 
 #pragma mark Transfer Records
 
-- (CKTransferRecord *)makeTransferRecordWithPath:(NSString *)path size:(unsigned long long)size
+- (CKTransferRecord *)makeTransferRecordWithPath:(NSString *)path operation:(CK2FileOperation *)operation;
 {
     CKTransferRecord *result = [CKTransferRecord recordWithName:[path lastPathComponent]];
+    result.uploadOperation = operation;
     
     CKTransferRecord *parent = [self directoryTransferRecordWithPath:[path stringByDeletingLastPathComponent]];
     [parent addContent:result];
