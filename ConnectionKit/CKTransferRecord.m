@@ -497,7 +497,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
     NSDictionary *result = [self nameWithProgress];
     
     // Directories should not display their size info
-    if (self.uploadOperation > 0 && [[self contents] count] == 0)
+    if (self.uploadOperation && [[self contents] count] == 0)
     {
         // Calculate the size of the transfer in a user-friendly manner
         NSString *fileSize = [self.class formattedFileSize:(double)[self size]];
