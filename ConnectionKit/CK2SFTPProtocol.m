@@ -223,7 +223,7 @@
     // So jump straight to completion
     if (![self request])
     {
-        [[self client] protocolDidFinish:self];
+        [[self client] protocol:self didCompleteWithError:nil];
         return;
     }
     

@@ -318,7 +318,7 @@
 
         if (error)
         {
-            [client protocol:self didFailWithError:error];
+            [client protocol:self didCompleteWithError:error];
         }
         else
         {
@@ -341,14 +341,7 @@
 
            // Process the data to make a directory listing
             NSError* error = [self processData:totalData request:request url:directoryURL path:directoryPath keys:keys options:mask];
-            if (error)
-            {
-                [self.client protocol:self didFailWithError:error];
-            }
-            else
-            {
-                [self.client protocolDidFinish:self];
-            }
+            [self.client protocol:self didCompleteWithError:error];
         }
     }];
 
@@ -457,14 +450,7 @@
 
 - (void)reportToProtocolWithError:(NSError*)error
 {
-    if (error)
-    {
-        [[self client] protocol:self didFailWithError:error];
-    }
-    else
-    {
-        [[self client] protocolDidFinish:self];
-    }
+    [[self client] protocol:self didCompleteWithError:error];
 }
 
 - (void)stop;
@@ -706,9 +692,9 @@
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    [[self client] protocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain
-                                                                      code:NSURLErrorUserCancelledAuthentication
-                                                                  userInfo:nil]];
+    [self.client protocol:self didCompleteWithError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                        code:NSURLErrorUserCancelledAuthentication
+                                                                    userInfo:nil]];
 }
 
 #pragma mark Customization

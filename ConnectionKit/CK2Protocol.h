@@ -141,8 +141,7 @@
 @protocol CK2ProtocolClient <NSObject>
 
 #pragma mark General
-- (void)protocolDidFinish:(CK2Protocol *)protocol;
-- (void)protocol:(CK2Protocol *)protocol didFailWithError:(NSError *)error;
+- (void)protocol:(CK2Protocol *)protocol didCompleteWithError:(NSError *)error;
 
 /*!
  @method protocoldidReceiveAuthenticationChallenge:
