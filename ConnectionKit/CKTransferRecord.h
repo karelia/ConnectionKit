@@ -118,6 +118,5 @@ extern NSString *CKTransferRecordTransferDidFinishNotification;
 @interface CKTransferRecord (Private)
 - (void)setSpeed:(double)bps;
 - (void)setUpload:(BOOL)flag;
-- (void)setSize:(unsigned long long)size;
 - (BOOL)isLeaf;
 @end
