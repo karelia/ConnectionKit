@@ -226,6 +226,13 @@
     }
 }
 
+- (void)addOperation:(CK2FileOperation *)operation;
+{
+    [self addOperationWithBlock:^CK2FileOperation *{
+        return operation;
+    }];
+}
+
 - (void)operation:(CK2FileOperation *)operation didFinish:(NSError *)error;
 {
     // This method gets called on all sorts of threads, so marshall back to main queue
