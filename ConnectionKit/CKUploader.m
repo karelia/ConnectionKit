@@ -331,6 +331,15 @@
         CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
         NSAssert(record, @"Unknown operation");
         [record transfer:record transferredDataOfLength:bytesWritten];
+        
+        if ([self.delegate respondsToSelector:@selector(uploader:transferRecord:didWriteBodyData:totalBytesWritten:totalBytesExpectedToWrite:)])
+        {
+            [self.delegate uploader:self
+                     transferRecord:record
+                   didWriteBodyData:bytesWritten
+                  totalBytesWritten:totalBytesSent
+          totalBytesExpectedToWrite:totalBytesExpectedToSend];
+        }
     });
 }
 

@@ -85,6 +85,11 @@ typedef NSUInteger CKUploadingOptions;
 - (BOOL)uploader:(CKUploader *)uploader shouldProceedAfterError:(NSError *)error;
 
 - (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record
+                                      didWriteBodyData:(int64_t)bytesSent
+                                     totalBytesWritten:(int64_t)totalBytesSent
+                             totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToSend;
+
+- (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record
                                   didCompleteWithError:(NSError *)error;
 
 @end
