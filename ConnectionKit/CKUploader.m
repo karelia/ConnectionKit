@@ -225,12 +225,9 @@
     // This method gets called on all sorts of threads, so marshall back to main queue
     dispatch_async(dispatch_get_main_queue(), ^{
         
-        // Tell the record it's finished
-        if (operation)
-        {
-            CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
-            [record transferDidFinish:record error:error];
-        }
+        // Tell the record & delegate it's finished
+        CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
+        [record transferDidFinish:record error:error];
         
         
         if (error)
