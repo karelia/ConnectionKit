@@ -90,11 +90,10 @@
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
     [mutableRequest curl_setNewFilePermissions:[attributes objectForKey:NSFilePosixPermissions]];
     
-    NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
-    NSString* name = [path lastPathComponent];
-
     if (self = [self initForCreatingFileWithRequest:mutableRequest size:size withIntermediateDirectories:createIntermediates client:client completionHandler:NULL])
     {
+        NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
+        NSString* name = [path lastPathComponent];
         _transcriptMessage = [[NSString alloc] initWithFormat:@"Uploading %@ to %@\n", name, path];
     }
     
