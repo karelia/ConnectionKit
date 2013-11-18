@@ -34,7 +34,6 @@
 #import <AppKit/AppKit.h>   // for NSColor
 
 
-NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgressChangedNotification";
 NSString *CKTransferRecordTransferDidBeginNotification = @"CKTransferRecordTransferDidBeginNotification";
 NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTransferDidFinishNotification";
 
@@ -197,8 +196,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 		[self willChangeValueForKey:@"progress"];
 		//_progress = i * 25;
 		[self didChangeValueForKey:@"progress"];
-		[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification
-															object:self];
 	}
 }
 

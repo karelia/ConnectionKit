@@ -97,7 +97,6 @@
 
 @end
 
-extern NSString *CKTransferRecordProgressChangedNotification;
 extern NSString *CKTransferRecordTransferDidBeginNotification;
 extern NSString *CKTransferRecordTransferDidFinishNotification;
 
