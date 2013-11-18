@@ -169,15 +169,8 @@
 
 - (void)finishUploading;
 {
-    [self addOperationWithBlock:^CK2FileOperation* {
-        
-        NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
-        [[self delegate] uploaderDidFinishUploading:self];
-        [self operation:nil didFinish:nil];
-        return nil;
-    }];
-    
     _isFinishing = YES;
+    if (!_queue.count) [self startNextOperation];
 }
 
 #pragma mark Queue
@@ -194,17 +187,23 @@
 
 - (CK2FileOperation *)currentOperation; { return _currentOperation; }
 
-- (void)addOperationWithBlock:(CK2FileOperation* (^)(void))block;
+- (void)addOperation:(CK2FileOperation *)operation;
 {
     NSAssert([NSThread isMainThread], @"-addOperation: is only safe to call on the main thread");
     
     // No more operations can go on once finishing up
     if (_isFinishing) return;
     
-    NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
-        
+    [_queue addObject:operation];
+    if (_queue.count == 1) [self startNextOperation];
+}
+
+- (void)startNextOperation;
+{
+    if (_queue.count)
+    {
         NSAssert(_currentOperation == nil, @"Seems like an op is starting before another has finished");
-        _currentOperation = [block() retain];
+        _currentOperation = [[_queue objectAtIndex:0] retain];
         
         if (!self.isCancelled)
         {
@@ -214,20 +213,12 @@
             [record transferDidBegin:record];
             if (record) [self.delegate uploader:self didBeginUploadToPath:record.path];
         }
-    }];
-    
-    [_queue addObject:operation];
-    if ([_queue count] == 1)
-    {
-        [operation start];
     }
-}
-
-- (void)addOperation:(CK2FileOperation *)operation;
-{
-    [self addOperationWithBlock:^CK2FileOperation *{
-        return operation;
-    }];
+    else if (_isFinishing)
+    {
+        NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
+        [self.delegate uploaderDidFinishUploading:self];
+    }
 }
 
 - (void)operation:(CK2FileOperation *)operation didFinish:(NSError *)error;
@@ -263,10 +254,7 @@
         }
         
         [_queue removeObjectAtIndex:0];
-        if ([_queue count])
-        {
-            [[_queue objectAtIndex:0] start];
-        }
+        [self startNextOperation];
     });
 }
 
