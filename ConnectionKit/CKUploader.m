@@ -185,7 +185,7 @@
 
 - (BOOL)isCancelled; { return _isCancelled; }
 
-- (CK2FileOperation *)currentOperation; { return _currentOperation; }
+- (CK2FileOperation *)currentOperation; { return [_queue firstObject]; }
 
 - (void)addOperation:(CK2FileOperation *)operation;
 {
@@ -202,14 +202,13 @@
 {
     if (_queue.count)
     {
-        NSAssert(_currentOperation == nil, @"Seems like an op is starting before another has finished");
-        _currentOperation = [[_queue objectAtIndex:0] retain];
+        CK2FileOperation *operation = [_queue objectAtIndex:0];
         
         if (!self.isCancelled)
         {
-            [_currentOperation resume];
+            [operation resume];
             
-            CKTransferRecord *record = [_recordsByOperation objectForKey:_currentOperation];
+            CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
             [record transferDidBegin:record];
             if (record) [self.delegate uploader:self didBeginUploadToPath:record.path];
         }
@@ -233,8 +232,6 @@
             [record transferDidFinish:record error:error];
         }
         
-        
-        [_currentOperation release]; _currentOperation = nil;
         
         if (error)
         {

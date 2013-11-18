@@ -30,7 +30,6 @@ typedef NSUInteger CKUploadingOptions;
     CKUploadingOptions  _options;
     
     CK2FileManager      *_fileManager;
-    CK2FileOperation    *_currentOperation;
     NSMutableArray      *_queue;
     NSMutableDictionary *_recordsByOperation;
     
