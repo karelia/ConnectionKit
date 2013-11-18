@@ -229,6 +229,10 @@
         CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
         [record transferDidFinish:record error:error];
         
+        if (record && [self.delegate respondsToSelector:@selector(uploader:transferRecord:didCompleteWithError:)])
+        {
+            [self.delegate uploader:self transferRecord:record didCompleteWithError:error];
+        }
         
         if (error)
         {

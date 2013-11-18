@@ -84,4 +84,7 @@ typedef NSUInteger CKUploadingOptions;
 @optional
 - (BOOL)uploader:(CKUploader *)uploader shouldProceedAfterError:(NSError *)error;
 
+- (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record
+                                  didCompleteWithError:(NSError *)error;
+
 @end
