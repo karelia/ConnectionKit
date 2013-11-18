@@ -165,7 +165,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 - (CK2FileOperation *)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
 
 - (CK2FileOperation *)createFileOperationWithURL:(NSURL *)url
-                                        contents:(NSData *)data
+                                        fromData:(NSData *)data
                      withIntermediateDirectories:(BOOL)createIntermediates
                                openingAttributes:(NSDictionary *)attributes
                                completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
@@ -209,7 +209,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 - (CK2FileOperation *)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
 
 - (CK2FileOperation *)createFileOperationWithURL:(NSURL *)destinationURL
-                               withContentsOfURL:(NSURL *)sourceURL
+                                        fromFile:(NSURL *)sourceURL
                      withIntermediateDirectories:(BOOL)createIntermediates
                                openingAttributes:(NSDictionary *)attributes
                                completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));

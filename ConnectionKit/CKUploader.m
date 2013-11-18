@@ -105,7 +105,7 @@
 {
     NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
     
-    __block CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path] contents:data withIntermediateDirectories:YES openingAttributes:attributes completionHandler:^(NSError *error) {
+    __block CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path] fromData:data withIntermediateDirectories:YES openingAttributes:attributes completionHandler:^(NSError *error) {
         [self operation:op didFinish:error];
     }];
     
@@ -119,7 +119,7 @@
     
     NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
     
-    __block CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path] withContentsOfURL:localURL withIntermediateDirectories:YES openingAttributes:attributes completionHandler:^(NSError *error) {
+    __block CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path] fromFile:localURL withIntermediateDirectories:YES openingAttributes:attributes completionHandler:^(NSError *error) {
         [self operation:op didFinish:error];
     }];
     
