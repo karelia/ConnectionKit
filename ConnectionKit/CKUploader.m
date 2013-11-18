@@ -210,9 +210,9 @@
         {
             [_currentOperation resume];
             
-            CKTransferRecord *record = [_recordsByOperation objectForKey:_currentOperation];    // might be no record
+            CKTransferRecord *record = [_recordsByOperation objectForKey:_currentOperation];
             [record transferDidBegin:record];
-            [self.delegate uploader:self didBeginUploadToPath:record.path];
+            if (record) [self.delegate uploader:self didBeginUploadToPath:record.path];
         }
     }];
     
