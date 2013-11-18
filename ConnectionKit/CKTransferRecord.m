@@ -188,17 +188,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	}
 }
 
-- (void)forceAnimationUpdate
-{
-	NSInteger i;
-	for (i = 1; i <= 4; i++)
-	{
-		[self willChangeValueForKey:@"progress"];
-		//_progress = i * 25;
-		[self didChangeValueForKey:@"progress"];
-	}
-}
-
 - (NSInteger)progress
 {
 	// Check if self of descendents have an error, so we can show that error.
