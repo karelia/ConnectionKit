@@ -59,8 +59,6 @@
 - (NSError *)error;
 
 - (CKTransferRecord *)parent;
-- (void)setParent:(CKTransferRecord *)parent;	// Weak ref
-
 
 + (instancetype)recordWithName:(NSString *)name uploadOperation:(CK2FileOperation *)operation;
 - (id)initWithName:(NSString *)name uploadOperation:(CK2FileOperation *)operation;
