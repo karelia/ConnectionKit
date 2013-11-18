@@ -174,12 +174,20 @@
     return self;
 }
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request size:(int64_t)size withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
 {
     CK2WebDAVLog(@"creating file");
 
     if ((self = [self initWithRequest:request client:client]) != nil)
     {
+        if (request.HTTPBodyStream)
+        {
+            NSMutableURLRequest *mutableRequest = [request mutableCopy];
+            [mutableRequest setValue:[NSString stringWithFormat:@"%llu", size] forHTTPHeaderField:@"Content-Length"];
+            request = [mutableRequest autorelease];
+        }
+    
+        
         _isWriteOp = YES;
         NSString* path = [self pathForRequest:request];
 

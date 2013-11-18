@@ -132,6 +132,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         request.HTTPBody = data;
         
         CK2Protocol *result = [[protocolClass alloc] initForCreatingFileWithRequest:request
+                                                                               size:data.length
                                                         withIntermediateDirectories:createIntermediates
                                                                   openingAttributes:attributes
                                                                              client:self];
@@ -167,15 +168,13 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         NSMutableURLRequest *request = [[self requestWithURL:url] mutableCopy];
         
         // Read the data using an input stream if possible, and know file size
-        if (fileSize)
+        int64_t size = (fileSize ? fileSize.longLongValue : NSURLResponseUnknownLength);
+        if (size >= 0)
         {
-            NSString *length = [NSString stringWithFormat:@"%llu", fileSize.unsignedLongLongValue];
-            
             NSInputStream *stream = [self protocol:nil needNewBodyStream:nil];
             if (stream)
             {
                 [request setHTTPBodyStream:stream];
-                [request setValue:length forHTTPHeaderField:@"Content-Length"];
             }
         }
         
@@ -187,6 +186,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             if (data)
             {
                 [request setHTTPBody:data];
+                size = data.length;
                 [data release];
             }
             else
@@ -199,6 +199,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         }
         
         CK2Protocol *result = [[protocolClass alloc] initForCreatingFileWithRequest:request
+                                                                               size:size
                                                         withIntermediateDirectories:createIntermediates
                                                                   openingAttributes:attributes
                                                                              client:self];

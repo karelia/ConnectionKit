@@ -120,9 +120,11 @@ static size_t kCopyBufferSize = 4096;
 }
 
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request size:(int64_t)size withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
 {
     return [self initWithBlock:^{
+        
+        _bytesExpectedToWrite = size;
         
         // Sadly libcurl doesn't support creating intermediate directories for local files, so do it ourself
         if (createIntermediates)
@@ -327,7 +329,7 @@ static size_t kCopyBufferSize = 4096;
             [self.client protocol:self
                   didSendBodyData:length
                    totalBytesSent:[[inputStream propertyForKey:NSStreamFileCurrentOffsetKey] longValue]
-         totalBytesExpectedToSend:-1];
+         totalBytesExpectedToSend:_bytesExpectedToWrite];
         }
         
         [inputStream close];

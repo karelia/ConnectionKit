@@ -23,6 +23,7 @@
     void    (^_dataBlock)(NSData *data);
     
     NSUInteger _totalBytesWritten;
+    NSUInteger _totalBytesExpectedToWrite;
 }
 
 #pragma mark Initialisation
@@ -36,6 +37,7 @@
 // Already handled for you; can override in a subclass if you want
 - (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
 
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request size:(int64_t)size withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client completionHandler:(void (^)(NSError *error))handler;
 
 #pragma mark Loading
 

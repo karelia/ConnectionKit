@@ -85,18 +85,18 @@
     return self;
 }
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request size:(int64_t)size withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
 {
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
-    [mutableRequest curl_setCreateIntermediateDirectories:createIntermediates];
     [mutableRequest curl_setNewFilePermissions:[attributes objectForKey:NSFilePosixPermissions]];
     
     NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
     NSString* name = [path lastPathComponent];
 
-    self = [self initWithRequest:mutableRequest client:client completionHandler:nil];
-    
-    _transcriptMessage = [[NSString alloc] initWithFormat:@"Uploading %@ to %@\n", name, path];
+    if (self = [self initForCreatingFileWithRequest:mutableRequest size:size withIntermediateDirectories:createIntermediates client:client completionHandler:NULL])
+    {
+        _transcriptMessage = [[NSString alloc] initWithFormat:@"Uploading %@ to %@\n", name, path];
+    }
     
     [mutableRequest release];
     

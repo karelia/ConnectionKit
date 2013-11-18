@@ -39,8 +39,8 @@
                                    client:(id <CK2ProtocolClient>)client;
 
 // The data is supplied as -HTTPBodyData or -HTTPBodyStream on the request
-// For streams, ConnectionKit guarantees to provide the HTTP header @"Content-Length" indicating expected size
 - (id)initForCreatingFileWithRequest:(NSURLRequest *)request
+                                size:(int64_t)size
          withIntermediateDirectories:(BOOL)createIntermediates
                    openingAttributes:(NSDictionary *)attributes
                               client:(id <CK2ProtocolClient>)client;

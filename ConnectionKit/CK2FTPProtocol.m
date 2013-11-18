@@ -107,16 +107,9 @@
             ];
 }
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request size:(int64_t)size withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
 {
-    if ([request curl_createIntermediateDirectories] != createIntermediates)
-    {
-        NSMutableURLRequest *mutableRequest = [[request mutableCopy] autorelease];
-        [mutableRequest curl_setCreateIntermediateDirectories:createIntermediates];
-        request = mutableRequest;
-    }
-
-    self = [self initWithRequest:request client:client completionHandler:^(NSError *error) {
+    return [self initForCreatingFileWithRequest:request size:size withIntermediateDirectories:createIntermediates client:client completionHandler:^(NSError *error) {
         
         // Long FTP uploads have a tendency to have the control connection cutoff for idling. As a hack, assume that if we reached the end of the body stream, a timeout is likely because of that
         if (error && _atEnd && [error code] == NSURLErrorTimedOut && [[error domain] isEqualToString:NSURLErrorDomain])
@@ -126,8 +119,6 @@
         
         [client protocol:self didCompleteWithError:error];
     }];
-    
-    return self;
 }
 
 - (void)transfer:(CURLTransfer *)transfer willSendBodyDataOfLength:(NSUInteger)bytesWritten;
