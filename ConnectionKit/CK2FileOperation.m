@@ -55,7 +55,19 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         _manager = [manager retain];
         _URL = [url copy];
         _descriptionForErrors = [errorDescription copy];
+        
+        if (!completionBlock)
+        {
+            completionBlock = ^(NSError *error) {
+                id <CK2FileManagerDelegate> delegate = manager.delegate;
+                if ([delegate respondsToSelector:@selector(fileManager:operation:didCompleteWithError:)])
+                {
+                    [delegate fileManager:manager operation:self didCompleteWithError:error];
+                }
+            };
+        }
         _completionBlock = [completionBlock copy];
+        
         _createProtocolBlock = [createBlock copy];
         _queue = dispatch_queue_create("com.karelia.connection.file-operation", NULL);
     }

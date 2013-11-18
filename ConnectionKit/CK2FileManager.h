@@ -421,6 +421,13 @@ typedef NS_ENUM(NSUInteger, CK2TranscriptType) {
  */
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 
+/**
+ * Sent as the last message related to a specific operation. Error may be
+ * `nil`, which implies that no error occurred and this operation is finished.
+ */
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation
+                                   didCompleteWithError:(NSError *)error;
+
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge __attribute((deprecated("implement -fileManager:operation:didReceiveChallenge:completionHandler: instead")));
 
 @end
