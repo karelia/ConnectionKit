@@ -146,17 +146,7 @@
     
     
     // Enqueue upload
-    [self addOperationWithBlock:^{
-        
-        if (!self.isCancelled)
-        {
-            [operation resume];
-            [result transferDidBegin:result];
-            [self.delegate uploader:self didBeginUploadToPath:path];
-        }
-        
-        return operation;
-    }];
+    [self addOperation:operation];
     
     
     // Notify delegate
@@ -217,6 +207,15 @@
         
         NSAssert(_currentOperation == nil, @"Seems like an op is starting before another has finished");
         _currentOperation = [block() retain];
+        
+        if (!self.isCancelled)
+        {
+            [_currentOperation resume];
+            
+            CKTransferRecord *record = [_recordsByOperation objectForKey:_currentOperation];    // might be no record
+            [record transferDidBegin:record];
+            [self.delegate uploader:self didBeginUploadToPath:record.path];
+        }
     }];
     
     [_queue addObject:operation];
