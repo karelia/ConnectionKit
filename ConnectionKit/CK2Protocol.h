@@ -39,12 +39,11 @@
                                    client:(id <CK2ProtocolClient>)client;
 
 // The data is supplied as -HTTPBodyData or -HTTPBodyStream on the request
-// For streams, ConnectionKit guarantees to provide the HTTP header @"Content-Length" indicating expected size
 - (id)initForCreatingFileWithRequest:(NSURLRequest *)request
+                                size:(int64_t)size
          withIntermediateDirectories:(BOOL)createIntermediates
                    openingAttributes:(NSDictionary *)attributes
-                              client:(id <CK2ProtocolClient>)client
-                       progressBlock:(CK2ProgressBlock)progressBlock;
+                              client:(id <CK2ProtocolClient>)client;
 
 - (id)initForRemovingItemWithRequest:(NSURLRequest *)request
                               client:(id <CK2ProtocolClient>)client;
@@ -164,6 +163,11 @@
 // Only made use of by directory enumeration at present, but hey, maybe something else will in future
 // URL should be pre-populated with properties requested by client
 - (void)protocol:(CK2Protocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
+
+- (void)protocol:(CK2Protocol *)protocol
+ didSendBodyData:(int64_t)bytesSent
+  totalBytesSent:(int64_t)totalBytesSent
+totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend;
 
 // Call if reading from a stream needs to be retried. The client will provide you with a fresh, unopened stream to read from
 - (NSInputStream *)protocol:(CK2Protocol *)protocol needNewBodyStream:(NSURLRequest *)request;

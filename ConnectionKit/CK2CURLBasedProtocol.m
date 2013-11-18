@@ -60,15 +60,6 @@
     return self;
 }
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *))handler
-{
-    if (self = [self initWithRequest:request client:client completionHandler:handler])
-    {
-        _progressBlock = [progressBlock copy];
-    }
-    return self;
-}
-
 - (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)sourceRequest createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *error))handler;
 {
     // Navigate to the directory
@@ -85,6 +76,22 @@
     self = [self initWithRequest:request client:client dataHandler:nil completionHandler:handler];
     
     [request release];
+    return self;
+}
+
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request size:(int64_t)size withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client completionHandler:(void (^)(NSError *error))handler;
+{
+    if ([request curl_createIntermediateDirectories] != createIntermediates)
+    {
+        NSMutableURLRequest *mutableRequest = [[request mutableCopy] autorelease];
+        [mutableRequest curl_setCreateIntermediateDirectories:createIntermediates];
+        request = mutableRequest;
+    }
+    
+    if (self = [self initWithRequest:request client:client completionHandler:handler])
+    {
+        _totalBytesExpectedToWrite = size;
+    }
     return self;
 }
 
@@ -387,7 +394,6 @@
     [_user release];
     [_completionHandler release];
     [_dataBlock release];
-    [_progressBlock release];
     
     [super dealloc];
 }
@@ -596,7 +602,11 @@
 - (void)transfer:(CURLTransfer *)transfer willSendBodyDataOfLength:(NSUInteger)bytesWritten
 {
     _totalBytesWritten += bytesWritten;
-    if (_progressBlock) _progressBlock(bytesWritten, _totalBytesWritten, -1);
+    
+    [self.client protocol:self
+          didSendBodyData:bytesWritten
+           totalBytesSent:_totalBytesWritten
+ totalBytesExpectedToSend:_totalBytesExpectedToWrite];
 }
 
 - (void)transfer:(CURLTransfer *)transfer didCompleteWithError:(NSError *)error;

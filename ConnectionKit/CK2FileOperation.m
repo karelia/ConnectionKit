@@ -51,47 +51,25 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     if (self = [self init])
     {
+        _state = CK2FileOperationStateSuspended;
         _manager = [manager retain];
         _URL = [url copy];
         _descriptionForErrors = [errorDescription copy];
-        _completionBlock = [completionBlock copy];
-        _queue = dispatch_queue_create("com.karelia.connection.file-operation", NULL);
         
-        [CK2Protocol classForURL:url completionHandler:^(Class protocolClass) {
-            
-            if (protocolClass)
-            {
-                // Bounce over to operation's own queue for kicking off the real work
-                // Keep an eye out for early opportunity to bail out if get cancelled
-                dispatch_async(_queue, ^{
-                    
-                    if (self.state == CK2FileOperationStateRunning)
-                    {
-                        _protocol = createBlock(protocolClass);
-                        if (!_protocol)
-                        {
-                            // it's likely that the protocol has already called protocol:didFailWithError:, which will have called finishWithError:, which means that a call to the completion
-                            // block is queue up already with an error in it
-                            // just in case though, we can report a more generic error here - once the completion block is called once it will be cleared out, the protocol's error will win
-                            // if there is one
-                            NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
-                            NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info]; // TODO: what's the correct error to report here?
-                            [self completeWithError:error];
-                            [error release];
-                        }
-
-                        if (self.state == CK2FileOperationStateRunning) [_protocol start];
-                    }
-                });
-            }
-            else
-            {
-                NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
-                NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info];
-                [self completeWithError:error];
-                [error release];
-            }
-        }];
+        if (!completionBlock)
+        {
+            completionBlock = ^(NSError *error) {
+                id <CK2FileManagerDelegate> delegate = manager.delegate;
+                if ([delegate respondsToSelector:@selector(fileManager:operation:didCompleteWithError:)])
+                {
+                    [delegate fileManager:manager operation:self didCompleteWithError:error];
+                }
+            };
+        }
+        _completionBlock = [completionBlock copy];
+        
+        _createProtocolBlock = [createBlock copy];
+        _queue = dispatch_queue_create("com.karelia.connection.file-operation", NULL);
     }
     
     return self;
@@ -160,20 +138,25 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be uploaded.", "error descrption"),
                              url.lastPathComponent];
     
-    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         NSMutableURLRequest *request = [[self requestWithURL:url] mutableCopy];
         request.HTTPBody = data;
         
         CK2Protocol *result = [[protocolClass alloc] initForCreatingFileWithRequest:request
+                                                                               size:data.length
                                                         withIntermediateDirectories:createIntermediates
                                                                   openingAttributes:attributes
-                                                                             client:self
-                                                                      progressBlock:progressBlock];
+                                                                             client:self];
         
         [request release];
         return result;
     }];
+    
+    _bytesExpectedToWrite = data.length;
+    _progressBlock = [progressBlock copy];
+
+    return self;
 }
 
 - (id)initFileCreationOperationWithURL:(NSURL *)url
@@ -187,23 +170,23 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be uploaded.", "error descrption"),
                              url.lastPathComponent];
     
-    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    NSNumber *fileSize;
+    if (![sourceURL getResourceValue:&fileSize forKey:NSURLFileSizeKey error:NULL]) fileSize = nil;;
+    
+    self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         _localURL = [sourceURL copy];
         
         NSMutableURLRequest *request = [[self requestWithURL:url] mutableCopy];
         
         // Read the data using an input stream if possible, and know file size
-        NSNumber *fileSize;
-        if ([sourceURL getResourceValue:&fileSize forKey:NSURLFileSizeKey error:NULL] && fileSize)
+        int64_t size = (fileSize ? fileSize.longLongValue : NSURLResponseUnknownLength);
+        if (size >= 0)
         {
-            NSString *length = [NSString stringWithFormat:@"%llu", fileSize.unsignedLongLongValue];
-            
             NSInputStream *stream = [self protocol:nil needNewBodyStream:nil];
             if (stream)
             {
                 [request setHTTPBodyStream:stream];
-                [request setValue:length forHTTPHeaderField:@"Content-Length"];
             }
         }
         
@@ -215,6 +198,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             if (data)
             {
                 [request setHTTPBody:data];
+                size = data.length;
                 [data release];
             }
             else
@@ -227,14 +211,19 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         }
         
         CK2Protocol *result = [[protocolClass alloc] initForCreatingFileWithRequest:request
+                                                                               size:size
                                                         withIntermediateDirectories:createIntermediates
                                                                   openingAttributes:attributes
-                                                                             client:self
-                                                                      progressBlock:progressBlock];
+                                                                             client:self];
         
         [request release];
         return result;
     }];
+    
+    _bytesExpectedToWrite = fileSize.longLongValue;
+    _progressBlock = [progressBlock copy];
+    
+    return self;
 }
 
 - (id)initRemovalOperationWithURL:(NSURL *)url
@@ -319,6 +308,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     if (_queue) dispatch_release(_queue);
     [_completionBlock release];
     [_enumerationBlock release];
+    [_createProtocolBlock release];
+    [_progressBlock release];
     [_localURL release];
     [_error release];
 
@@ -337,6 +328,11 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     return [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:60.0];
 }
+
+#pragma mark Body Data
+
+@synthesize countOfBytesWritten = _bytesWritten;
+@synthesize countOfBytesExpectedToWrite = _bytesExpectedToWrite;
 
 #pragma mark Cancellation
 
@@ -360,6 +356,51 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 @synthesize state = _state;
 @synthesize error = _error;
+
+- (void)resume;
+{
+    if (_state == CK2FileOperationStateSuspended)
+    {
+        _state = CK2FileOperationStateRunning;
+        NSURL *url = self.originalURL;
+        
+        [CK2Protocol classForURL:url completionHandler:^(Class protocolClass) {
+            
+            if (protocolClass)
+            {
+                // Bounce over to operation's own queue for kicking off the real work
+                // Keep an eye out for early opportunity to bail out if get cancelled
+                dispatch_async(_queue, ^{
+                    
+                    if (self.state == CK2FileOperationStateRunning)
+                    {
+                        _protocol = _createProtocolBlock(protocolClass);
+                        if (!_protocol)
+                        {
+                            // it's likely that the protocol has already called protocol:didFailWithError:, which will have called finishWithError:, which means that a call to the completion
+                            // block is queue up already with an error in it
+                            // just in case though, we can report a more generic error here - once the completion block is called once it will be cleared out, the protocol's error will win
+                            // if there is one
+                            NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
+                            NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info]; // TODO: what's the correct error to report here?
+                            [self completeWithError:error];
+                            [error release];
+                        }
+                        
+                        if (self.state == CK2FileOperationStateRunning) [_protocol start];
+                    }
+                });
+            }
+            else
+            {
+                NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
+                NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info];
+                [self completeWithError:error];
+                [error release];
+            }
+        }];
+    }
+}
 
 #pragma mark CK2ProtocolClient
 
@@ -605,12 +646,28 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     }
 }
 
+- (void)protocol:(CK2Protocol *)protocol didSendBodyData:(int64_t)bytesSent totalBytesSent:(int64_t)totalBytesSent totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend;
+{
+    _bytesWritten = totalBytesSent;
+    _bytesExpectedToWrite = totalBytesExpectedToSend;
+    
+    _progressBlock(bytesSent, totalBytesSent, totalBytesExpectedToSend);
+}
+
 - (NSInputStream *)protocol:(CK2Protocol *)protocol needNewBodyStream:(NSURLRequest *)request;
 {
     NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     
     NSInputStream *stream = [[NSInputStream alloc] initWithURL:_localURL];
     return [stream autorelease];
+}
+
+#pragma mark NSCopying
+
+- (id)copyWithZone:(NSZone *)zone;
+{
+    // For easy stashing in dictionaries
+    return [self retain];
 }
 
 @end

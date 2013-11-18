@@ -10,6 +10,10 @@
 
 
 @interface CK2FTPProtocol : CK2CURLBasedProtocol
+{
+  @private
+    BOOL    _atEnd;
+}
 
 @end
 

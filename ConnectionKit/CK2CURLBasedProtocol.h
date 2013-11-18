@@ -21,9 +21,9 @@
     
     void    (^_completionHandler)(NSError *error);
     void    (^_dataBlock)(NSData *data);
-    CK2ProgressBlock _progressBlock;
     
     NSUInteger _totalBytesWritten;
+    NSUInteger _totalBytesExpectedToWrite;
 }
 
 #pragma mark Initialisation
@@ -31,13 +31,13 @@
 
 - (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *))handler;
 - (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client dataHandler:(void (^)(NSData *))dataBlock completionHandler:(void (^)(NSError *))handler;
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *))handler;
 
 - (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)request createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *error))handler;
 
 // Already handled for you; can override in a subclass if you want
 - (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
 
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request size:(int64_t)size withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client completionHandler:(void (^)(NSError *error))handler;
 
 #pragma mark Loading
 

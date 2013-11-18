@@ -30,8 +30,8 @@ typedef NSUInteger CKUploadingOptions;
     CKUploadingOptions  _options;
     
     CK2FileManager      *_fileManager;
-    CK2FileOperation    *_currentOperation;
     NSMutableArray      *_queue;
+    NSMutableDictionary *_recordsByOperation;
     
     CKTransferRecord    *_rootRecord;
     CKTransferRecord    *_baseRecord;
@@ -83,5 +83,13 @@ typedef NSUInteger CKUploadingOptions;
 
 @optional
 - (BOOL)uploader:(CKUploader *)uploader shouldProceedAfterError:(NSError *)error;
+
+- (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record
+                                      didWriteBodyData:(int64_t)bytesSent
+                                     totalBytesWritten:(int64_t)totalBytesSent
+                             totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToSend;
+
+- (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record
+                                  didCompleteWithError:(NSError *)error;
 
 @end
