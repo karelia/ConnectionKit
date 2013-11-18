@@ -105,9 +105,11 @@
 {
     NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
     
-    __block CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path] fromData:data withIntermediateDirectories:YES openingAttributes:attributes completionHandler:^(NSError *error) {
-        [self operation:op didFinish:error];
-    }];
+    CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path]
+                                                           fromData:data
+                                        withIntermediateDirectories:YES
+                                                  openingAttributes:attributes
+                                                  completionHandler:NULL];
     
     return [self uploadToPath:path usingOperation:op];
 }
@@ -119,9 +121,11 @@
     
     NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
     
-    __block CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path] fromFile:localURL withIntermediateDirectories:YES openingAttributes:attributes completionHandler:^(NSError *error) {
-        [self operation:op didFinish:error];
-    }];
+    CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path]
+                                                           fromFile:localURL
+                                        withIntermediateDirectories:YES
+                                                  openingAttributes:attributes
+                                                  completionHandler:NULL];
     
     return [self uploadToPath:path usingOperation:op];
 }
@@ -345,6 +349,11 @@
 	dispatch_async(dispatch_get_main_queue(), ^{
         [[self delegate] uploader:self appendString:info toTranscript:transcript];
     });
+}
+
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation didCompleteWithError:(NSError *)error;
+{
+    [self operation:operation didFinish:error];
 }
 
 @end
