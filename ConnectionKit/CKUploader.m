@@ -252,7 +252,7 @@
         }
         
         [_queue removeObjectAtIndex:0];
-        [self startNextOperation];
+        if (!_isCancelled) [self startNextOperation];
     });
 }
 
