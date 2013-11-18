@@ -92,13 +92,11 @@
 
 - (void)removeFileAtPath:(NSString *)path reportError:(BOOL)reportError;
 {
-    [self addOperationWithBlock:^{
-                
-        return [_fileManager removeItemAtURL:[self URLForPath:path] completionHandler:^(NSError *error) {
-            
-            [self operation:nil didFinish:(reportError ? error : nil)];
-        }];
+    CK2FileOperation *op = [_fileManager removeOperationWithURL:[self URLForPath:path] completionHandler:^(NSError *error) {
+        [self operation:nil didFinish:(reportError ? error : nil)];
     }];
+    
+    [self addOperation:op];
 }
 
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
