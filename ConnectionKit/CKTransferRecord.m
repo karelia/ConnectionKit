@@ -184,11 +184,26 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (CGFloat)progress
 {
-		unsigned long long size = [self size];
-		unsigned long long transferred = [self transferred];
-		if (size == 0) size = 1;
-    CGFloat result = ((transferred / (size * 1.0)) * 100);
-    return result;
+    CK2FileOperation *op = self.uploadOperation;
+    __block int64_t totalWritten = op.countOfBytesWritten;
+    
+    __block int64_t totalExpected = op.countOfBytesExpectedToWrite;
+    if (totalWritten > totalExpected) totalExpected = totalWritten;
+    
+    [self enumerateTransferRecordsRecursively:YES usingBlock:^(CKTransferRecord *record) {
+        
+        CK2FileOperation *op = record.uploadOperation;
+        int64_t written = op.countOfBytesWritten;
+        
+        int64_t expected = op.countOfBytesExpectedToWrite;
+        if (written > expected) expected = written;
+        
+        totalWritten += written;
+        totalExpected += expected;
+    }];
+    
+    if (!totalExpected) return 0;
+    return (100 * totalWritten) / totalExpected;
 }
 
 - (void)enumerateTransferRecordsRecursively:(BOOL)recursive usingBlock:(void (^)(CKTransferRecord *record))block;
