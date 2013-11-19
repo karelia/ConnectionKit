@@ -38,6 +38,7 @@
 @interface CKTransferProgressCell : NSCell
 {
 	NSInteger myProgress;
+    BOOL        _finished;
 }
 
 @end
