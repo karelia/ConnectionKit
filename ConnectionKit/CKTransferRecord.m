@@ -184,12 +184,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (CGFloat)progress
 {
-	// Check if self of descendents have an error, so we can show that error.
-	if (self.error)
-	{
-		return -1;
-	}
-	
 		unsigned long long size = [self size];
 		unsigned long long transferred = [self transferred];
 		if (size == 0) size = 1;

@@ -70,7 +70,7 @@
 - (unsigned long long)transferred;
 
 /**
- Between 0 and 100. -1 when an error occurs
+ Between 0 and 100.
  */
 @property(readonly) CGFloat progress;
 
