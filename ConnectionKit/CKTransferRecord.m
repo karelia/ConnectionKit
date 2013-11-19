@@ -118,7 +118,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (int64_t)size
 {
-	//Calculate our size including our children
+	// Calculate our size including our children
 	int64_t result = _size;
 	NSEnumerator *e = [[self contents] objectEnumerator];
 	CKTransferRecord *cur;
