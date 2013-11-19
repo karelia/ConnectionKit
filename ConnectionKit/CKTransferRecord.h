@@ -36,6 +36,7 @@
 {
 	NSString *_name;
     CK2FileOperation    *_operation;
+    int64_t             _size;
 	NSTimeInterval _lastTransferTime;
 	NSTimeInterval _transferStartTime;
 	NSTimeInterval _lastDirectorySpeedUpdate;

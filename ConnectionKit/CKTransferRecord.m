@@ -98,6 +98,9 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
         _operation = [operation retain];
 		_contents = [[NSMutableArray array] retain];
 		_properties = [[NSMutableDictionary dictionary] retain];
+        
+        // Cache initial size estimate. Don't want it to change if request needs retransmitting
+        _size = operation.countOfBytesExpectedToWrite;
 	}
 	return self;
 }
@@ -116,7 +119,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 - (unsigned long long)size
 {
 	//Calculate our size including our children
-	unsigned long long size = self.uploadOperation.countOfBytesExpectedToWrite;
+	unsigned long long size = _size;
 	NSEnumerator *e = [[self contents] objectEnumerator];
 	CKTransferRecord *cur;
 	
