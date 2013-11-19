@@ -429,9 +429,19 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     
     id <CK2FileManagerDelegate> delegate = self.fileManager.delegate;
-    if ([delegate respondsToSelector:@selector(fileManager:operation:willSendRequest:redirectResponse:)])
+    if ([delegate respondsToSelector:@selector(fileManager:operation:willSendRequest:redirectResponse:completionHandler:)])
     {
-        request = [delegate fileManager:self.fileManager operation:self willSendRequest:request redirectResponse:response];
+        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+        
+        __block NSURLRequest *weakRequest;
+        [delegate fileManager:self.fileManager operation:self willSendRequest:request redirectResponse:response completionHandler:^(NSURLRequest *request) {
+            weakRequest = [request retain];
+            dispatch_semaphore_signal(semaphore);
+        }];
+        
+        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+        request = [weakRequest autorelease];
+        dispatch_release(semaphore);
     }
     
     return request;
