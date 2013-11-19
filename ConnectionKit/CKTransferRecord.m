@@ -191,6 +191,15 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
     return result;
 }
 
+- (void)enumerateTransferRecordsRecursively:(BOOL)recursive usingBlock:(void (^)(CKTransferRecord *record))block;
+{
+    [self.contents enumerateObjectsUsingBlock:^(CKTransferRecord *record, NSUInteger idx, BOOL *stop) {
+        
+        block(record);
+        if (recursive) [record enumerateTransferRecordsRecursively:recursive usingBlock:block];
+    }];
+}
+
 - (BOOL)problemsTransferringCountingErrors:(NSInteger *)outErrors successes:(NSInteger *)outSuccesses
 {
 	if ([self isLeaf])
