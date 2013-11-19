@@ -509,10 +509,9 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
                             value:[NSColor grayColor]
                             range:NSMakeRange([[self name] length] + 1, [fileSize length] + 2)];
         
-        result = [NSDictionary dictionaryWithObjectsAndKeys:
-                  [result objectForKey:@"progress"], @"progress",
-                  description, @"name",
-                  nil];
+        NSMutableDictionary *mutable = [result mutableCopy];
+        [mutable setObject:description forKey:@"name"];
+        result = [mutable autorelease];
         
         [description release];
     }
