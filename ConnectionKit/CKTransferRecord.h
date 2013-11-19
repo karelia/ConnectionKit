@@ -51,7 +51,7 @@
 - (NSString *)name;
 - (void)setName:(NSString *)name;
 
-- (unsigned long long)size;
+@property(readonly) int64_t size;
 
 - (CGFloat)speed;
 - (void)setSpeed:(CGFloat)speed;	// TODO: Switch to CGFloat

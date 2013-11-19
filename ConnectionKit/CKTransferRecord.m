@@ -116,10 +116,10 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	[super dealloc];
 }
 
-- (unsigned long long)size
+- (int64_t)size
 {
 	//Calculate our size including our children
-	unsigned long long size = _size;
+	int64_t result = _size;
 	NSEnumerator *e = [[self contents] objectEnumerator];
 	CKTransferRecord *cur;
 	
@@ -127,7 +127,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	{
 		if ([cur respondsToSelector:@selector(size)])
 		{
-			size += [cur size];
+			result += [cur size];
 		}
 		else
 		{
@@ -135,7 +135,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 		}
 	}
 	
-	return size;
+	return result;
 }
 
 - (unsigned long long)transferred
