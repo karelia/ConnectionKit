@@ -120,20 +120,11 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 {
 	// Calculate our size including our children
 	int64_t result = _size;
-	NSEnumerator *e = [[self contents] objectEnumerator];
-	CKTransferRecord *cur;
 	
-	while ((cur = [e nextObject]))
-	{
-		if ([cur respondsToSelector:@selector(size)])
-		{
-			result += [cur size];
-		}
-		else
-		{
-			NSLog(@"CKTransferRecord content object does not have 'size'");		// work around bogus children?
-		}
-	}
+    for (CKTransferRecord *aRecord in self.contents)
+    {
+        result += [aRecord size];
+    }
 	
 	return result;
 }
