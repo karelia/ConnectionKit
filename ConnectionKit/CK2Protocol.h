@@ -141,7 +141,13 @@
 @protocol CK2ProtocolClient <NSObject>
 
 #pragma mark General
+
 - (void)protocol:(CK2Protocol *)protocol didCompleteWithError:(NSError *)error;
+
+/**
+ Experimental; for URLRequest-based protocols
+ */
+- (NSURLRequest *)protocol:(CK2Protocol *)protocol willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)response;
 
 /*!
  @method protocoldidReceiveAuthenticationChallenge:

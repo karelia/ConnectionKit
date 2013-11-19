@@ -424,6 +424,12 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     [self completeWithError:error];
 }
 
+- (NSURLRequest *)protocol:(CK2Protocol *)protocol willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)response;
+{
+    NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
+    return request;
+}
+
 - (void)protocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)originalChallenge;
 {
     NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
