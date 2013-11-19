@@ -68,7 +68,11 @@
 
 - (BOOL)isDirectory;
 - (unsigned long long)transferred;
-- (NSInteger)progress;
+
+/**
+ Between 0 and 100. -1 when an error occurs
+ */
+@property(readonly) CGFloat progress;
 
 - (NSDictionary *)nameWithProgressAndFileSize;
 

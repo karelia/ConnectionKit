@@ -182,7 +182,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	}
 }
 
-- (NSInteger)progress
+- (CGFloat)progress
 {
 	// Check if self of descendents have an error, so we can show that error.
 	if (self.error)
@@ -193,8 +193,8 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 		unsigned long long size = [self size];
 		unsigned long long transferred = [self transferred];
 		if (size == 0) size = 1;
-		NSInteger percent = (NSInteger)((transferred / (size * 1.0)) * 100);
-		return percent;
+    CGFloat result = ((transferred / (size * 1.0)) * 100);
+    return result;
 }
 
 - (BOOL)problemsTransferringCountingErrors:(NSInteger *)outErrors successes:(NSInteger *)outSuccesses
