@@ -427,6 +427,13 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 - (NSURLRequest *)protocol:(CK2Protocol *)protocol willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)response;
 {
     NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
+    
+    id <CK2FileManagerDelegate> delegate = self.fileManager.delegate;
+    if ([delegate respondsToSelector:@selector(fileManager:operation:willSendRequest:redirectResponse:)])
+    {
+        request = [delegate fileManager:self.fileManager operation:self willSendRequest:request redirectResponse:response];
+    }
+    
     return request;
 }
 

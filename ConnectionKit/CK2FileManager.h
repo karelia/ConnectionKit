@@ -387,6 +387,16 @@ typedef NS_ENUM(NSInteger, CK2AuthChallengeDisposition) {
 @optional
 
 /**
+ EXPERIMENTAL
+ 
+ Gives the delegate a chance to customise requests for those protocols which use
+ them (currently WebDAV only)
+ */
+- (NSURLRequest *)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation
+                                                  willSendRequest:(NSURLRequest *)request
+                                                 redirectResponse:(NSURLResponse *)response;
+
+/**
  The task has received an authentication challenge.
  
  If this delegate is not implemented, the behavior will be the same as using the
