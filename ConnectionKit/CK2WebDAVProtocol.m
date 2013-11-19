@@ -342,6 +342,11 @@
     }
 }
 
+- (NSURLRequest *)request:(DAVRequest *)aRequest willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponse;
+{
+    return [self.client protocol:self willSendRequest:request redirectResponse:redirectResponse];
+}
+
 - (void)webDAVRequest:(DAVRequest *)request didSendDataOfLength:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite
 {
     CK2WebDAVLog(@"webdav sent data");
