@@ -410,7 +410,8 @@
     // Add to transcript since DAVKit isn't in a position to do that
     if (challenge.failureResponse)
     {
-        NSURLRequest *request = self.request;
+        DAVRequest *op = [self.queue.operations objectAtIndex:0];
+        NSURLRequest *request = op.request;
         
         [self.client protocol:self
                  appendString:[NSString stringWithFormat:@"%@ %@", request.HTTPMethod, request.URL.path]
