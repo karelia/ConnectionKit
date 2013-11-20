@@ -406,6 +406,17 @@
     }
     
     NSURLAuthenticationChallenge *original = challenge.originalChallenge;
+    
+    // Add to transcript since DAVKit isn't in a position to do that
+    if (challenge.failureResponse)
+    {
+        NSURLRequest *request = self.request;
+        
+        [self.client protocol:self
+                 appendString:[NSString stringWithFormat:@"%@ %@", request.HTTPMethod, request.URL.path]
+                 toTranscript:CK2TranscriptHeaderOut];
+    }
+    
     [original.sender useCredential:credential forAuthenticationChallenge:original];
 }
 
