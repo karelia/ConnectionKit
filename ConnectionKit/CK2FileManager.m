@@ -270,6 +270,8 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                                                                               values:keyedValues
                                                                                              manager:self
                                                                                      completionBlock:handler];
+    
+    [operation resume];
     return [operation autorelease];
 }
 
