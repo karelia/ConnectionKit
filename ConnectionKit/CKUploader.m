@@ -267,20 +267,27 @@
 
 - (void)startNextOperation;
 {
-    if (_queue.count)
+    while (_queue.count)
     {
         CK2FileOperation *operation = [_queue objectAtIndex:0];
-        
-        if (!self.isCancelled)
+        if (operation.state == CK2FileOperationStateSuspended)
         {
             [operation resume];
             
             CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
             [record transferDidBegin:record];
             if (record) [self.delegate uploader:self didBeginUploadToPath:record.path];
+            
+            return;
+        }
+        else
+        {
+            // Something other than us must have started the op
+            [_queue removeObjectAtIndex:0];
         }
     }
-    else if (_invalidated)
+    
+    if (_invalidated)
     {
         NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
         [self complete];
