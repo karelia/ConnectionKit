@@ -307,7 +307,7 @@
         
         
         // The delegate has a say in error handling, but there's no point if the op was cancelled
-        if (error && error.code != NSURLErrorCancelled && ![error.domain isEqualToString:NSURLErrorDomain])
+        if (error && !(error.code == NSURLErrorCancelled && [error.domain isEqualToString:NSURLErrorDomain]))
         {
             if ([delegate respondsToSelector:@selector(uploader:transferRecord:shouldProceedAfterError:completionHandler:)])
             {
