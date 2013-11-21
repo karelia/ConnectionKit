@@ -64,6 +64,11 @@ typedef NSUInteger CKUploadingOptions;
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
 - (void)removeFileAtPath:(NSString *)path;
 
+/**
+ The underlying `CK2FileOperation`s that are in the queue.
+ */
+- (NSArray *)operations;
+
 @property (nonatomic, retain, readonly) CKTransferRecord *rootTransferRecord;
 @property (nonatomic, retain, readonly) CKTransferRecord *baseTransferRecord;
 

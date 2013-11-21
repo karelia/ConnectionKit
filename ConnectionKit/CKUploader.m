@@ -229,6 +229,8 @@
 
 #pragma mark Queue
 
+- (NSArray *)operations; { return [[_queue copy] autorelease]; }
+
 - (void)cancel;
 {
     _isCancelled = YES;
