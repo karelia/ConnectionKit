@@ -217,7 +217,7 @@
         void (^existingHandler)(NSError*) = _completionBlock;
         
         _completionBlock = ^(NSError *error) {
-            existingHandler(error);
+            if (existingHandler) existingHandler(error);
             handler(error);
         };
         _completionBlock = [_completionBlock copy];
