@@ -313,7 +313,9 @@
                     }
                     else
                     {
-                        [self completeWithError:error];
+                        [self completeWithError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                    code:NSURLErrorCancelled
+                                                                userInfo:nil]];
                         [self cancel];
                     }
                 }];
