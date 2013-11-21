@@ -127,8 +127,8 @@
 
 - (void)removeFileAtPath:(NSString *)path reportError:(BOOL)reportError;
 {
-    CK2FileOperation *op = [_fileManager removeOperationWithURL:[self URLForPath:path] completionHandler:^(NSError *error) {
-        [self operation:nil didFinish:(reportError ? error : nil)];
+    __block CK2FileOperation *op = [_fileManager removeOperationWithURL:[self URLForPath:path] completionHandler:^(NSError *error) {
+        [self operation:op didFinish:(reportError ? error : nil)];
     }];
     
     [self addOperation:op];
@@ -252,6 +252,19 @@
     if (_queue.count == 1) [self startNextOperation];
 }
 
+- (void)removeOperationAndStartNextIfAppropriate:(CK2FileOperation *)operation;
+{
+    NSParameterAssert(operation);
+    NSAssert([NSThread isMainThread], @"-%@ is only safe to call on the main thread", NSStringFromSelector(_cmd));
+    
+    // We assume the operation is only in the queue the once, and most likely near the front
+    NSUInteger index = [_queue indexOfObject:operation];
+    [_queue removeObjectAtIndex:index];
+    
+    // If was the current op, time to start the next
+    if (index == 0) [self startNextOperation];
+}
+
 - (void)startNextOperation;
 {
     if (_queue.count)
@@ -276,6 +289,8 @@
 
 - (void)operation:(CK2FileOperation *)operation didFinish:(NSError *)error;
 {
+    NSParameterAssert(operation);
+    
     // This method gets called on all sorts of threads, so marshall back to main queue
     dispatch_async(dispatch_get_main_queue(), ^{
         
@@ -298,8 +313,7 @@
                     
                     if (proceed)
                     {
-                        [_queue removeObjectAtIndex:0];
-                        if (!self.isCancelled) [self startNextOperation];
+                        [self removeOperationAndStartNextIfAppropriate:operation];
                     }
                     else
                     {
@@ -311,8 +325,7 @@
             }
         }
         
-        [_queue removeObjectAtIndex:0];
-        if (!self.isCancelled) [self startNextOperation];
+        [self removeOperationAndStartNextIfAppropriate:operation];
     });
 }
 
