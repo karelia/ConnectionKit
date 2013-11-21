@@ -256,7 +256,7 @@
     
     // We assume the operation is only in the queue the once, and most likely near the front
     NSUInteger index = [_queue indexOfObject:operation];
-    [_queue removeObjectAtIndex:index];
+    if (index != NSNotFound) [_queue removeObjectAtIndex:index];
     
     // If was the current op, time to start the next
     if (index == 0) [self startNextOperation];
