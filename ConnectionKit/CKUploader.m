@@ -234,8 +234,7 @@
 - (void)cancel;
 {
     _isCancelled = YES;
-    [_queue makeObjectsPerformSelector:_cmd];
-    [_queue release]; _queue = nil;
+    [self.operations makeObjectsPerformSelector:_cmd];
 }
 
 - (BOOL)isCancelled; { return _isCancelled; }
