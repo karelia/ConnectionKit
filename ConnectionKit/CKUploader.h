@@ -40,7 +40,17 @@ typedef NSUInteger CKUploadingOptions;
     BOOL    _isCancelled;
     
     id <CKUploaderDelegate> _delegate;
+    void                    (^_completionBlock)(NSError*);
 }
+
+/**
+ If non-NULL, the handler is called when uploading ends, instead of the `didFinish`
+ or `didFail` delegate methods.
+ */
++ (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
+               filePosixPermissions:(NSNumber *)customPermissions
+                            options:(CKUploadingOptions)options
+                  completionHandler:(void (^)(NSError *error))handler;
 
 // File permissions default to 0644. Supply a non-nil value if you want something different, or override -posixPermissionsForPath:isDirectory:
 + (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
@@ -69,9 +79,6 @@ typedef NSUInteger CKUploadingOptions;
 
 @protocol CKUploaderDelegate <NSObject>
 
-- (void)uploaderDidFinishUploading:(CKUploader *)uploader;
-- (void)uploader:(CKUploader *)uploader didFailWithError:(NSError *)error;
-
 - (void)uploader:(CKUploader *)uploader didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
 
 @optional
@@ -91,5 +98,9 @@ typedef NSUInteger CKUploadingOptions;
 
 - (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record
                                   didCompleteWithError:(NSError *)error;
+
+// These are semi-deprecated in favour of completion handler
+- (void)uploaderDidFinishUploading:(CKUploader *)uploader;
+- (void)uploader:(CKUploader *)uploader didFailWithError:(NSError *)error;
 
 @end
