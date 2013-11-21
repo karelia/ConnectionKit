@@ -90,7 +90,7 @@ typedef NSUInteger CKUploadingOptions;
 - (void)uploader:(CKUploader *)uploader appendString:(NSString *)string toTranscript:(CK2TranscriptType)transcript;
 
 @optional
-- (BOOL)uploader:(CKUploader *)uploader shouldProceedAfterError:(NSError *)error;
+- (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record shouldProceedAfterError:(NSError *)error completionHandler:(void (^)(BOOL proceed))completionHandler;
 
 - (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record
                                       didWriteBodyData:(int64_t)bytesSent

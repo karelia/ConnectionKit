@@ -293,20 +293,32 @@
         CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
         [record transferDidFinish:record error:error];
         
-        if (record && [self.delegate respondsToSelector:@selector(uploader:transferRecord:didCompleteWithError:)])
+        id <CKUploaderDelegate> delegate = self.delegate;
+        
+        if (record && [delegate respondsToSelector:@selector(uploader:transferRecord:didCompleteWithError:)])
         {
-            [self.delegate uploader:self transferRecord:record didCompleteWithError:error];
+            [delegate uploader:self transferRecord:record didCompleteWithError:error];
         }
         
         if (error)
         {
-            if ([self.delegate respondsToSelector:@selector(uploader:shouldProceedAfterError:)])
+            if ([delegate respondsToSelector:@selector(uploader:transferRecord:shouldProceedAfterError:completionHandler:)])
             {
-                if (![self.delegate uploader:self shouldProceedAfterError:error])
-                {
-                    [self completeWithError:error];
-                    [self cancel];
-                }
+                [delegate uploader:self transferRecord:record shouldProceedAfterError:error completionHandler:^(BOOL proceed) {
+                    
+                    if (proceed)
+                    {
+                        [_queue removeObjectAtIndex:0];
+                        if (!_isCancelled) [self startNextOperation];
+                    }
+                    else
+                    {
+                        [self completeWithError:error];
+                        [self cancel];
+                    }
+                }];
+                
+                return;
             }
             else
             {
