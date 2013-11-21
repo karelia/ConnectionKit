@@ -65,7 +65,8 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, CGFloat toMaxDimension);
         _finished = [[value objectForKey:@"finished"] boolValue];
         if (_finished) myProgress = 100;
         
-        if ([value objectForKey:@"error"]) myProgress = -1;
+        NSError *error = [value objectForKey:@"error"];
+        if (error && !(error.code == NSURLErrorCancelled && [error.domain isEqualToString:NSURLErrorDomain])) myProgress = -1;
         
 		[super setObjectValue:[value objectForKey:@"name"]];
 	}
