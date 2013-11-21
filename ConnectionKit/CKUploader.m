@@ -85,8 +85,11 @@
 
 - (void)completeWithError:(NSError *)error;
 {
-    _completionBlock(error);
-    [_completionBlock release]; _completionBlock = NULL;    // break retain cycle
+    if (_completionBlock)
+    {
+        _completionBlock(error);
+        [_completionBlock release]; _completionBlock = NULL;    // break retain cycle
+    }
 }
 
 - (void)dealloc
