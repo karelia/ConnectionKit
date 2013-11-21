@@ -209,7 +209,7 @@
 
 - (void)finishUploadingWithCompletionHandler:(void (^)())handler;
 {
-    _isFinishing = YES;
+    _invalidated = YES;
     
     // Add in the new completion block
     if (handler)
@@ -246,7 +246,7 @@
     NSAssert([NSThread isMainThread], @"-addOperation: is only safe to call on the main thread");
     
     // No more operations can go on once finishing up
-    if (_isFinishing) return;
+    if (_invalidated) return;
     
     [_queue addObject:operation];
     if (_queue.count == 1) [self startNextOperation];
@@ -280,7 +280,7 @@
             if (record) [self.delegate uploader:self didBeginUploadToPath:record.path];
         }
     }
-    else if (_isFinishing)
+    else if (_invalidated)
     {
         NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
         [self complete];
