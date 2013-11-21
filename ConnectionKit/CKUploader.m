@@ -309,10 +309,6 @@
                 
                 return;
             }
-            else
-            {
-                [self cancel];
-            }
         }
         
         [_queue removeObjectAtIndex:0];
