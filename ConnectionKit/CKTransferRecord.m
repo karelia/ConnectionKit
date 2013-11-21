@@ -483,7 +483,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	return [NSDictionary dictionaryWithObjectsAndKeys:
             @(self.progress), @"progress",
             self.name, @"name",
-            @(self.isFinished), @"finished",
+            @(self.isFinished && !self.error), @"finished",
             self.error, @"error",
             nil];
 }
