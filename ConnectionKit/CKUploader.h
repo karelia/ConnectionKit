@@ -75,7 +75,6 @@ typedef NSUInteger CKUploadingOptions;
 - (void)finishUploading;    // will disconnect once all files are uploaded
 - (void)finishUploadingWithCompletionHandler:(void (^)())handler;
 - (void)cancel;             // bails out as quickly as possible
-- (BOOL)isCancelled;
 
 // The permissions given to uploaded files
 - (unsigned long)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
