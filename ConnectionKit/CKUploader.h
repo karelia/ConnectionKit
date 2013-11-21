@@ -40,7 +40,7 @@ typedef NSUInteger CKUploadingOptions;
     BOOL    _isCancelled;
     
     id <CKUploaderDelegate> _delegate;
-    void                    (^_completionBlock)(NSError*);
+    void                    (^_completionBlock)();
 }
 
 /**
@@ -50,7 +50,7 @@ typedef NSUInteger CKUploadingOptions;
 + (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
                filePosixPermissions:(NSNumber *)customPermissions
                             options:(CKUploadingOptions)options
-                  completionHandler:(void (^)(NSError *error))handler;
+                  completionHandler:(void (^)())handler;
 
 // File permissions default to 0644. Supply a non-nil value if you want something different, or override -posixPermissionsForPath:isDirectory:
 + (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
@@ -68,7 +68,7 @@ typedef NSUInteger CKUploadingOptions;
 @property (nonatomic, retain, readonly) CKTransferRecord *baseTransferRecord;
 
 - (void)finishUploading;    // will disconnect once all files are uploaded
-- (void)finishUploadingWithCompletionHandler:(void (^)(NSError *error))handler;
+- (void)finishUploadingWithCompletionHandler:(void (^)())handler;
 - (void)cancel;             // bails out as quickly as possible
 - (BOOL)isCancelled;
 
@@ -103,6 +103,6 @@ typedef NSUInteger CKUploadingOptions;
 
 // These are semi-deprecated in favour of completion handler
 - (void)uploaderDidFinishUploading:(CKUploader *)uploader;
-- (void)uploader:(CKUploader *)uploader didFailWithError:(NSError *)error;
+- (void)uploader:(CKUploader *)uploader didFailWithError:(NSError *)error;  // never called any more
 
 @end

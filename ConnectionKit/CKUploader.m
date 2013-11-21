@@ -36,19 +36,9 @@
             handler = ^(NSError *error) {
                 
                 id <CKUploaderDelegate> delegate = self.delegate;
-                if (error)
+                if ([delegate respondsToSelector:@selector(uploaderDidFinishUploading:)])
                 {
-                    if ([delegate respondsToSelector:@selector(uploader:didFailWithError:)])
-                    {
-                        [delegate uploader:self didFailWithError:error];
-                    }
-                }
-                else
-                {
-                    if ([delegate respondsToSelector:@selector(uploaderDidFinishUploading:)])
-                    {
-                        [self.delegate uploaderDidFinishUploading:self];
-                    }
+                    [self.delegate uploaderDidFinishUploading:self];
                 }
             };
         }
@@ -66,7 +56,7 @@
 + (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
                filePosixPermissions:(NSNumber *)customPermissions
                             options:(CKUploadingOptions)options
-                  completionHandler:(void (^)(NSError *error))handler;
+                  completionHandler:(void (^)())handler;
 {
     NSParameterAssert(request);
     
@@ -83,11 +73,11 @@
     return [self uploaderWithRequest:request filePosixPermissions:customPermissions options:options completionHandler:NULL];
 }
 
-- (void)completeWithError:(NSError *)error;
+- (void)complete;
 {
     if (_completionBlock)
     {
-        _completionBlock(error);
+        _completionBlock();
         [_completionBlock release]; _completionBlock = NULL;    // break retain cycle
     }
 }
@@ -217,7 +207,7 @@
     [self finishUploadingWithCompletionHandler:NULL];
 }
 
-- (void)finishUploadingWithCompletionHandler:(void (^)(NSError *error))handler;
+- (void)finishUploadingWithCompletionHandler:(void (^)())handler;
 {
     _isFinishing = YES;
     
@@ -280,7 +270,7 @@
     else if (_isFinishing)
     {
         NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
-        [self completeWithError:nil];
+        [self complete];
     }
 }
 
@@ -313,9 +303,6 @@
                     }
                     else
                     {
-                        [self completeWithError:[NSError errorWithDomain:NSURLErrorDomain
-                                                                    code:NSURLErrorCancelled
-                                                                userInfo:nil]];
                         [self cancel];
                     }
                 }];
@@ -324,7 +311,6 @@
             }
             else
             {
-                [self completeWithError:error];
                 [self cancel];
             }
         }
