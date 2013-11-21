@@ -34,13 +34,21 @@
         if (!handler)
         {
             handler = ^(NSError *error) {
+                
+                id <CKUploaderDelegate> delegate = self.delegate;
                 if (error)
                 {
-                    [self.delegate uploader:self didFailWithError:error];
+                    if ([delegate respondsToSelector:@selector(uploader:didFailWithError:)])
+                    {
+                        [delegate uploader:self didFailWithError:error];
+                    }
                 }
                 else
                 {
-                    [self.delegate uploaderDidFinishUploading:self];
+                    if ([delegate respondsToSelector:@selector(uploaderDidFinishUploading:)])
+                    {
+                        [self.delegate uploaderDidFinishUploading:self];
+                    }
                 }
             };
         }
