@@ -8,12 +8,14 @@
 
 #import "CKUploader.h"
 
+#import "CK2FileOperation.h"
+
 
 @implementation CKUploader
 
 #pragma mark Lifecycle
 
-- (id)initWithRequest:(NSURLRequest *)request filePosixPermissions:(unsigned long)customPermissions options:(CKUploadingOptions)options;
+- (id)initWithRequest:(NSURLRequest *)request filePosixPermissions:(unsigned long)customPermissions options:(CKUploadingOptions)options completionHandler:(void (^)(NSError *error))handler;
 {
     if (self = [self init])
     {
@@ -28,7 +30,24 @@
                                                       delegateQueue:[NSOperationQueue mainQueue]];
         }
         
+        
+        // Always have some sort of completion action, one way or another
+        if (!handler)
+        {
+            handler = ^(NSError *error) {
+                
+                id <CKUploaderDelegate> delegate = self.delegate;
+                if ([delegate respondsToSelector:@selector(uploaderDidFinishUploading:)])
+                {
+                    [self.delegate uploaderDidFinishUploading:self];
+                }
+            };
+        }
+        _completionBlock = [handler copy];
+        
+        
         _queue = [[NSMutableArray alloc] init];
+        _recordsByOperation = [[NSMutableDictionary alloc] init];
         _rootRecord = [[CKTransferRecord rootRecordWithPath:[[request URL] path]] retain];
         _baseRecord = [_rootRecord retain];
     }
@@ -37,13 +56,31 @@
 
 + (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
                filePosixPermissions:(NSNumber *)customPermissions
-                            options:(CKUploadingOptions)options;
+                            options:(CKUploadingOptions)options
+                  completionHandler:(void (^)())handler;
 {
     NSParameterAssert(request);
     
     return [[[self alloc] initWithRequest:request
                      filePosixPermissions:(customPermissions ? [customPermissions unsignedLongValue] : 0644)
-                                  options:options] autorelease];
+                                  options:options
+                        completionHandler:handler] autorelease];
+}
+
++ (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
+               filePosixPermissions:(NSNumber *)customPermissions
+                            options:(CKUploadingOptions)options;
+{
+    return [self uploaderWithRequest:request filePosixPermissions:customPermissions options:options completionHandler:NULL];
+}
+
+- (void)complete;
+{
+    if (_completionBlock)
+    {
+        _completionBlock();
+        [_completionBlock release]; _completionBlock = NULL;    // break retain cycle
+    }
 }
 
 - (void)dealloc
@@ -54,6 +91,8 @@
     [_fileManager release];
     [_rootRecord release];
     [_baseRecord release];
+    [_recordsByOperation release];
+    [_completionBlock release];
     
     [super dealloc];
 }
@@ -89,41 +128,24 @@
 
 - (void)removeFileAtPath:(NSString *)path reportError:(BOOL)reportError;
 {
-    [self addOperationWithBlock:^{
-                
-        return [_fileManager removeItemAtURL:[self URLForPath:path] completionHandler:^(NSError *error) {
-            
-            [self operationDidFinish:(reportError ? error : nil)];
-        }];
+    CK2FileOperation *op = [_fileManager removeOperationWithURL:[self URLForPath:path] completionHandler:^(NSError *error) {
+        [self operation:nil didFinish:(reportError ? error : nil)];
     }];
+    
+    [self addOperation:op];
 }
 
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
 {
-    return [self uploadToPath:path size:data.length usingBlock:^CK2FileOperation* (CKTransferRecord *record) {
-        
-        NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
-        
-        CK2FileOperation *op = [_fileManager createFileAtURL:[self URLForPath:path] contents:data withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
-            
-            [record transfer:record transferredDataOfLength:bytesWritten];
-            
-        } completionHandler:^(NSError *error) {
-            
-            [record transferDidFinish:record error:error];
-            [self operationDidFinish:error];
-        }];
-        
-        NSAssert(op, @"Failed to create upload operation");
-        
-        if (!self.isCancelled)
-        {
-            [record transferDidBegin:record];
-            [self.delegate uploader:self didBeginUploadToPath:path];
-        }
-        
-        return op;
-    }];
+    NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
+    
+    CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path]
+                                                           fromData:data
+                                        withIntermediateDirectories:YES
+                                                  openingAttributes:attributes
+                                                  completionHandler:NULL];
+    
+    return [self uploadToPath:path usingOperation:op];
 }
 
 - (CKTransferRecord *)uploadFileAtURL:(NSURL *)localURL toPath:(NSString *)path;
@@ -131,34 +153,21 @@
     NSNumber *size;
     if (![localURL getResourceValue:&size forKey:NSURLFileSizeKey error:NULL]) size = nil;
     
-    return [self uploadToPath:path size:size.unsignedLongLongValue usingBlock:^CK2FileOperation* (CKTransferRecord *record) {
-        
-        NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
-        
-        CK2FileOperation *op = [_fileManager createFileAtURL:[self URLForPath:path] withContentsOfURL:localURL withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
-            
-            [record transfer:record transferredDataOfLength:bytesWritten];
-            
-        }  completionHandler:^(NSError *error) {
-            
-            [record transferDidFinish:record error:error];
-            [self operationDidFinish:error];
-        }];
-        
-        NSAssert(op, @"Failed to create upload operation");
-        
-        if (!self.isCancelled)
-        {
-            [record transferDidBegin:record];
-            [self.delegate uploader:self didBeginUploadToPath:path];
-        }
-        
-        return op;
-    }];
+    NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
+    
+    CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path]
+                                                           fromFile:localURL
+                                        withIntermediateDirectories:YES
+                                                  openingAttributes:attributes
+                                                  completionHandler:NULL];
+    
+    return [self uploadToPath:path usingOperation:op];
 }
 
-- (CKTransferRecord *)uploadToPath:(NSString *)path size:(unsigned long long)size usingBlock:(CK2FileOperation* (^)(CKTransferRecord *record))block;
+- (CKTransferRecord *)uploadToPath:(NSString *)path usingOperation:(CK2FileOperation *)operation;
 {
+    NSParameterAssert(operation);
+    
     // Create transfer record
     if (_options & CKUploadingDeleteExistingFileFirst)
 	{
@@ -166,13 +175,12 @@
         [self removeFileAtPath:path reportError:NO];
 	}
     
-    CKTransferRecord *result = [self makeTransferRecordWithPath:path size:size];
+    CKTransferRecord *result = [self makeTransferRecordWithPath:path operation:operation];
+    [_recordsByOperation setObject:result forKey:operation];
     
     
     // Enqueue upload
-    [self addOperationWithBlock:^CK2FileOperation* {
-        return block(result);
-    }];
+    [self addOperation:operation];
     
     
     // Notify delegate
@@ -197,15 +205,27 @@
 
 - (void)finishUploading;
 {
-    [self addOperationWithBlock:^CK2FileOperation* {
-        
-        NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
-        [[self delegate] uploaderDidFinishUploading:self];
-        [self operationDidFinish:nil];
-        return nil;
-    }];
-    
+    [self finishUploadingWithCompletionHandler:NULL];
+}
+
+- (void)finishUploadingWithCompletionHandler:(void (^)())handler;
+{
     _isFinishing = YES;
+    
+    // Add in the new completion block
+    if (handler)
+    {
+        void (^existingHandler)(NSError*) = _completionBlock;
+        
+        _completionBlock = ^(NSError *error) {
+            existingHandler(error);
+            handler(error);
+        };
+        _completionBlock = [_completionBlock copy];
+        [existingHandler release];
+    }
+    
+    if (!_queue.count) [self startNextOperation];
 }
 
 #pragma mark Queue
@@ -220,61 +240,86 @@
 
 - (BOOL)isCancelled; { return _isCancelled; }
 
-- (CK2FileOperation *)currentOperation; { return _currentOperation; }
+- (CK2FileOperation *)currentOperation; { return [_queue firstObject]; }
 
-- (void)addOperationWithBlock:(CK2FileOperation* (^)(void))block;
+- (void)addOperation:(CK2FileOperation *)operation;
 {
     NSAssert([NSThread isMainThread], @"-addOperation: is only safe to call on the main thread");
     
     // No more operations can go on once finishing up
     if (_isFinishing) return;
     
-    NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
-        
-        NSAssert(_currentOperation == nil, @"Seems like an op is starting before another has finished");
-        _currentOperation = [block() retain];
-    }];
-    
     [_queue addObject:operation];
-    if ([_queue count] == 1)
+    if (_queue.count == 1) [self startNextOperation];
+}
+
+- (void)startNextOperation;
+{
+    if (_queue.count)
     {
-        [operation start];
+        CK2FileOperation *operation = [_queue objectAtIndex:0];
+        
+        if (!self.isCancelled)
+        {
+            [operation resume];
+            
+            CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
+            [record transferDidBegin:record];
+            if (record) [self.delegate uploader:self didBeginUploadToPath:record.path];
+        }
+    }
+    else if (_isFinishing)
+    {
+        NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
+        [self complete];
     }
 }
 
-- (void)operationDidFinish:(NSError *)error;
+- (void)operation:(CK2FileOperation *)operation didFinish:(NSError *)error;
 {
-        [_currentOperation release]; _currentOperation = nil;
+    NSAssert([NSThread isMainThread], @"Operation broke threading contract");
+    
+        // Tell the record & delegate it's finished
+        CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
+        [record transferDidFinish:record error:error];
+        
+        id <CKUploaderDelegate> delegate = self.delegate;
+        
+        if (record && [delegate respondsToSelector:@selector(uploader:transferRecord:didCompleteWithError:)])
+        {
+            [delegate uploader:self transferRecord:record didCompleteWithError:error];
+        }
         
         if (error)
         {
-            if ([self.delegate respondsToSelector:@selector(uploader:shouldProceedAfterError:)])
+            if ([delegate respondsToSelector:@selector(uploader:transferRecord:shouldProceedAfterError:completionHandler:)])
             {
-                if (![self.delegate uploader:self shouldProceedAfterError:error])
-                {
-                    [self.delegate uploader:self didFailWithError:error];
-                    [self cancel];
-                }
-            }
-            else
-            {
-                [self.delegate uploader:self didFailWithError:error];
-                [self cancel];
+                [delegate uploader:self transferRecord:record shouldProceedAfterError:error completionHandler:^(BOOL proceed) {
+                    
+                    if (proceed)
+                    {
+                        [_queue removeObjectAtIndex:0];
+                        if (!self.isCancelled) [self startNextOperation];
+                    }
+                    else
+                    {
+                        [self cancel];
+                    }
+                }];
+                
+                return;
             }
         }
         
         [_queue removeObjectAtIndex:0];
-        if ([_queue count])
-        {
-            [[_queue objectAtIndex:0] start];
-        }
+        if (!self.isCancelled) [self startNextOperation];
 }
 
 #pragma mark Transfer Records
 
-- (CKTransferRecord *)makeTransferRecordWithPath:(NSString *)path size:(unsigned long long)size
+- (CKTransferRecord *)makeTransferRecordWithPath:(NSString *)path operation:(CK2FileOperation *)operation;
 {
-    CKTransferRecord *result = [CKTransferRecord recordWithName:[path lastPathComponent] size:size];
+    CKTransferRecord *result = [CKTransferRecord recordWithName:[path lastPathComponent] uploadOperation:operation];
     
     CKTransferRecord *parent = [self directoryTransferRecordWithPath:[path stringByDeletingLastPathComponent]];
     [parent addContent:result];
@@ -312,7 +357,7 @@
     
     if (!result)
     {
-        result = [CKTransferRecord recordWithName:[path lastPathComponent] size:0];
+        result = [CKTransferRecord recordWithName:[path lastPathComponent] uploadOperation:nil];
         [parent addContent:result];
         [self didAddTransferRecord:result];
     }
@@ -336,9 +381,30 @@
     }
 }
 
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation didWriteBodyData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesSent totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToSend;
+{
+        CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
+        NSAssert(record, @"Unknown operation");
+        [record transfer:record transferredDataOfLength:bytesWritten];
+        
+        if ([self.delegate respondsToSelector:@selector(uploader:transferRecord:didWriteBodyData:totalBytesWritten:totalBytesExpectedToWrite:)])
+        {
+            [self.delegate uploader:self
+                     transferRecord:record
+                   didWriteBodyData:bytesWritten
+                  totalBytesWritten:totalBytesSent
+          totalBytesExpectedToWrite:totalBytesExpectedToSend];
+        }
+}
+
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 {
     [[self delegate] uploader:self appendString:info toTranscript:transcript];
+}
+
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation didCompleteWithError:(NSError *)error;
+{
+    [self operation:operation didFinish:error];
 }
 
 @end

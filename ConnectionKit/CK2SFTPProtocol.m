@@ -85,18 +85,17 @@
     return self;
 }
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request size:(int64_t)size withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
 {
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
-    [mutableRequest curl_setCreateIntermediateDirectories:createIntermediates];
     [mutableRequest curl_setNewFilePermissions:[attributes objectForKey:NSFilePosixPermissions]];
     
-    NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
-    NSString* name = [path lastPathComponent];
-
-    self = [self initWithRequest:mutableRequest client:client progressBlock:progressBlock completionHandler:nil];
-    
-    _transcriptMessage = [[NSString alloc] initWithFormat:@"Uploading %@ to %@\n", name, path];
+    if (self = [self initForCreatingFileWithRequest:mutableRequest size:size withIntermediateDirectories:createIntermediates client:client completionHandler:NULL])
+    {
+        NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
+        NSString* name = [path lastPathComponent];
+        _transcriptMessage = [[NSString alloc] initWithFormat:@"Uploading %@ to %@\n", name, path];
+    }
     
     [mutableRequest release];
     
@@ -223,7 +222,7 @@
     // So jump straight to completion
     if (![self request])
     {
-        [[self client] protocolDidFinish:self];
+        [[self client] protocol:self didCompleteWithError:nil];
         return;
     }
     

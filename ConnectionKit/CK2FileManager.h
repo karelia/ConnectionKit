@@ -176,6 +176,12 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  */
 - (CK2FileOperation *)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
 
+- (CK2FileOperation *)createFileOperationWithURL:(NSURL *)url
+                                        fromData:(NSData *)data
+                     withIntermediateDirectories:(BOOL)createIntermediates
+                               openingAttributes:(NSDictionary *)attributes
+                               completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
+
 /**
  Creates a file by copying the content of the specified URL.
  
@@ -214,6 +220,12 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  */
 - (CK2FileOperation *)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
 
+- (CK2FileOperation *)createFileOperationWithURL:(NSURL *)destinationURL
+                                        fromFile:(NSURL *)sourceURL
+                     withIntermediateDirectories:(BOOL)createIntermediates
+                               openingAttributes:(NSDictionary *)attributes
+                               completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
+
 
 #pragma mark Deleting Items
 
@@ -246,6 +258,8 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @return The new file operation.
  */
 - (CK2FileOperation *)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1)));
+
+- (CK2FileOperation *)removeOperationWithURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1)));
 
 
 #pragma mark Moving Items
@@ -391,6 +405,17 @@ typedef NS_ENUM(NSInteger, CK2AuthChallengeDisposition) {
 @optional
 
 /**
+ EXPERIMENTAL
+ 
+ Gives the delegate a chance to customise requests for those protocols which use
+ them (currently WebDAV only)
+ */
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation
+                                        willSendRequest:(NSURLRequest *)request
+                                       redirectResponse:(NSURLResponse *)response
+                                      completionHandler:(void (^)(NSURLRequest *))completionHandler;
+
+/**
  The task has received an authentication challenge.
  
  If this delegate is not implemented, the behavior will be the same as using the
@@ -399,6 +424,15 @@ typedef NS_ENUM(NSInteger, CK2AuthChallengeDisposition) {
 - (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation
                                     didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge
                                       completionHandler:(void (^)(CK2AuthChallengeDisposition disposition, NSURLCredential *credential))completionHandler;
+
+/**
+ * Sent periodically to notify the delegate of upload progress. This
+ * information is also available as properties of the operation.
+ */
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation
+                                       didWriteBodyData:(int64_t)bytesSent
+                                      totalBytesWritten:(int64_t)totalBytesSent
+                              totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToSend;
 
 
 typedef NS_ENUM(NSUInteger, CK2TranscriptType) {
@@ -415,6 +449,13 @@ typedef NS_ENUM(NSUInteger, CK2TranscriptType) {
  @param transcript The type of transcript received.
  */
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
+
+/**
+ * Sent as the last message related to a specific operation. Error may be
+ * `nil`, which implies that no error occurred and this operation is finished.
+ */
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation
+                                   didCompleteWithError:(NSError *)error;
 
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge __attribute((deprecated("implement -fileManager:operation:didReceiveChallenge:completionHandler: instead")));
 

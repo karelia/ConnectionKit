@@ -14,6 +14,8 @@
     void    (^_block)(void);
     BOOL    _cancelled;
     dispatch_queue_t _queue;
+    
+    int64_t _bytesExpectedToWrite;
 }
 
 @end

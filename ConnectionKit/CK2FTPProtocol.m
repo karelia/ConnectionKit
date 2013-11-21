@@ -107,42 +107,26 @@
             ];
 }
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request size:(int64_t)size withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
 {
-    if ([request curl_createIntermediateDirectories] != createIntermediates)
-    {
-        NSMutableURLRequest *mutableRequest = [[request mutableCopy] autorelease];
-        [mutableRequest curl_setCreateIntermediateDirectories:createIntermediates];
-        request = mutableRequest;
-    }
-
-    // Use our own progress block to watch for the file end being reached before passing onto the original requester
-    __block BOOL atEnd = NO;
-    
-    self = [self initWithRequest:request client:client progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
-        
-        if (bytesWritten == 0) atEnd = YES;
-        if (bytesWritten && progressBlock) progressBlock(bytesWritten, totalBytesWritten, totalBytesExpectedToSend);
-        
-    } completionHandler:^(NSError *error) {
+    return [self initForCreatingFileWithRequest:request size:size withIntermediateDirectories:createIntermediates client:client completionHandler:^(NSError *error) {
         
         // Long FTP uploads have a tendency to have the control connection cutoff for idling. As a hack, assume that if we reached the end of the body stream, a timeout is likely because of that
-        if (error && atEnd && [error code] == NSURLErrorTimedOut && [[error domain] isEqualToString:NSURLErrorDomain])
+        if (error && _atEnd && [error code] == NSURLErrorTimedOut && [[error domain] isEqualToString:NSURLErrorDomain])
         {
             error = nil;
         }
         
-        if (error)
-        {
-            [client protocol:self didFailWithError:error];
-        }
-        else
-        {
-            [client protocolDidFinish:self];
-        }
+        [client protocol:self didCompleteWithError:error];
     }];
+}
+
+- (void)transfer:(CURLTransfer *)transfer willSendBodyDataOfLength:(NSUInteger)bytesWritten;
+{
+    // Watch for the file end being reached before passing onto the original requester
+    if (bytesWritten == 0) _atEnd = YES;
     
-    return self;
+    [super transfer:transfer willSendBodyDataOfLength:bytesWritten];
 }
 
 - (id)initForRenamingItemWithRequest:(NSURLRequest *)request newName:(NSString *)newName client:(id<CK2ProtocolClient>)client
@@ -284,7 +268,7 @@
     // So jump straight to completion
     if (![self request])
     {
-        [[self client] protocolDidFinish:self];
+        [[self client] protocol:self didCompleteWithError:nil];
         return;
     }
 

@@ -30,8 +30,8 @@ typedef NSUInteger CKUploadingOptions;
     CKUploadingOptions  _options;
     
     CK2FileManager      *_fileManager;
-    CK2FileOperation    *_currentOperation;
     NSMutableArray      *_queue;
+    NSMutableDictionary *_recordsByOperation;
     
     CKTransferRecord    *_rootRecord;
     CKTransferRecord    *_baseRecord;
@@ -40,7 +40,17 @@ typedef NSUInteger CKUploadingOptions;
     BOOL    _isCancelled;
     
     id <CKUploaderDelegate> _delegate;
+    void                    (^_completionBlock)();
 }
+
+/**
+ If non-NULL, the handler is called when uploading ends, instead of the `didFinish`
+ or `didFail` delegate methods.
+ */
++ (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
+               filePosixPermissions:(NSNumber *)customPermissions
+                            options:(CKUploadingOptions)options
+                  completionHandler:(void (^)())handler;
 
 // File permissions default to 0644. Supply a non-nil value if you want something different, or override -posixPermissionsForPath:isDirectory:
 + (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
@@ -58,7 +68,9 @@ typedef NSUInteger CKUploadingOptions;
 @property (nonatomic, retain, readonly) CKTransferRecord *baseTransferRecord;
 
 - (void)finishUploading;    // will disconnect once all files are uploaded
+- (void)finishUploadingWithCompletionHandler:(void (^)())handler;
 - (void)cancel;             // bails out as quickly as possible
+- (BOOL)isCancelled;
 
 // The permissions given to uploaded files
 - (unsigned long)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
@@ -68,9 +80,6 @@ typedef NSUInteger CKUploadingOptions;
 
 
 @protocol CKUploaderDelegate <NSObject>
-
-- (void)uploaderDidFinishUploading:(CKUploader *)uploader;
-- (void)uploader:(CKUploader *)uploader didFailWithError:(NSError *)error;
 
 - (void)uploader:(CKUploader *)uploader didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
 
@@ -82,6 +91,18 @@ typedef NSUInteger CKUploadingOptions;
 - (void)uploader:(CKUploader *)uploader appendString:(NSString *)string toTranscript:(CK2TranscriptType)transcript;
 
 @optional
-- (BOOL)uploader:(CKUploader *)uploader shouldProceedAfterError:(NSError *)error;
+- (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record shouldProceedAfterError:(NSError *)error completionHandler:(void (^)(BOOL proceed))completionHandler;
+
+- (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record
+                                      didWriteBodyData:(int64_t)bytesSent
+                                     totalBytesWritten:(int64_t)totalBytesSent
+                             totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToSend;
+
+- (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record
+                                  didCompleteWithError:(NSError *)error;
+
+// These are semi-deprecated in favour of completion handler
+- (void)uploaderDidFinishUploading:(CKUploader *)uploader;
+- (void)uploader:(CKUploader *)uploader didFailWithError:(NSError *)error;  // never called any more
 
 @end

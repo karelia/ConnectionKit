@@ -61,6 +61,12 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, CGFloat toMaxDimension);
 	if ([value isKindOfClass:[NSDictionary class]])
 	{
 		myProgress = [[value objectForKey:@"progress"] intValue];
+        
+        _finished = [[value objectForKey:@"finished"] boolValue];
+        if (_finished) myProgress = 100;
+        
+        if ([value objectForKey:@"error"]) myProgress = -1;
+        
 		[super setObjectValue:[value objectForKey:@"name"]];
 	}
 	else if ([value isKindOfClass:[NSNumber class]])
@@ -114,7 +120,7 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, CGFloat toMaxDimension);
 					  operation:NSCompositeSourceOver
 					   fraction:1.0];
 	}
-	else if (myProgress >= 0 && myProgress < 100)
+	else if (myProgress >= 0 && !_finished)
 	{
 		NSAffineTransform *flip = nil;
 		if ([controlView isFlipped]) 

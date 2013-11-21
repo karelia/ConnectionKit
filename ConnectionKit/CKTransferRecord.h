@@ -31,56 +31,53 @@
 #import <Foundation/Foundation.h>
 
 
+@class CK2FileOperation;
 @interface CKTransferRecord : NSObject
 {
 	NSString *_name;
-	unsigned long long _size;
-	unsigned long long _sizeWithChildren;
-	unsigned long long _transferred;
-	unsigned long long _intermediateTransferred;
+    CK2FileOperation    *_operation;
+    int64_t             _size;
 	NSTimeInterval _lastTransferTime;
 	NSTimeInterval _transferStartTime;
 	NSTimeInterval _lastDirectorySpeedUpdate;
 	CGFloat _speed;
-	NSUInteger _progress;
 	NSMutableArray *_contents;
 	CKTransferRecord *_parent; //not retained
 	NSMutableDictionary *_properties;
-	
-	NSError *_error;
-    
+	    
     void *_observationInfo;
 }
 
 - (NSString *)name;
 - (void)setName:(NSString *)name;
 
-- (unsigned long long)size;
-- (void)setSize:(unsigned long long)size;
+@property(readonly) int64_t size;
 
 - (CGFloat)speed;
 - (void)setSpeed:(CGFloat)speed;	// TODO: Switch to CGFloat
 
+- (BOOL)isFinished;
 - (NSError *)error;
 
 - (CKTransferRecord *)parent;
-- (void)setParent:(CKTransferRecord *)parent;	// Weak ref
 
++ (instancetype)recordWithName:(NSString *)name uploadOperation:(CK2FileOperation *)operation;
+- (id)initWithName:(NSString *)name uploadOperation:(CK2FileOperation *)operation;
 
-+ (instancetype)recordWithName:(NSString *)name size:(unsigned long long)size;
-- (id)initWithName:(NSString *)name size:(unsigned long long)size;
+@property(nonatomic, retain, readonly) CK2FileOperation *uploadOperation;
 
 - (BOOL)isDirectory;
 - (unsigned long long)transferred;
-- (NSInteger)progress;
-- (void)setProgress:(NSInteger)progress;
+
+/**
+ Between 0 and 100.
+ */
+@property(readonly) CGFloat progress;
 
 - (NSDictionary *)nameWithProgressAndFileSize;
 
 - (void)addContent:(CKTransferRecord *)record;
 - (NSArray *)contents;
-
-- (BOOL)hasError;
 
 - (CKTransferRecord *)root;
 - (NSString *)path; 
@@ -103,7 +100,6 @@
 
 @end
 
-extern NSString *CKTransferRecordProgressChangedNotification;
 extern NSString *CKTransferRecordTransferDidBeginNotification;
 extern NSString *CKTransferRecordTransferDidFinishNotification;
 
@@ -114,7 +110,6 @@ extern NSString *CKTransferRecordTransferDidFinishNotification;
 @interface NSObject (CKConnectionTransferDelegate)
 - (void)transferDidBegin:(CKTransferRecord *)transfer;
 - (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length;
-- (void)transfer:(CKTransferRecord *)transfer progressedTo:(NSNumber *)percent;
 - (void)transfer:(CKTransferRecord *)transfer receivedError:(NSError *)error;
 - (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error;
 @end
@@ -125,9 +120,6 @@ extern NSString *CKTransferRecordTransferDidFinishNotification;
 
 @interface CKTransferRecord (Private)
 - (void)setSpeed:(double)bps;
-- (void)setError:(NSError *)error;
 - (void)setUpload:(BOOL)flag;
-- (void)setSize:(unsigned long long)size;
 - (BOOL)isLeaf;
-- (void)_sizeWithChildrenChangedBy:(unsigned long long)sizeDelta;
 @end
