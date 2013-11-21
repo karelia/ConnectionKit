@@ -309,7 +309,7 @@
                     if (proceed)
                     {
                         [_queue removeObjectAtIndex:0];
-                        if (!_isCancelled) [self startNextOperation];
+                        if (!self.isCancelled) [self startNextOperation];
                     }
                     else
                     {
@@ -330,7 +330,7 @@
         }
         
         [_queue removeObjectAtIndex:0];
-        if (!_isCancelled) [self startNextOperation];
+        if (!self.isCancelled) [self startNextOperation];
     });
 }
 
