@@ -37,7 +37,6 @@ typedef NSUInteger CKUploadingOptions;
     CKTransferRecord    *_baseRecord;
     
     BOOL    _invalidated;
-    BOOL    _isCancelled;
     
     id <CKUploaderDelegate> _delegate;
     void                    (^_completionBlock)();

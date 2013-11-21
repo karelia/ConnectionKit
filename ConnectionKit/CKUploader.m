@@ -233,11 +233,8 @@
 
 - (void)cancel;
 {
-    _isCancelled = YES;
     [self.operations makeObjectsPerformSelector:_cmd];
 }
-
-- (BOOL)isCancelled; { return _isCancelled; }
 
 - (CK2FileOperation *)currentOperation; { return [_queue firstObject]; }
 
@@ -287,11 +284,7 @@
         }
     }
     
-    if (_invalidated)
-    {
-        NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
-        [self complete];
-    }
+    if (_invalidated) [self complete];
 }
 
 - (void)operation:(CK2FileOperation *)operation didFinish:(NSError *)error;
