@@ -232,7 +232,6 @@
 - (void)cancel;
 {
     _isCancelled = YES;
-    [self.currentOperation cancel];
     [_queue makeObjectsPerformSelector:_cmd];
     [_queue release]; _queue = nil;
 }
