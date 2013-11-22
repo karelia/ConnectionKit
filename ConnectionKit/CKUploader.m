@@ -99,12 +99,10 @@
 #pragma mark Properties
 
 @synthesize delegate = _delegate;
-
+@synthesize baseRequest = _request;
 @synthesize options = _options;
 @synthesize rootTransferRecord = _rootRecord;
 @synthesize baseTransferRecord = _baseRecord;
-
-- (NSURLRequest *)request; { return _request; }
 
 - (unsigned long)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
 {
@@ -199,7 +197,7 @@
 
 - (NSURL *)URLForPath:(NSString *)path;
 {
-    return [CK2FileManager URLWithPath:path relativeToURL:[self request].URL];
+    return [CK2FileManager URLWithPath:path relativeToURL:self.baseRequest.URL];
 }
 
 - (void)finishUploading;

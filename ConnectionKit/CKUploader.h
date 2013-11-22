@@ -56,6 +56,7 @@ typedef NSUInteger CKUploadingOptions;
                filePosixPermissions:(NSNumber *)customPermissions
                             options:(CKUploadingOptions)options;
 
+@property (nonatomic, copy, readonly) NSURLRequest *baseRequest;
 @property (nonatomic, assign, readonly) CKUploadingOptions options;
 @property (nonatomic, assign) id <CKUploaderDelegate> delegate;
 
