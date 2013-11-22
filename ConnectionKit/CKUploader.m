@@ -381,6 +381,23 @@
 
 #pragma mark CK2FileManager Delegate
 
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)response completionHandler:(void (^)(NSURLRequest *))completionHandler;
+{
+    // Apply any customisations
+    NSMutableURLRequest *customized = [request mutableCopy];
+    
+    [self.baseRequest.allHTTPHeaderFields enumerateKeysAndObjectsUsingBlock:^(NSString *aField, NSString *aValue, BOOL *stop) {
+        
+        if (![customized valueForHTTPHeaderField:aField])
+        {
+            [customized setValue:aValue forHTTPHeaderField:aField];
+        }
+    }];
+    
+    completionHandler(customized);
+    [customized release];
+}
+
 - (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
 {
     // Hand off to the delegate for auth, on the main queue as it expects
