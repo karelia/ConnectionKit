@@ -281,17 +281,8 @@
                                                                        realm:nil
                                                         authenticationMethod:NSURLAuthenticationMethodDefault];
     
-    NSURLAuthenticationChallenge *challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
-                                                                                         proposedCredential:nil // client will fill it in for us
-                                                                                       previousFailureCount:0
-                                                                                            failureResponse:nil
-                                                                                                      error:nil
-                                                                                                     sender:self];
-    
+    [self startWithProtectionSpace:space];
     [space release];
-    
-    [[self client] protocol:self didReceiveAuthenticationChallenge:challenge];
-    [challenge release];
 }
 
 #pragma mark Home Directory

@@ -154,12 +154,13 @@
  @abstract Start authentication for the specified request
  @param protocol The protocol object requesting authentication.
  @param challenge The authentication challenge.
+ @param completionHandler Called by the system to specify what it would like done.
  @discussion The protocol client answers the request on the same queue
  as -start was called on. It may add a default credential to the
  challenge it issues to the connection delegate, if the protocol did not
  provide one.
  */
-- (void)protocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)protocol:(CK2Protocol *)protocol didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential*))completionHandler;
 
 - (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 

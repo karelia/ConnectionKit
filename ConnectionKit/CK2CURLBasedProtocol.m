@@ -402,6 +402,74 @@
 
 - (void)start; { return [self startWithCredential:nil]; }
 
+- (void)startWithProtectionSpace:(NSURLProtectionSpace *)protectionSpace;
+{
+    NSURLAuthenticationChallenge *challenge = [[NSURLAuthenticationChallenge alloc]
+                                               initWithProtectionSpace:protectionSpace
+                                               proposedCredential:nil
+                                               previousFailureCount:0
+                                               failureResponse:nil
+                                               error:nil
+                                               sender:nil];
+    
+    [self sendAuthChallenge:challenge];
+    [challenge release];
+}
+
+- (void)sendAuthChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    NSParameterAssert(challenge);
+    
+    [self.client protocol:self didReceiveChallenge:challenge completionHandler:^(CK2AuthChallengeDisposition disposition, NSURLCredential *credential) {
+        
+        switch (disposition)
+        {
+            case CK2AuthChallengePerformDefaultHandling:
+                credential = challenge.proposedCredential;
+                
+            case CK2AuthChallengeUseCredential:
+            {
+                // Swap out existing handler for one that retries after an auth failure. Stores credential if requested upon success
+                [self pushCompletionHandler:^(NSError *error) {
+                    
+                    if (error.code == NSURLErrorUserAuthenticationRequired && [error.domain isEqualToString:NSURLErrorDomain])
+                    {
+                        // Retry auth
+                        NSURLAuthenticationChallenge *newChallenge = [[NSURLAuthenticationChallenge alloc]
+                                                                      initWithProtectionSpace:challenge.protectionSpace
+                                                                      proposedCredential:credential
+                                                                      previousFailureCount:(challenge.previousFailureCount + 1)
+                                                                      failureResponse:nil
+                                                                      error:error
+                                                                      sender:nil];
+                        
+                        [self sendAuthChallenge:newChallenge];
+                        [newChallenge release];
+                    }
+                    else
+                    {
+                        if (!error)
+                        {
+                            [[NSURLCredentialStorage sharedCredentialStorage] setCredential:credential forProtectionSpace:challenge.protectionSpace];
+                        }
+                        
+                        [self popCompletionHandlerByExecutingWithError:error];
+                    }
+                }];
+                
+                [self startWithCredential:credential];
+                break;
+            }
+            default:
+            {
+                [self.client protocol:self didCompleteWithError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                                    code:NSURLErrorUserCancelledAuthentication
+                                                                                userInfo:nil]];
+            }
+        }
+    }];
+}
+
 - (void)startWithCredential:(NSURLCredential *)credential;
 {
     _user = [credential.user copy];
@@ -636,67 +704,6 @@
     }
 
     [[self client] protocol:self appendString:string toTranscript:ckType];
-}
-
-#pragma mark NSURLAuthenticationChallengeSender
-
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    // Swap out existing handler for one that retries after an auth failure. Stores credential if requested upon success
-    [self pushCompletionHandler:^(NSError *error) {
-        
-        if (error.code == NSURLErrorUserAuthenticationRequired && [error.domain isEqualToString:NSURLErrorDomain])
-        {
-            // Retry auth
-            NSURLAuthenticationChallenge *newChallenge = [[NSURLAuthenticationChallenge alloc]
-                                                          initWithProtectionSpace:[challenge protectionSpace]
-                                                          proposedCredential:credential
-                                                          previousFailureCount:([challenge previousFailureCount] + 1)
-                                                          failureResponse:nil
-                                                          error:error
-                                                          sender:self];
-            
-            [[self client] protocol:self didReceiveAuthenticationChallenge:newChallenge];
-            [newChallenge release];
-        }
-        else
-        {
-            if (!error)
-            {
-                [[NSURLCredentialStorage sharedCredentialStorage] setCredential:credential forProtectionSpace:challenge.protectionSpace];
-            }
-            
-            [self popCompletionHandlerByExecutingWithError:error];
-        }
-    }];
-    
-    [self startWithCredential:credential];
-}
-
-- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    if (challenge.previousFailureCount == 0)
-    {
-        [self useCredential:nil forAuthenticationChallenge:challenge];  // libcurl will use annonymous login
-    }
-    else
-    {
-        // Give up :)
-        NSError *error = challenge.error;
-        
-        if (!error) error = [NSError errorWithDomain:NSURLErrorDomain
-                                                code:NSURLErrorUserAuthenticationRequired
-                                            userInfo:@{ NSURLErrorFailingURLErrorKey : self.request.URL }];
-        
-        [self popCompletionHandlerByExecutingWithError:error];
-    }
-}
-
-- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    [self.client protocol:self didCompleteWithError:[NSError errorWithDomain:NSURLErrorDomain
-                                                                        code:NSURLErrorUserCancelledAuthentication
-                                                                    userInfo:nil]];
 }
 
 #pragma mark Customization

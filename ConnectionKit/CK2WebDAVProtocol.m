@@ -5,13 +5,12 @@
 //
 
 #import "CK2WebDAVProtocol.h"
-#import "CK2TrampolineAuthenticationChallenge.h"
 
 #ifndef CK2WebDAVLog
 #define CK2WebDAVLog NSLog
 #endif
 
-@interface CK2WebDAVProtocol() <NSURLAuthenticationChallengeSender>
+@interface CK2WebDAVProtocol()
 
 @property (copy, nonatomic) CK2WebDAVCompletionHandler completionHandler;
 @property (copy, nonatomic) CK2WebDAVErrorHandler errorHandler;
@@ -371,9 +370,51 @@
 {
     CK2WebDAVLog(@"webdav received challenge");
     
-    challenge = [[CK2TrampolineAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge sender:self];
-    [[self client] protocol:self didReceiveAuthenticationChallenge:challenge];
-    [challenge release];
+    [self.client protocol:self didReceiveChallenge:challenge completionHandler:^(CK2AuthChallengeDisposition disposition, NSURLCredential *credential) {
+        
+        switch (disposition)
+        {
+            case CK2AuthChallengeUseCredential:
+            {
+                NSString *user = credential.user;
+                if (user)
+                {
+                    [_user release]; _user = [user copy];
+                }
+                
+                // Add to transcript since DAVKit isn't in a position to do that
+                if (challenge.failureResponse)
+                {
+                    DAVRequest *op = [self.queue.operations objectAtIndex:0];
+                    NSURLRequest *request = op.request;
+                    
+                    [self.client protocol:self
+                             appendString:[NSString stringWithFormat:@"%@ %@", request.HTTPMethod, request.URL.path]
+                             toTranscript:CK2TranscriptHeaderOut];
+                }
+                
+                [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+                break;
+            }
+            case CK2AuthChallengePerformDefaultHandling:
+            {
+                // Seems to do the right thing for server trust
+                [challenge.sender useCredential:challenge.proposedCredential forAuthenticationChallenge:challenge];
+                break;
+            }
+            case CK2AuthChallengeRejectProtectionSpace:
+                if ([challenge.sender respondsToSelector:@selector(rejectProtectionSpaceAndContinueWithChallenge:)])
+                {
+                    [challenge.sender rejectProtectionSpaceAndContinueWithChallenge:challenge];
+                    break;
+                }
+                // On 10.6, fall back to cancelling the challenge till I think of something better
+                
+            default:
+                [challenge.sender cancelAuthenticationChallenge:challenge];
+                break;
+        }
+    }];
 }
 
 - (void)webDAVSession:(DAVSession *)session didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
@@ -393,44 +434,6 @@
     string = [string stringByAppendingString:@"\n"];
     
     [[self client] protocol:self appendString:string toTranscript:(sent ? CK2TranscriptHeaderOut : CK2TranscriptHeaderIn)];
-}
-
-#pragma mark NSURLAuthenticationChallengeSender
-
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(CK2TrampolineAuthenticationChallenge *)challenge;
-{
-    NSString *user = credential.user;
-    if (user)
-    {
-        [_user release]; _user = [user copy];
-    }
-    
-    NSURLAuthenticationChallenge *original = challenge.originalChallenge;
-    
-    // Add to transcript since DAVKit isn't in a position to do that
-    if (challenge.failureResponse)
-    {
-        DAVRequest *op = [self.queue.operations objectAtIndex:0];
-        NSURLRequest *request = op.request;
-        
-        [self.client protocol:self
-                 appendString:[NSString stringWithFormat:@"%@ %@", request.HTTPMethod, request.URL.path]
-                 toTranscript:CK2TranscriptHeaderOut];
-    }
-    
-    [original.sender useCredential:credential forAuthenticationChallenge:original];
-}
-
-- (void)continueWithoutCredentialForAuthenticationChallenge:(CK2TrampolineAuthenticationChallenge *)challenge;
-{
-    NSURLAuthenticationChallenge *original = challenge.originalChallenge;
-    [original.sender continueWithoutCredentialForAuthenticationChallenge:original];
-}
-
-- (void)cancelAuthenticationChallenge:(CK2TrampolineAuthenticationChallenge *)challenge;
-{
-    NSURLAuthenticationChallenge *original = challenge.originalChallenge;
-    [original.sender cancelAuthenticationChallenge:original];
 }
 
 #pragma mark - Utilities
