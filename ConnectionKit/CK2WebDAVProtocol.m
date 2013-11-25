@@ -379,17 +379,6 @@
             {
                 [_user release]; _user = [user copy];
             }
-            
-            // Add to transcript since DAVKit isn't in a position to do that
-            if (challenge.failureResponse)
-            {
-                DAVRequest *op = [self.queue.operations objectAtIndex:0];
-                NSURLRequest *request = op.request;
-                
-                [self.client protocol:self
-                         appendString:[NSString stringWithFormat:@"%@ %@", request.HTTPMethod, request.URL.path]
-                         toTranscript:CK2TranscriptHeaderOut];
-            }
         }
         
         completionHandler(disposition, credential);
