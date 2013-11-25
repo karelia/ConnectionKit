@@ -366,64 +366,34 @@
 
 #pragma mark WebDAV Authentication
 
-- (void)webDAVSession:(DAVSession *)session didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)webDAVSession:(DAVSession *)session didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSInteger, NSURLCredential *))completionHandler;
 {
     CK2WebDAVLog(@"webdav received challenge");
     
     [self.client protocol:self didReceiveChallenge:challenge completionHandler:^(CK2AuthChallengeDisposition disposition, NSURLCredential *credential) {
         
-        switch (disposition)
+        if (disposition == CK2AuthChallengeUseCredential)
         {
-            case CK2AuthChallengeUseCredential:
+            NSString *user = credential.user;
+            if (user)
             {
-                NSString *user = credential.user;
-                if (user)
-                {
-                    [_user release]; _user = [user copy];
-                }
-                
-                // Add to transcript since DAVKit isn't in a position to do that
-                if (challenge.failureResponse)
-                {
-                    DAVRequest *op = [self.queue.operations objectAtIndex:0];
-                    NSURLRequest *request = op.request;
-                    
-                    [self.client protocol:self
-                             appendString:[NSString stringWithFormat:@"%@ %@", request.HTTPMethod, request.URL.path]
-                             toTranscript:CK2TranscriptHeaderOut];
-                }
-                
-                [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
-                break;
+                [_user release]; _user = [user copy];
             }
-            case CK2AuthChallengePerformDefaultHandling:
+            
+            // Add to transcript since DAVKit isn't in a position to do that
+            if (challenge.failureResponse)
             {
-                // Seems to do the right thing for server trust
-                [challenge.sender useCredential:challenge.proposedCredential forAuthenticationChallenge:challenge];
-                break;
-            }
-            case CK2AuthChallengeRejectProtectionSpace:
-                if ([challenge.sender respondsToSelector:@selector(rejectProtectionSpaceAndContinueWithChallenge:)])
-                {
-                    [challenge.sender rejectProtectionSpaceAndContinueWithChallenge:challenge];
-                    break;
-                }
-                // On 10.6, fall back to cancelling the challenge till I think of something better
+                DAVRequest *op = [self.queue.operations objectAtIndex:0];
+                NSURLRequest *request = op.request;
                 
-            default:
-                [challenge.sender cancelAuthenticationChallenge:challenge];
-                break;
+                [self.client protocol:self
+                         appendString:[NSString stringWithFormat:@"%@ %@", request.HTTPMethod, request.URL.path]
+                         toTranscript:CK2TranscriptHeaderOut];
+            }
         }
+        
+        completionHandler(disposition, credential);
     }];
-}
-
-- (void)webDAVSession:(DAVSession *)session didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    CK2WebDAVLog(@"webdav cancelled challenge");
-    
-    [self.client protocol:self didCompleteWithError:[NSError errorWithDomain:NSURLErrorDomain
-                                                                        code:NSURLErrorUserCancelledAuthentication
-                                                                    userInfo:nil]];
 }
 
 - (void)webDAVSession:(DAVSession *)session appendStringToTranscript:(NSString *)string sent:(BOOL)sent;
