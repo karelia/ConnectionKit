@@ -44,6 +44,7 @@
 // If the protocol requires authentication, override -start to fire off an authentication challenge to the client. When a response is received to the challenge, CK2CURLBasedProtocol automatically handles it to start up the handle/request
 - (void)start;
 - (void)startWithProtectionSpace:(NSURLProtectionSpace *)protectionSpace;
+- (void)startWithRequest:(NSURLRequest *)request credential:(NSURLCredential *)credential;
 
 
 #pragma mark Customization

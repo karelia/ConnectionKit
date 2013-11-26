@@ -400,7 +400,7 @@
 
 #pragma mark Loading
 
-- (void)start; { return [self startWithCredential:nil]; }
+- (void)start; { return [self startWithRequest:self.request credential:nil]; }
 
 - (void)startWithProtectionSpace:(NSURLProtectionSpace *)protectionSpace;
 {
@@ -457,7 +457,7 @@
                     }
                 }];
                 
-                [self startWithCredential:credential];
+                [self startWithRequest:self.request credential:credential];
                 break;
             }
             default:
@@ -470,11 +470,10 @@
     }];
 }
 
-- (void)startWithCredential:(NSURLCredential *)credential;
+- (void)startWithRequest:(NSURLRequest *)request credential:(NSURLCredential *)credential;
 {
     _user = [credential.user copy];
     
-    NSURLRequest* request = [self request];
     CURLMultiHandle* multi = nil;
     if ([request respondsToSelector:@selector(ck2_multi)])  // should only be a testing/debugging feature
     {
@@ -527,7 +526,7 @@
             if (_cancelled) return;
             
             _transfer = [transferToUse retain];
-            [_transfer sendSynchronousRequest:self.request credential:credential delegate:self];
+            [_transfer sendSynchronousRequest:request credential:credential delegate:self];
         });
     }
 }
