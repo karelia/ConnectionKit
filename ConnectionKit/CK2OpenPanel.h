@@ -121,7 +121,11 @@
  The completion block will not be called until the given URL's contents are fully loaded. That way, if you show the
  panel in the completion block, nothing will be "in progress". You can still show the panel beforehand but much of
  the UI will be disabled until the URL is loaded. The UI will still be responsive in that you'll see progress
- indicators spinning and you can still cancel the panel. The completion block is called on the main thread.
+ indicators spinning and you can still cancel the panel.
+ 
+ The completion block is called on the main thread, and as a nicety,
+ deliberately *avoids* using a dispatch queue to do so, so you can call
+ `-runModal` from within it if desired (see the `-runModal` docs for details).
 
  Note that directoryURL immediately reflects the URL this method was called with but may change when the operation
  is complete as the server may resolve the URL to something else. It's best to not rely on the directoryURL until
