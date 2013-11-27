@@ -62,6 +62,7 @@ typedef NSUInteger CKUploadingOptions;
 
 - (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path;
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
+- (void)removeItemAtURL:(NSURL *)url __attribute((nonnull));
 - (void)removeFileAtPath:(NSString *)path;
 
 /**

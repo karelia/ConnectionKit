@@ -118,14 +118,19 @@
 
 #pragma mark Publishing
 
-- (void)removeFileAtPath:(NSString *)path;
+- (void)removeItemAtURL:(NSURL *)url;
 {
-    [self removeFileAtPath:path reportError:YES];
+    [self removeItemAtURL:url reportError:YES];
 }
 
-- (void)removeFileAtPath:(NSString *)path reportError:(BOOL)reportError;
+- (void)removeFileAtPath:(NSString *)path;
 {
-    __block CK2FileOperation *op = [_fileManager removeOperationWithURL:[self URLForPath:path] completionHandler:^(NSError *error) {
+    [self removeItemAtURL:[self URLForPath:path]];
+}
+
+- (void)removeItemAtURL:(NSURL *)url reportError:(BOOL)reportError;
+{
+    __block CK2FileOperation *op = [_fileManager removeOperationWithURL:url completionHandler:^(NSError *error) {
         [self operation:op didFinish:(reportError ? error : nil)];
     }];
     
@@ -169,7 +174,7 @@
     if (_options & CKUploadingDeleteExistingFileFirst)
 	{
         // The file might not exist, so will fail in that case. We don't really care since should a deletion fail for a good reason, that ought to then cause the actual upload to fail
-        [self removeFileAtPath:path reportError:NO];
+        [self removeItemAtURL:[self URLForPath:path] reportError:NO];
 	}
     
     CKTransferRecord *result = [self makeTransferRecordWithPath:path operation:operation];
