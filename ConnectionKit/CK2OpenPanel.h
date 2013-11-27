@@ -137,6 +137,15 @@
 
 - (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
 - (void)beginWithCompletionHandler:(void (^)(NSInteger result))handler;
+
+/**
+ Displays the panel and begins its event loop with the current working (or last selected) directory as the default starting point.
+ 
+ @return `NSFileHandlingPanelOKButton` (if the user clicks the OK button) or `NSFileHandlingPanelCancelButton` (if the user clicks the Cancel button).
+ 
+ This method invokes `-[NSApplication runModalForWindow:` with `self` as the
+ argument.
+ */
 - (NSInteger)runModal;
 
 - (IBAction)ok:(id)sender;
