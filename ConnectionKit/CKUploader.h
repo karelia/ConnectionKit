@@ -36,8 +36,7 @@ typedef NSUInteger CKUploadingOptions;
     CKTransferRecord    *_rootRecord;
     CKTransferRecord    *_baseRecord;
     
-    BOOL    _isFinishing;
-    BOOL    _isCancelled;
+    BOOL    _invalidated;
     
     id <CKUploaderDelegate> _delegate;
     void                    (^_completionBlock)();
@@ -57,6 +56,7 @@ typedef NSUInteger CKUploadingOptions;
                filePosixPermissions:(NSNumber *)customPermissions
                             options:(CKUploadingOptions)options;
 
+@property (nonatomic, copy, readonly) NSURLRequest *baseRequest;
 @property (nonatomic, assign, readonly) CKUploadingOptions options;
 @property (nonatomic, assign) id <CKUploaderDelegate> delegate;
 
@@ -64,13 +64,17 @@ typedef NSUInteger CKUploadingOptions;
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
 - (void)removeFileAtPath:(NSString *)path;
 
+/**
+ The underlying `CK2FileOperation`s that are in the queue.
+ */
+- (NSArray *)operations;
+
 @property (nonatomic, retain, readonly) CKTransferRecord *rootTransferRecord;
 @property (nonatomic, retain, readonly) CKTransferRecord *baseTransferRecord;
 
 - (void)finishUploading;    // will disconnect once all files are uploaded
 - (void)finishUploadingWithCompletionHandler:(void (^)())handler;
 - (void)cancel;             // bails out as quickly as possible
-- (BOOL)isCancelled;
 
 // The permissions given to uploaded files
 - (unsigned long)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;

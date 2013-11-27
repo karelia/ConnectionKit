@@ -13,6 +13,10 @@
 {
   @private
     BOOL    _atEnd;
+    
+    // SSL
+    NSURLCredential *_credential;
+    NSUInteger      _sslFailures;
 }
 
 @end

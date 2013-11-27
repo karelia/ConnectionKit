@@ -227,6 +227,12 @@
     }
 }
 
+- (void)dealloc;
+{
+    [_credential release];
+    [super dealloc];
+}
+
 #pragma mark Errors
 
 - (NSError*)translateStandardErrors:(NSError*)error
@@ -281,17 +287,17 @@
                                                                        realm:nil
                                                         authenticationMethod:NSURLAuthenticationMethodDefault];
     
-    NSURLAuthenticationChallenge *challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
-                                                                                         proposedCredential:nil // client will fill it in for us
-                                                                                       previousFailureCount:0
-                                                                                            failureResponse:nil
-                                                                                                      error:nil
-                                                                                                     sender:self];
-    
+    [self startWithProtectionSpace:space];
     [space release];
+}
+
+- (void)startWithRequest:(NSURLRequest *)request credential:(NSURLCredential *)credential;
+{
+    // Cache the credential in case we need to retry FTPS
+    [credential retain];
+    [_credential release]; _credential = credential;
     
-    [[self client] protocol:self didReceiveAuthenticationChallenge:challenge];
-    [challenge release];
+    [super startWithRequest:request credential:credential];
 }
 
 #pragma mark Home Directory
@@ -318,6 +324,54 @@
 }*/
 
 #pragma mark CURLTransferDelegate
+
+- (void)transfer:(CURLTransfer *)transfer didCompleteWithError:(NSError *)error;
+{
+    // For SSL errors, report extra info
+    if (error.code == CURLE_SSL_CACERT && [error.domain isEqualToString:CURLcodeErrorDomain])
+    {
+        NSString *host = transfer.primaryIPAddress;
+        if (!host) host = self.request.URL.host;
+        
+        NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:host
+                                                                            port:self.request.URL.port.integerValue
+                                                                        protocol:@"ftps"
+                                                                           realm:nil
+                                                            authenticationMethod:NSURLAuthenticationMethodServerTrust];
+        
+        _sslFailures++;
+        
+        NSURLAuthenticationChallenge *challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
+                                                                                             proposedCredential:nil
+                                                                                           previousFailureCount:_sslFailures
+                                                                                                failureResponse:nil
+                                                                                                          error:error
+                                                                                                         sender:nil];
+        
+        [self.client protocol:self didReceiveChallenge:challenge completionHandler:^(CK2AuthChallengeDisposition disposition, NSURLCredential *credential) {
+            
+            if (disposition == CK2AuthChallengeUseCredential && credential)
+            {
+                // Retry
+                NSMutableURLRequest *request = [self.request mutableCopy];
+                [request curl_setShouldVerifySSLCertificate:NO];
+                [self startWithRequest:request credential:_credential];
+                [request release];
+            }
+            else
+            {
+                [super transfer:transfer didCompleteWithError:error];
+            }
+        }];
+        
+        [challenge release];
+        [space release];
+        
+        return;
+    }
+    
+    [super transfer:transfer didCompleteWithError:error];
+}
 
 - (void)transfer:(CURLTransfer *)transfer didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
 {

@@ -66,8 +66,6 @@
 		27431CA11630381D00F6FB58 /* CK2FileProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */; };
 		2743E8091622E47600019979 /* CK2FileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 2743E8071622E47600019979 /* CK2FileManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2743E80A1622E47600019979 /* CK2FileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 2743E8081622E47600019979 /* CK2FileManager.m */; };
-		278CA749178DDAA3000A4F19 /* CK2TrampolineAuthenticationChallenge.h in Headers */ = {isa = PBXBuildFile; fileRef = 278CA747178DDAA3000A4F19 /* CK2TrampolineAuthenticationChallenge.h */; };
-		278CA74A178DDAA3000A4F19 /* CK2TrampolineAuthenticationChallenge.m in Sources */ = {isa = PBXBuildFile; fileRef = 278CA748178DDAA3000A4F19 /* CK2TrampolineAuthenticationChallenge.m */; };
 		278CFE1316BADE030018A14B /* URLCanonicalizationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 278CFE1216BADE030018A14B /* URLCanonicalizationTests.m */; };
 		278D8B79167FF35D00622468 /* CK2Authentication.h in Headers */ = {isa = PBXBuildFile; fileRef = 278D8B77167FF35D00622468 /* CK2Authentication.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		278D8B7A167FF35D00622468 /* CK2Authentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 278D8B78167FF35D00622468 /* CK2Authentication.m */; };
@@ -357,8 +355,6 @@
 		2743E8081622E47600019979 /* CK2FileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManager.m; sourceTree = "<group>"; };
 		27448C2414580F7500EB086F /* DAVKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = DAVKit.xcodeproj; path = ../DAVKit/DAVKit.xcodeproj; sourceTree = "<group>"; };
 		27448C371458100D00EB086F /* DAVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DAVKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		278CA747178DDAA3000A4F19 /* CK2TrampolineAuthenticationChallenge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2TrampolineAuthenticationChallenge.h; sourceTree = "<group>"; };
-		278CA748178DDAA3000A4F19 /* CK2TrampolineAuthenticationChallenge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2TrampolineAuthenticationChallenge.m; sourceTree = "<group>"; };
 		278CFE1216BADE030018A14B /* URLCanonicalizationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = URLCanonicalizationTests.m; sourceTree = "<group>"; };
 		278D8B77167FF35D00622468 /* CK2Authentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2Authentication.h; sourceTree = "<group>"; };
 		278D8B78167FF35D00622468 /* CK2Authentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2Authentication.m; sourceTree = "<group>"; };
@@ -951,8 +947,6 @@
 		79CFD8A009F705B400172CDD /* Private */ = {
 			isa = PBXGroup;
 			children = (
-				278CA747178DDAA3000A4F19 /* CK2TrampolineAuthenticationChallenge.h */,
-				278CA748178DDAA3000A4F19 /* CK2TrampolineAuthenticationChallenge.m */,
 				273F0E13164E8D3E00588885 /* Protocols */,
 			);
 			name = Private;
@@ -1021,7 +1015,6 @@
 				27F394F5162C162900944F43 /* CK2SFTPProtocol.h in Headers */,
 				27431CA01630381D00F6FB58 /* CK2FileProtocol.h in Headers */,
 				27A2072B1671634800D8284D /* CK2CURLBasedProtocol.h in Headers */,
-				278CA749178DDAA3000A4F19 /* CK2TrampolineAuthenticationChallenge.h in Headers */,
 				278D8B79167FF35D00622468 /* CK2Authentication.h in Headers */,
 				ADEE5E18169C84DF006188C5 /* KMSState.h in Headers */,
 				27993E8416FCB30D008DC1B0 /* CK2FileOperation.h in Headers */,
@@ -1463,7 +1456,6 @@
 				2790A94916278F1D000C9D9F /* CK2FTPProtocol.m in Sources */,
 				27F394F6162C162900944F43 /* CK2SFTPProtocol.m in Sources */,
 				27431CA11630381D00F6FB58 /* CK2FileProtocol.m in Sources */,
-				278CA74A178DDAA3000A4F19 /* CK2TrampolineAuthenticationChallenge.m in Sources */,
 				2288CD76165A99FC00F34E24 /* CK2WebDAVProtocol.m in Sources */,
 				27A2072C1671634800D8284D /* CK2CURLBasedProtocol.m in Sources */,
 				278D8B7A167FF35D00622468 /* CK2Authentication.m in Sources */,

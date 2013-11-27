@@ -461,17 +461,16 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     return request;
 }
 
-- (void)protocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)originalChallenge;
+- (void)protocol:(CK2Protocol *)protocol didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
 {
     NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     if (self.state >= CK2FileOperationStateCanceling) return; // don't care about auth once cancelled
     
     
     // Invent a default credential if needed
-    NSURLAuthenticationChallenge *challenge = originalChallenge;
-    if (!originalChallenge.proposedCredential)
+    if (!challenge.proposedCredential)
     {
-        NSURLProtectionSpace *space = originalChallenge.protectionSpace;
+        NSURLProtectionSpace *space = challenge.protectionSpace;
         NSString *user = self.originalURL.user;
         NSString *password = self.originalURL.password;
         
@@ -487,10 +486,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         
         challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
                                                                proposedCredential:credential
-                                                             previousFailureCount:originalChallenge.previousFailureCount
-                                                                  failureResponse:originalChallenge.failureResponse
-                                                                            error:originalChallenge.error
-                                                                           sender:originalChallenge.sender];
+                                                             previousFailureCount:challenge.previousFailureCount
+                                                                  failureResponse:challenge.failureResponse
+                                                                            error:challenge.error
+                                                                           sender:challenge.sender];
         
         [challenge autorelease];
     }
@@ -510,37 +509,9 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             if (handlerCalled) [NSException raise:NSInvalidArgumentException format:@"Auth Challenge completion handler block called more than once"];
             handlerCalled = YES;
             
-            id <NSURLAuthenticationChallengeSender> sender = originalChallenge.sender;
-            
-            switch (disposition)
-            {
-                case CK2AuthChallengeUseCredential:
-                    dispatch_async(_queue, ^{
-                        [sender useCredential:credential forAuthenticationChallenge:originalChallenge];
-                    });
-                    break;
-                    
-                case CK2AuthChallengePerformDefaultHandling:
-                    [self performDefaultHandlingForAuthenticationChallenge:originalChallenge proposedCredential:challenge.proposedCredential];
-                    break;
-                    
-                case CK2AuthChallengeRejectProtectionSpace:
-                    if ([sender respondsToSelector:@selector(rejectProtectionSpaceAndContinueWithChallenge:)])
-                    {
-                        [sender rejectProtectionSpaceAndContinueWithChallenge:originalChallenge];
-                        break;
-                    }
-                    // On 10.6, fall back to cancelling the challenge till I think of something better
-                    
-                case CK2AuthChallengeCancelAuthenticationChallenge:
-                    dispatch_async(_queue, ^{
-                        [sender cancelAuthenticationChallenge:originalChallenge];
-                    });
-                    break;
-                    
-                default:
-                    [NSException raise:NSInvalidArgumentException format:@"Unrecognised Auth Challenge Disposition"];
-            }
+            dispatch_async(_queue, ^{
+                completionHandler(disposition, credential);
+            });
         }];
             
         }];
@@ -551,37 +522,13 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     }
     else
     {
-        [self performDefaultHandlingForAuthenticationChallenge:originalChallenge proposedCredential:challenge.proposedCredential];
+        dispatch_async(_queue, ^{
+            completionHandler(CK2AuthChallengePerformDefaultHandling, nil);
+        });
     }
     
     
     // TODO: Cache credentials per protection space
-}
-
-- (void)performDefaultHandlingForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge proposedCredential:(NSURLCredential *)credential;
-{
-    dispatch_async(_queue, ^{
-        
-        id <NSURLAuthenticationChallengeSender> sender = challenge.sender;
-        if ([sender respondsToSelector:@selector(performDefaultHandlingForAuthenticationChallenge:)])
-        {
-            [sender performDefaultHandlingForAuthenticationChallenge:challenge];
-        }
-        else
-        {
-            if (challenge.previousFailureCount == 0)
-            {
-                if (credential)
-                {
-                    [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
-                    return;
-                }
-            }
-            
-            // Happily this performs the default handling for server trust challenges it seems
-            [challenge.sender continueWithoutCredentialForAuthenticationChallenge:challenge];
-        }
-    });
 }
 
 - (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;

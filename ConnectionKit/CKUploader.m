@@ -100,12 +100,10 @@
 #pragma mark Properties
 
 @synthesize delegate = _delegate;
-
+@synthesize baseRequest = _request;
 @synthesize options = _options;
 @synthesize rootTransferRecord = _rootRecord;
 @synthesize baseTransferRecord = _baseRecord;
-
-- (NSURLRequest *)request; { return _request; }
 
 - (unsigned long)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
 {
@@ -128,8 +126,8 @@
 
 - (void)removeFileAtPath:(NSString *)path reportError:(BOOL)reportError;
 {
-    CK2FileOperation *op = [_fileManager removeOperationWithURL:[self URLForPath:path] completionHandler:^(NSError *error) {
-        [self operation:nil didFinish:(reportError ? error : nil)];
+    __block CK2FileOperation *op = [_fileManager removeOperationWithURL:[self URLForPath:path] completionHandler:^(NSError *error) {
+        [self operation:op didFinish:(reportError ? error : nil)];
     }];
     
     [self addOperation:op];
@@ -200,7 +198,7 @@
 
 - (NSURL *)URLForPath:(NSString *)path;
 {
-    return [CK2FileManager URLWithPath:path relativeToURL:[self request].URL];
+    return [CK2FileManager URLWithPath:path relativeToURL:self.baseRequest.URL];
 }
 
 - (void)finishUploading;
@@ -210,7 +208,7 @@
 
 - (void)finishUploadingWithCompletionHandler:(void (^)())handler;
 {
-    _isFinishing = YES;
+    _invalidated = YES;
     
     // Add in the new completion block
     if (handler)
@@ -218,7 +216,7 @@
         void (^existingHandler)(NSError*) = _completionBlock;
         
         _completionBlock = ^(NSError *error) {
-            existingHandler(error);
+            if (existingHandler) existingHandler(error);
             handler(error);
         };
         _completionBlock = [_completionBlock copy];
@@ -230,15 +228,12 @@
 
 #pragma mark Queue
 
+- (NSArray *)operations; { return [[_queue copy] autorelease]; }
+
 - (void)cancel;
 {
-    _isCancelled = YES;
-    [self.currentOperation cancel];
-    [_queue makeObjectsPerformSelector:_cmd];
-    [_queue release]; _queue = nil;
+    [self.operations makeObjectsPerformSelector:_cmd];
 }
-
-- (BOOL)isCancelled; { return _isCancelled; }
 
 - (CK2FileOperation *)currentOperation; { return [_queue firstObject]; }
 
@@ -247,37 +242,54 @@
     NSAssert([NSThread isMainThread], @"-addOperation: is only safe to call on the main thread");
     
     // No more operations can go on once finishing up
-    if (_isFinishing) return;
+    if (_invalidated) return;
     
     [_queue addObject:operation];
     if (_queue.count == 1) [self startNextOperation];
 }
 
+- (void)removeOperationAndStartNextIfAppropriate:(CK2FileOperation *)operation;
+{
+    NSParameterAssert(operation);
+    NSAssert([NSThread isMainThread], @"-%@ is only safe to call on the main thread", NSStringFromSelector(_cmd));
+    
+    // We assume the operation is only in the queue the once, and most likely near the front
+    NSUInteger index = [_queue indexOfObject:operation];
+    if (index != NSNotFound) [_queue removeObjectAtIndex:index];
+    
+    // If was the current op, time to start the next
+    if (index == 0) [self startNextOperation];
+}
+
 - (void)startNextOperation;
 {
-    if (_queue.count)
+    while (_queue.count)
     {
         CK2FileOperation *operation = [_queue objectAtIndex:0];
-        
-        if (!self.isCancelled)
+        if (operation.state == CK2FileOperationStateSuspended)
         {
             [operation resume];
             
             CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
             [record transferDidBegin:record];
             if (record) [self.delegate uploader:self didBeginUploadToPath:record.path];
+            
+            return;
+        }
+        else
+        {
+            // Something other than us must have started the op
+            [_queue removeObjectAtIndex:0];
         }
     }
-    else if (_isFinishing)
-    {
-        NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
-        [self complete];
-    }
+    
+    if (_invalidated) [self complete];
 }
 
 - (void)operation:(CK2FileOperation *)operation didFinish:(NSError *)error;
 {
     NSAssert([NSThread isMainThread], @"Operation broke threading contract");
+    NSParameterAssert(operation);
     
         // Tell the record & delegate it's finished
         CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
@@ -290,7 +302,9 @@
             [delegate uploader:self transferRecord:record didCompleteWithError:error];
         }
         
-        if (error)
+        
+        // The delegate has a say in error handling, but there's no point if the op was cancelled
+        if (error && !(error.code == NSURLErrorCancelled && [error.domain isEqualToString:NSURLErrorDomain]))
         {
             if ([delegate respondsToSelector:@selector(uploader:transferRecord:shouldProceedAfterError:completionHandler:)])
             {
@@ -298,8 +312,7 @@
                     
                     if (proceed)
                     {
-                        [_queue removeObjectAtIndex:0];
-                        if (!self.isCancelled) [self startNextOperation];
+                        [self removeOperationAndStartNextIfAppropriate:operation];
                     }
                     else
                     {
@@ -311,8 +324,7 @@
             }
         }
         
-        [_queue removeObjectAtIndex:0];
-        if (!self.isCancelled) [self startNextOperation];
+        [self removeOperationAndStartNextIfAppropriate:operation];
 }
 
 #pragma mark Transfer Records
@@ -366,6 +378,23 @@
 }
 
 #pragma mark CK2FileManager Delegate
+
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)response completionHandler:(void (^)(NSURLRequest *))completionHandler;
+{
+    // Apply any customisations
+    NSMutableURLRequest *customized = [request mutableCopy];
+    
+    [self.baseRequest.allHTTPHeaderFields enumerateKeysAndObjectsUsingBlock:^(NSString *aField, NSString *aValue, BOOL *stop) {
+        
+        if (![customized valueForHTTPHeaderField:aField])
+        {
+            [customized setValue:aValue forHTTPHeaderField:aField];
+        }
+    }];
+    
+    completionHandler(customized);
+    [customized release];
+}
 
 - (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
 {

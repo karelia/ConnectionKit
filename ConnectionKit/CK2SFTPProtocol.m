@@ -244,18 +244,8 @@
                                                                         realm:nil
                                                          authenticationMethod:NSURLAuthenticationMethodDefault];
     
-    NSURLAuthenticationChallenge *challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
-                                                                                         proposedCredential:nil // client will fill it in for us
-                                                                                       previousFailureCount:0
-                                                                                            failureResponse:nil
-                                                                                                      error:nil
-                                                                                                     sender:self];
-    
-    
+    [self startWithProtectionSpace:space];
     [space release];
-    
-    [[self client] protocol:self didReceiveAuthenticationChallenge:challenge];
-    [challenge release];
 }
 
 - (void)stop;
@@ -282,42 +272,6 @@
 }
 
 #pragma mark Auth
-
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    if (challenge == _fingerprintChallenge && _fingerprintChallenge)
-    {
-        [self useKnownHostsStat:([credential persistence] == NSURLCredentialPersistencePermanent ? CURLKHSTAT_FINE_ADD_TO_FILE : CURLKHSTAT_FINE)];
-    }
-    else
-    {
-        [super useCredential:credential forAuthenticationChallenge:challenge];
-    }
-}
-
-- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    if (challenge == _fingerprintChallenge && _fingerprintChallenge)
-    {
-        [self useKnownHostsStat:CURLKHSTAT_REJECT];
-    }
-    else
-    {
-        [super continueWithoutCredentialForAuthenticationChallenge:challenge];
-    }
-}
-
-- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    if (challenge == _fingerprintChallenge && _fingerprintChallenge)
-    {
-        [self useKnownHostsStat:CURLKHSTAT_REJECT];
-    }
-    else
-    {
-        [super cancelAuthenticationChallenge:challenge];
-    }
-}
 
 - (id)initWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
@@ -395,10 +349,34 @@
                                                                          previousFailureCount:0
                                                                               failureResponse:nil
                                                                                         error:nil
-                                                                                       sender:self];
+                                                                                       sender:nil];
         
         _fingerprintSemaphore = dispatch_semaphore_create(0);   // must be setup before handing off to client
-        [[self client] protocol:self didReceiveAuthenticationChallenge:_fingerprintChallenge];
+        
+        [[self client] protocol:self didReceiveChallenge:_fingerprintChallenge completionHandler:^(CK2AuthChallengeDisposition disposition, NSURLCredential *credential) {
+            
+            switch (disposition)
+            {
+                case CK2AuthChallengePerformDefaultHandling:
+                    credential = _fingerprintChallenge.proposedCredential;
+                    
+                case CK2AuthChallengeUseCredential:
+                    if (credential)
+                    {
+                        [self useKnownHostsStat:(credential.persistence == NSURLCredentialPersistencePermanent ? CURLKHSTAT_FINE_ADD_TO_FILE : CURLKHSTAT_FINE)];
+                    }
+                    else
+                    {
+                        [self useKnownHostsStat:CURLKHSTAT_REJECT];
+                    }
+                    break;
+                    
+                default:
+                    [self.client protocol:self didCompleteWithError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:nil]];
+                    [self useKnownHostsStat:CURLKHSTAT_REJECT];
+                    break;
+            }
+        }];
     }
     
     // Until the client replies, give libcurl a chance to process anything else. Ugly isn't it?

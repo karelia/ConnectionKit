@@ -192,6 +192,8 @@
     else
     {
         NSData *replacement = [(NSString *)user dataUsingEncoding:NSUTF8StringEncoding];
+        
+        if (!user) authRange.length = authSeparatorsRange.location + authSeparatorsRange.length - authRange.location;
         CFDataReplaceBytes((CFMutableDataRef)data, authRange, [replacement bytes], replacement.length);
     }
     

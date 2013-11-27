@@ -13,7 +13,7 @@
 
 @class CK2RemoteURL;
 
-@interface CK2CURLBasedProtocol : CK2Protocol <CURLTransferDelegate, NSURLAuthenticationChallengeSender>
+@interface CK2CURLBasedProtocol : CK2Protocol <CURLTransferDelegate>
 {
     CURLTransfer    *_transfer;
     BOOL            _cancelled;
@@ -43,6 +43,8 @@
 
 // If the protocol requires authentication, override -start to fire off an authentication challenge to the client. When a response is received to the challenge, CK2CURLBasedProtocol automatically handles it to start up the handle/request
 - (void)start;
+- (void)startWithProtectionSpace:(NSURLProtectionSpace *)protectionSpace;
+- (void)startWithRequest:(NSURLRequest *)request credential:(NSURLCredential *)credential;
 
 
 #pragma mark Customization

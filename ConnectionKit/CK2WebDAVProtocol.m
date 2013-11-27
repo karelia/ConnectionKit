@@ -5,13 +5,12 @@
 //
 
 #import "CK2WebDAVProtocol.h"
-#import "CK2TrampolineAuthenticationChallenge.h"
 
 #ifndef CK2WebDAVLog
 #define CK2WebDAVLog NSLog
 #endif
 
-@interface CK2WebDAVProtocol() <NSURLAuthenticationChallengeSender>
+@interface CK2WebDAVProtocol()
 
 @property (copy, nonatomic) CK2WebDAVCompletionHandler completionHandler;
 @property (copy, nonatomic) CK2WebDAVErrorHandler errorHandler;
@@ -367,22 +366,23 @@
 
 #pragma mark WebDAV Authentication
 
-- (void)webDAVSession:(DAVSession *)session didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)webDAVSession:(DAVSession *)session didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSInteger, NSURLCredential *))completionHandler;
 {
     CK2WebDAVLog(@"webdav received challenge");
     
-    challenge = [[CK2TrampolineAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge sender:self];
-    [[self client] protocol:self didReceiveAuthenticationChallenge:challenge];
-    [challenge release];
-}
-
-- (void)webDAVSession:(DAVSession *)session didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    CK2WebDAVLog(@"webdav cancelled challenge");
-    
-    [self.client protocol:self didCompleteWithError:[NSError errorWithDomain:NSURLErrorDomain
-                                                                        code:NSURLErrorUserCancelledAuthentication
-                                                                    userInfo:nil]];
+    [self.client protocol:self didReceiveChallenge:challenge completionHandler:^(CK2AuthChallengeDisposition disposition, NSURLCredential *credential) {
+        
+        if (disposition == CK2AuthChallengeUseCredential)
+        {
+            NSString *user = credential.user;
+            if (user)
+            {
+                [_user release]; _user = [user copy];
+            }
+        }
+        
+        completionHandler(disposition, credential);
+    }];
 }
 
 - (void)webDAVSession:(DAVSession *)session appendStringToTranscript:(NSString *)string sent:(BOOL)sent;
@@ -393,44 +393,6 @@
     string = [string stringByAppendingString:@"\n"];
     
     [[self client] protocol:self appendString:string toTranscript:(sent ? CK2TranscriptHeaderOut : CK2TranscriptHeaderIn)];
-}
-
-#pragma mark NSURLAuthenticationChallengeSender
-
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(CK2TrampolineAuthenticationChallenge *)challenge;
-{
-    NSString *user = credential.user;
-    if (user)
-    {
-        [_user release]; _user = [user copy];
-    }
-    
-    NSURLAuthenticationChallenge *original = challenge.originalChallenge;
-    
-    // Add to transcript since DAVKit isn't in a position to do that
-    if (challenge.failureResponse)
-    {
-        DAVRequest *op = [self.queue.operations objectAtIndex:0];
-        NSURLRequest *request = op.request;
-        
-        [self.client protocol:self
-                 appendString:[NSString stringWithFormat:@"%@ %@", request.HTTPMethod, request.URL.path]
-                 toTranscript:CK2TranscriptHeaderOut];
-    }
-    
-    [original.sender useCredential:credential forAuthenticationChallenge:original];
-}
-
-- (void)continueWithoutCredentialForAuthenticationChallenge:(CK2TrampolineAuthenticationChallenge *)challenge;
-{
-    NSURLAuthenticationChallenge *original = challenge.originalChallenge;
-    [original.sender continueWithoutCredentialForAuthenticationChallenge:original];
-}
-
-- (void)cancelAuthenticationChallenge:(CK2TrampolineAuthenticationChallenge *)challenge;
-{
-    NSURLAuthenticationChallenge *original = challenge.originalChallenge;
-    [original.sender cancelAuthenticationChallenge:original];
 }
 
 #pragma mark - Utilities
