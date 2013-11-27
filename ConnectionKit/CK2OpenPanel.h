@@ -145,6 +145,15 @@
  
  This method invokes `-[NSApplication runModalForWindow:` with `self` as the
  argument.
+ 
+ You must **NOT** run an open panel modally from the main dispatch
+ queue. Doing so will block the queue, preventing important internal callbacks
+ from arriving, including from ConnectionKit itself, and the springy scrolling
+ behaviour introduced in 10.7+.
+ 
+ Instead, call as part of regular runloop activity, such as directly from a user-
+ generated event, or deferred execution using something like
+ `-performSelector:afterDelay:…`
  */
 - (NSInteger)runModal;
 
