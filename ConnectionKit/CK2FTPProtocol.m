@@ -330,11 +330,10 @@
     // For SSL errors, report extra info
     if (error.code == CURLE_SSL_CACERT && [error.domain isEqualToString:CURLcodeErrorDomain])
     {
-        NSString *host = transfer.primaryIPAddress;
-        if (!host) host = self.request.URL.host;
+        NSURL *url = self.request.URL;
         
-        NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:host
-                                                                            port:self.request.URL.port.integerValue
+        NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:url.host
+                                                                            port:url.port.integerValue
                                                                         protocol:@"ftps"
                                                                            realm:nil
                                                             authenticationMethod:NSURLAuthenticationMethodServerTrust];
