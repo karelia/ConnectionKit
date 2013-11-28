@@ -343,7 +343,15 @@
 
 - (NSURLRequest *)request:(DAVRequest *)aRequest willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponse;
 {
-    return [self.client protocol:self willSendRequest:request redirectResponse:redirectResponse];
+    if (redirectResponse)
+    {
+        // Dissallow redirects as we have no security mechanism to manage them currnetly
+        return nil;
+    }
+    else
+    {
+        return [self.client protocol:self willSendRequest:request redirectResponse:redirectResponse];
+    }
 }
 
 - (void)webDAVRequest:(DAVRequest *)request didSendDataOfLength:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite
