@@ -10,6 +10,8 @@
 
 #import "CK2FileOperation.h"
 
+#import <CURLHandle/CURLHandle.h>
+
 
 @implementation CKUploader
 
@@ -389,15 +391,20 @@
 - (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)response completionHandler:(void (^)(NSURLRequest *))completionHandler;
 {
     // Apply any customisations
+    // Only allow SSL security to be *up*graded
+    NSURLRequest *base = self.baseRequest;
     NSMutableURLRequest *customized = [request mutableCopy];
     
-    [self.baseRequest.allHTTPHeaderFields enumerateKeysAndObjectsUsingBlock:^(NSString *aField, NSString *aValue, BOOL *stop) {
+    [base.allHTTPHeaderFields enumerateKeysAndObjectsUsingBlock:^(NSString *aField, NSString *aValue, BOOL *stop) {
         
         if (![customized valueForHTTPHeaderField:aField])
         {
             [customized setValue:aValue forHTTPHeaderField:aField];
         }
     }];
+    
+    curl_usessl level = base.curl_desiredSSLLevel;
+    if (level > customized.curl_desiredSSLLevel) [customized curl_setDesiredSSLLevel:level];
     
     completionHandler(customized);
     [customized release];
