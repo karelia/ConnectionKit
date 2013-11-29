@@ -236,9 +236,10 @@
 
 - (NSArray *)operations; { return [[_queue copy] autorelease]; }
 
-- (void)cancel;
+- (void)invalidateAndCancel;
 {
-    [self.operations makeObjectsPerformSelector:_cmd];
+    [self.operations makeObjectsPerformSelector:@selector(cancel)];
+    [self finishOperationsAndInvalidate];
 }
 
 - (CK2FileOperation *)currentOperation; { return [_queue firstObject]; }
@@ -324,7 +325,7 @@
                     }
                     else
                     {
-                        [self cancel];
+                        [self.operations makeObjectsPerformSelector:@selector(cancel)];
                     }
                 }];
                 

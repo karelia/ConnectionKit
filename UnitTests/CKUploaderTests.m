@@ -198,7 +198,7 @@
         STAssertTrue(record.size == [testData length], @"unexpected size %ld", record.size);
         [uploader finishOperationsAndInvalidate];
         STAssertFalse(self.finished, @"should not be finished");
-        [uploader cancel];
+        [uploader invalidateAndCancel];
     }
 }
 
