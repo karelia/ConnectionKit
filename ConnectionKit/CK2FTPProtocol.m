@@ -272,14 +272,21 @@
 {
     // If there's no request, that means we were asked to do nothing possible over FTP. Most likely, storing attributes that aren't POSIX permissions
     // So jump straight to completion
-    if (![self request])
+    NSURLRequest *request = self.request;
+    if (!request)
     {
         [[self client] protocol:self didCompleteWithError:nil];
         return;
     }
 
     NSURL *url = [[self request] URL];
-    NSString *protocol = ([@"ftps" caseInsensitiveCompare:[url scheme]] == NSOrderedSame ? @"ftps" : NSURLProtectionSpaceFTP);
+    
+    NSString *protocol = NSURLProtectionSpaceFTP;
+    if (request.curl_desiredSSLLevel >= CURLUSESSL_CONTROL ||
+        [@"ftps" caseInsensitiveCompare:[url scheme]] == NSOrderedSame)
+    {
+        protocol = @"ftps";
+    }
     
     NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:[url host]
                                                                         port:[[url port] integerValue]
