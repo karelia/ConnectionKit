@@ -17,7 +17,7 @@
 
 #pragma mark Lifecycle
 
-- (id)initWithRequest:(NSURLRequest *)request filePosixPermissions:(unsigned long)customPermissions options:(CKUploadingOptions)options completionHandler:(void (^)(NSError *error))handler;
+- (id)initWithRequest:(NSURLRequest *)request filePosixPermissions:(unsigned long)customPermissions options:(CKUploadingOptions)options;
 {
     if (self = [self init])
     {
@@ -31,22 +31,6 @@
             _fileManager.delegate = self;
         }
         
-        
-        // Always have some sort of completion action, one way or another
-        if (!handler)
-        {
-            handler = ^(NSError *error) {
-                
-                id <CKUploaderDelegate> delegate = self.delegate;
-                if ([delegate respondsToSelector:@selector(uploaderDidBecomeInvalid:)])
-                {
-                    [self.delegate uploaderDidBecomeInvalid:self];
-                }
-            };
-        }
-        _completionBlock = [handler copy];
-        
-        
         _queue = [[NSMutableArray alloc] init];
         _recordsByOperation = [[NSMutableDictionary alloc] init];
         _rootRecord = [[CKTransferRecord rootRecordWithPath:[[request URL] path]] retain];
@@ -57,30 +41,21 @@
 
 + (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
                filePosixPermissions:(NSNumber *)customPermissions
-                            options:(CKUploadingOptions)options
-                  completionHandler:(void (^)())handler;
-{
-    NSParameterAssert(request);
-    
-    return [[[self alloc] initWithRequest:request
-                     filePosixPermissions:(customPermissions ? [customPermissions unsignedLongValue] : 0644)
-                                  options:options
-                        completionHandler:handler] autorelease];
-}
-
-+ (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
-               filePosixPermissions:(NSNumber *)customPermissions
                             options:(CKUploadingOptions)options;
 {
-    return [self uploaderWithRequest:request filePosixPermissions:customPermissions options:options completionHandler:NULL];
+    NSParameterAssert(request);
+
+    return [[[self alloc] initWithRequest:request
+                     filePosixPermissions:(customPermissions ? [customPermissions unsignedLongValue] : 0644)
+                                  options:options] autorelease];
 }
 
-- (void)complete;
+- (void)didBecomeInvalid;
 {
-    if (_completionBlock)
+    id <CKUploaderDelegate> delegate = self.delegate;
+    if ([delegate respondsToSelector:@selector(uploaderDidBecomeInvalid:)])
     {
-        _completionBlock();
-        [_completionBlock release]; _completionBlock = NULL;    // break retain cycle
+        [self.delegate uploaderDidBecomeInvalid:self];
     }
 }
 
@@ -93,7 +68,6 @@
     [_rootRecord release];
     [_baseRecord release];
     [_recordsByOperation release];
-    [_completionBlock release];
     
     [super dealloc];
 }
@@ -209,6 +183,7 @@
 
 - (void)finishOperationsAndInvalidate;
 {
+    if (_invalidated) return;
     _invalidated = YES;
     
     if (!_queue.count)
@@ -216,7 +191,7 @@
         // Slightly delay delivery so it's similar to if there were operations
         // in the queue
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            [self complete];
+            [self didBecomeInvalid];
         }];
     }
 }
@@ -279,7 +254,7 @@
         }
     }
     
-    if (_invalidated) [self complete];
+    if (_invalidated) [self didBecomeInvalid];
 }
 
 - (void)operation:(CK2FileOperation *)operation didFinish:(NSError *)error;

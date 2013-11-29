@@ -39,17 +39,7 @@ typedef NSUInteger CKUploadingOptions;
     BOOL    _invalidated;
     
     id <CKUploaderDelegate> _delegate;
-    void                    (^_completionBlock)();
 }
-
-/**
- If non-NULL, the handler is called when uploading ends, instead of the `didFinish`
- or `didFail` delegate methods.
- */
-+ (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
-               filePosixPermissions:(NSNumber *)customPermissions
-                            options:(CKUploadingOptions)options
-                  completionHandler:(void (^)())handler;
 
 // File permissions default to 0644. Supply a non-nil value if you want something different, or override -posixPermissionsForPath:isDirectory:
 + (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
