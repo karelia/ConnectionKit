@@ -74,7 +74,6 @@ typedef NSUInteger CKUploadingOptions;
 @property (nonatomic, retain, readonly) CKTransferRecord *baseTransferRecord;
 
 - (void)finishOperationsAndInvalidate;    // will disconnect once all files are uploaded
-- (void)finishUploadingWithCompletionHandler:(void (^)())handler;
 - (void)invalidateAndCancel;             // bails out as quickly as possible
 
 // The permissions given to uploaded files

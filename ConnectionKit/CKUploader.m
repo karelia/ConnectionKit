@@ -209,25 +209,7 @@
 
 - (void)finishOperationsAndInvalidate;
 {
-    [self finishUploadingWithCompletionHandler:NULL];
-}
-
-- (void)finishUploadingWithCompletionHandler:(void (^)())handler;
-{
     _invalidated = YES;
-    
-    // Add in the new completion block
-    if (handler)
-    {
-        void (^existingHandler)(NSError*) = _completionBlock;
-        
-        _completionBlock = ^(NSError *error) {
-            if (existingHandler) existingHandler(error);
-            handler(error);
-        };
-        _completionBlock = [_completionBlock copy];
-        [existingHandler release];
-    }
     
     if (!_queue.count)
     {
