@@ -106,8 +106,8 @@ typedef NSUInteger CKUploadingOptions;
 - (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record
                                   didCompleteWithError:(NSError *)error;
 
-// These are semi-deprecated in favour of completion handler
-- (void)uploaderDidFinishUploading:(CKUploader *)uploader;
+- (void)uploaderDidBecomeInvalid:(CKUploader *)uploader;
+
 - (void)uploader:(CKUploader *)uploader didFailWithError:(NSError *)error;  // never called any more
 
 @end

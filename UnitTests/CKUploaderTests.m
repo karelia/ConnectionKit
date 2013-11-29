@@ -48,7 +48,7 @@
 
 #pragma mark - Upload Delegate Methods
 
-- (void)uploaderDidFinishUploading:(CKUploader *)uploader
+- (void)uploaderDidBecomeInvalid:(CKUploader *)uploader
 {
     self.finished = YES;
     [self pause];
