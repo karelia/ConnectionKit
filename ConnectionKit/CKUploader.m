@@ -229,7 +229,14 @@
         [existingHandler release];
     }
     
-    if (!_queue.count) [self complete];
+    if (!_queue.count)
+    {
+        // Slightly delay delivery so it's similar to if there were operations
+        // in the queue
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [self complete];
+        }];
+    }
 }
 
 #pragma mark Queue
