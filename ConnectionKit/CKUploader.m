@@ -221,15 +221,15 @@
     }
 }
 
-#pragma mark Queue
-
-- (NSArray *)operations; { return [[_queue copy] autorelease]; }
-
 - (void)invalidateAndCancel;
 {
     [self.operations makeObjectsPerformSelector:@selector(cancel)];
     [self finishOperationsAndInvalidate];
 }
+
+#pragma mark Queue
+
+- (NSArray *)operations; { return [[_queue copy] autorelease]; }
 
 - (CK2FileOperation *)currentOperation; { return [_queue firstObject]; }
 
