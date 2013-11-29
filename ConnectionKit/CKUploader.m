@@ -229,7 +229,7 @@
         [existingHandler release];
     }
     
-    if (!_queue.count) [self startNextOperation];
+    if (!_queue.count) [self complete];
 }
 
 #pragma mark Queue
