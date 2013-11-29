@@ -249,7 +249,7 @@
     NSAssert([NSThread isMainThread], @"-addOperation: is only safe to call on the main thread");
     
     // No more operations can go on once finishing up
-    if (_invalidated) return;
+    if (_invalidated) [NSException raise:NSInvalidArgumentException format:@"%@ has been invalidated", self];
     
     [_queue addObject:operation];
     if (_queue.count == 1) [self startNextOperation];
