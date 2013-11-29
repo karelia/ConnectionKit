@@ -207,7 +207,7 @@
     return [CK2FileManager URLWithPath:path relativeToURL:self.baseRequest.URL];
 }
 
-- (void)finishUploading;
+- (void)finishOperationsAndInvalidate;
 {
     [self finishUploadingWithCompletionHandler:NULL];
 }

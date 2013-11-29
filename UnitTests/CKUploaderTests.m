@@ -132,7 +132,7 @@
         CKTransferRecord *record = [uploader uploadFileAtURL:url toPath:@"test/test.txt"];
         STAssertNotNil(record, @"got a transfer record");
         STAssertTrue(record.size == [[testData dataUsingEncoding:NSUTF8StringEncoding] length], @"unexpected size %ld", record.size);
-        [uploader finishUploading];
+        [uploader finishOperationsAndInvalidate];
 
         [self runUntilPaused];
         [self checkResultForRecord:record uploading:YES];
@@ -154,7 +154,7 @@
         CKTransferRecord *record = [uploader uploadData:testData toPath:@"test/test.txt"];
         STAssertNotNil(record, @"got a transfer record");
         STAssertTrue(record.size == [testData length], @"unexpected size %ld", record.size);
-        [uploader finishUploading];
+        [uploader finishOperationsAndInvalidate];
 
         [self runUntilPaused];
         [self checkResultForRecord:record uploading:YES];
@@ -173,7 +173,7 @@
     if (uploader)
     {
         [uploader removeFileAtPath:@"test/test.txt"];
-        [uploader finishUploading];
+        [uploader finishOperationsAndInvalidate];
 
         [self runUntilPaused];
         [self checkResultForRecord:nil uploading:NO];
@@ -196,7 +196,7 @@
         CKTransferRecord *record = [uploader uploadData:testData toPath:@"test/test.txt"];
         STAssertNotNil(record, @"got a transfer record");
         STAssertTrue(record.size == [testData length], @"unexpected size %ld", record.size);
-        [uploader finishUploading];
+        [uploader finishOperationsAndInvalidate];
         STAssertFalse(self.finished, @"should not be finished");
         [uploader cancel];
     }
