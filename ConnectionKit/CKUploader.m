@@ -279,14 +279,8 @@
             {
                 [delegate uploader:self transferRecord:record shouldProceedAfterError:error completionHandler:^(BOOL proceed) {
                     
-                    if (proceed)
-                    {
-                        [self removeOperationAndStartNextIfAppropriate:operation];
-                    }
-                    else
-                    {
-                        [self.operations makeObjectsPerformSelector:@selector(cancel)];
-                    }
+                    if (!proceed) [self invalidateAndCancel];
+                    [self removeOperationAndStartNextIfAppropriate:operation];
                 }];
                 
                 return;
