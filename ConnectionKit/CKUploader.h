@@ -26,7 +26,6 @@ typedef NSUInteger CKUploadingOptions;
 {
   @private
 	NSURLRequest        *_request;
-    unsigned long       _permissions;
     CKUploadingOptions  _options;
     
     CK2FileManager      *_fileManager;
@@ -41,14 +40,18 @@ typedef NSUInteger CKUploadingOptions;
     id <CKUploaderDelegate> _delegate;
 }
 
-// File permissions default to 0644. Supply a non-nil value if you want something different, or override -posixPermissionsForPath:isDirectory:
+/**
+ File permissions are supplied by curl_curl_newFilePermissions. Supply a
+ non-`nil` value if you want something different, or override
+ `-posixPermissionsForPath:isDirectory:`
+ */
 + (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
-               filePosixPermissions:(NSNumber *)customPermissions
-                            options:(CKUploadingOptions)options;
+                            options:(CKUploadingOptions)options
+                           delegate:(id <CKUploaderDelegate>)delegate;
 
 @property (nonatomic, copy, readonly) NSURLRequest *baseRequest;
 @property (nonatomic, assign, readonly) CKUploadingOptions options;
-@property (nonatomic, assign) id <CKUploaderDelegate> delegate;
+@property (nonatomic, retain, readonly) id <CKUploaderDelegate> delegate; // retained until invalidated
 
 - (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path;
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
@@ -67,8 +70,7 @@ typedef NSUInteger CKUploadingOptions;
 - (void)invalidateAndCancel;             // bails out as quickly as possible
 
 // The permissions given to uploaded files
-- (unsigned long)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
-+ (unsigned long)posixPermissionsForDirectoryFromFilePermissions:(unsigned long)filePermissions;
+- (NSNumber *)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
 
 @end
 

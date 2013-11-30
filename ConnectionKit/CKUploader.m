@@ -17,13 +17,13 @@
 
 #pragma mark Lifecycle
 
-- (id)initWithRequest:(NSURLRequest *)request filePosixPermissions:(unsigned long)customPermissions options:(CKUploadingOptions)options;
+- (id)initWithRequest:(NSURLRequest *)request options:(CKUploadingOptions)options delegate:(id<CKUploaderDelegate>)delegate;
 {
     if (self = [self init])
     {
         _request = [request copy];
-        _permissions = customPermissions;
         _options = options;
+        _delegate = [delegate retain];
         
         if (!(_options & CKUploadingDryRun))
         {
@@ -39,15 +39,11 @@
     return self;
 }
 
-+ (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
-               filePosixPermissions:(NSNumber *)customPermissions
-                            options:(CKUploadingOptions)options;
++ (CKUploader *)uploaderWithRequest:(NSURLRequest *)request options:(CKUploadingOptions)options delegate:(id<CKUploaderDelegate>)delegate;
 {
     NSParameterAssert(request);
 
-    return [[[self alloc] initWithRequest:request
-                     filePosixPermissions:(customPermissions ? [customPermissions unsignedLongValue] : 0644)
-                                  options:options] autorelease];
+    return [[[self alloc] initWithRequest:request options:options delegate:delegate] autorelease];
 }
 
 - (void)didBecomeInvalid;
@@ -57,10 +53,14 @@
     {
         [self.delegate uploaderDidBecomeInvalid:self];
     }
+    
+    [_delegate release]; _delegate = nil;
 }
 
 - (void)dealloc
 {
+    NSAssert(_invalidated, @"%@ is being deallocated without being invalidated", self);
+    NSAssert(_delegate == nil, @"%@ is being deallocated while still having a delegate", self);
     [_fileManager setDelegate:nil];
     
     [_request release];
@@ -80,16 +80,12 @@
 @synthesize rootTransferRecord = _rootRecord;
 @synthesize baseTransferRecord = _baseRecord;
 
-- (unsigned long)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
+- (NSNumber *)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
 {
-    unsigned long result = _permissions;
-    if (directory) result = [[self class] posixPermissionsForDirectoryFromFilePermissions:result];
+    NSNumber *result = (directory ?
+                        self.baseRequest.curl_newDirectoryPermissions :
+                        self.baseRequest.curl_newFilePermissions);
     return result;
-}
-
-+ (unsigned long)posixPermissionsForDirectoryFromFilePermissions:(unsigned long)filePermissions;
-{
-    return (filePermissions | 0111);
 }
 
 #pragma mark Publishing
@@ -115,7 +111,7 @@
 
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
 {
-    NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
+    NSDictionary *attributes = @{ NSFilePosixPermissions : [self posixPermissionsForPath:path isDirectory:NO] };
     
     CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path]
                                                            fromData:data
@@ -131,7 +127,7 @@
     NSNumber *size;
     if (![localURL getResourceValue:&size forKey:NSURLFileSizeKey error:NULL]) size = nil;
     
-    NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
+    NSDictionary *attributes = @{ NSFilePosixPermissions : [self posixPermissionsForPath:path isDirectory:NO] };
     
     CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path]
                                                            fromFile:localURL
