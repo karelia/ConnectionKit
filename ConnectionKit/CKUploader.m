@@ -24,6 +24,7 @@
         _request = [request copy];
         _options = options;
         _delegate = [delegate retain];
+        _suspended = NO;
         
         if (!(_options & CKUploadingDryRun))
         {
@@ -212,7 +213,7 @@
     if (_invalidated) [NSException raise:NSInvalidArgumentException format:@"%@ has been invalidated", self];
     
     [_queue addObject:operation];
-    if (_queue.count == 1) [self startNextOperation];
+    if (_queue.count == 1) [self startNextOperationIfNotSuspended];
 }
 
 - (void)removeOperationAndStartNextIfAppropriate:(CK2FileOperation *)operation;
@@ -225,11 +226,13 @@
     if (index != NSNotFound) [_queue removeObjectAtIndex:index];
     
     // If was the current op, time to start the next
-    if (index == 0) [self startNextOperation];
+    if (index == 0) [self startNextOperationIfNotSuspended];
 }
 
-- (void)startNextOperation;
+- (void)startNextOperationIfNotSuspended;
 {
+    if (self.suspended) return;
+    
     while (_queue.count)
     {
         CK2FileOperation *operation = [_queue objectAtIndex:0];
@@ -339,6 +342,24 @@
     }
     
     return result;
+}
+
+#pragma mark Suspending Operations
+
+@synthesize suspended = _suspended;
+- (void)setSuspended:(BOOL)suspended;
+{
+    if (suspended == _suspended) return;
+    _suspended = suspended;
+    
+    if (!suspended)
+    {
+        CK2FileOperation *firstOp = _queue.firstObject;
+        if (firstOp.state == CK2FileOperationStateSuspended)
+        {
+            [self startNextOperationIfNotSuspended];
+        }
+    }
 }
 
 #pragma mark CK2FileManager Delegate

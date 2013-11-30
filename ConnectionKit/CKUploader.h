@@ -36,6 +36,7 @@ typedef NSUInteger CKUploadingOptions;
     CKTransferRecord    *_baseRecord;
     
     BOOL    _invalidated;
+    BOOL    _suspended;
     
     id <CKUploaderDelegate> _delegate;
 }
@@ -69,8 +70,15 @@ typedef NSUInteger CKUploadingOptions;
 - (void)finishOperationsAndInvalidate;    // will disconnect once all files are uploaded
 - (void)invalidateAndCancel;             // bails out as quickly as possible
 
+
+#pragma mark Suspending Operations
+@property (nonatomic, getter=isSuspended) BOOL suspended;
+
+
+#pragma mark Permissions
 // The permissions given to uploaded files
 - (NSNumber *)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
+
 
 @end
 
