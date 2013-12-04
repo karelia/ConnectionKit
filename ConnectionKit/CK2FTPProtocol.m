@@ -360,7 +360,7 @@
             {
                 // Retry
                 NSMutableURLRequest *request = [self.request mutableCopy];
-                [request curl_setShouldVerifySSLCertificate:NO];
+                [request curl_setShouldVerifySSLHost:NO];
                 [self startWithRequest:request credential:_credential];
                 [request release];
             }
