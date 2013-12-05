@@ -346,6 +346,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     /*  Any already-enqueued delegate messages will likely still run. That's fine as it seems we might as well report things that are already known to have happened
      */
     
+    // FIXME: There's a race condition here where .state could change after our intitial check of it
+    
     self.state = CK2FileOperationStateCanceling;
     
     // Report cancellation to completion handler. If protocol has already finished or failed, it'll go ignored
