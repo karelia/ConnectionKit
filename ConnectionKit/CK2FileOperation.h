@@ -41,6 +41,8 @@ typedef NS_ENUM(NSInteger, CK2FileOperationState) {
     NSError                 *_error;
 }
 
+// All @properties are KVO-compliant.
+
 /**
  * Number of body bytes already written.
  *
