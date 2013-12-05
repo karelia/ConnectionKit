@@ -378,6 +378,12 @@
                 [self startWithRequest:request credential:_credential];
                 [request release];
             }
+            else if (disposition == CK2AuthChallengeCancelAuthenticationChallenge)
+            {
+                [super transfer:transfer didCompleteWithError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                                  code:NSURLErrorUserCancelledAuthentication
+                                                                              userInfo:nil]];
+            }
             else
             {
                 [super transfer:transfer didCompleteWithError:error];
