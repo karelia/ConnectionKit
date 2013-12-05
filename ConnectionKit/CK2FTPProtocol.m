@@ -370,8 +370,11 @@
             if (disposition == CK2AuthChallengeUseCredential && credential)
             {
                 // Retry
+                // Ideally we'd adjust libcurl to only accept this one new
+                // certificate, but I can't spot a proper API for that, so we'll
+                // have to live with a minor security flaw for now.
                 NSMutableURLRequest *request = [self.request mutableCopy];
-                [request curl_setShouldVerifySSLHost:NO];
+                [request curl_setShouldVerifySSLCertificate:NO];
                 [self startWithRequest:request credential:_credential];
                 [request release];
             }
