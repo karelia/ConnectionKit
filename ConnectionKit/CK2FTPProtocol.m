@@ -11,6 +11,18 @@
 #import <CURLHandle/CURLHandle.h>
 
 
+@interface CK2FTPSProtectionSpace : NSURLProtectionSpace
+{
+  @private
+    SecTrustRef _trust;
+}
+- initWithServerTrust:(SecTrustRef)trust host:(NSString *)host port:(NSInteger)port;
+@end
+
+
+#pragma mark -
+
+
 @implementation CK2FTPProtocol
 
 #pragma mark URLs
@@ -335,15 +347,14 @@
 - (void)transfer:(CURLTransfer *)transfer didCompleteWithError:(NSError *)error;
 {
     // For SSL errors, report extra info
-    if (error.code == CURLE_SSL_CACERT && [error.domain isEqualToString:CURLcodeErrorDomain])
+    SecTrustRef trust = (SecTrustRef)[error.userInfo objectForKey:NSURLErrorFailingURLPeerTrustErrorKey];
+    if (trust)
     {
         NSURL *url = self.request.URL;
         
-        NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:url.host
-                                                                            port:url.port.integerValue
-                                                                        protocol:@"ftps"
-                                                                           realm:nil
-                                                            authenticationMethod:NSURLAuthenticationMethodServerTrust];
+        NSURLProtectionSpace *space = [[CK2FTPSProtectionSpace alloc] initWithServerTrust:trust
+                                                                                     host:url.host
+                                                                            port:url.port.integerValue];
         
         _sslFailures++;
         
@@ -391,5 +402,31 @@
     
     [super transfer:transfer didReceiveDebugInformation:string ofType:type];
 }
+
+@end
+
+
+#pragma mark -
+
+
+@implementation CK2FTPSProtectionSpace
+
+- initWithServerTrust:(SecTrustRef)trust host:(NSString *)host port:(NSInteger)port;
+{
+    if (self = [self initWithHost:host port:port protocol:@"ftps" realm:nil authenticationMethod:NSURLAuthenticationMethodServerTrust])
+    {
+        _trust = trust;
+        CFRetain(_trust);
+    }
+    return self;
+}
+
+- (void)dealloc;
+{
+    CFRelease(_trust);
+    [super dealloc];
+}
+
+- (SecTrustRef)serverTrust; { return _trust; }
 
 @end
