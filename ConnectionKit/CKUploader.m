@@ -139,6 +139,8 @@
     return [self uploadToPath:path usingOperation:op];
 }
 
+static void *sOperationStateObservationContext = &sOperationStateObservationContext;
+
 - (CKTransferRecord *)uploadToPath:(NSString *)path usingOperation:(CK2FileOperation *)operation;
 {
     NSParameterAssert(operation);
@@ -152,6 +154,10 @@
     
     CKTransferRecord *result = [self makeTransferRecordWithPath:path operation:operation];
     [_recordsByOperation setObject:result forKey:operation];
+    
+    
+    // Watch for it to complete
+    [operation addObserver:self forKeyPath:@"state" options:0 context:sOperationStateObservationContext];
     
     
     // Enqueue upload
@@ -346,6 +352,26 @@
     }
 }
 
+#pragma mark KVO
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context;
+{
+    if (context == sOperationStateObservationContext)
+    {
+        CK2FileOperation *op = object;
+        CK2FileOperationState state = op.state;
+        if (state == CK2FileOperationStateCompleted)
+        {
+            [op removeObserver:self forKeyPath:keyPath];
+            [self operation:op didFinish:op.error];
+        }
+    }
+    else
+    {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
+
 #pragma mark CK2FileManager Delegate
 
 - (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)response completionHandler:(void (^)(NSURLRequest *))completionHandler;
@@ -410,11 +436,6 @@
 	dispatch_async(dispatch_get_main_queue(), ^{
         [[self delegate] uploader:self appendString:info toTranscript:transcript];
     });
-}
-
-- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation didCompleteWithError:(NSError *)error;
-{
-    [self operation:operation didFinish:error];
 }
 
 @end
