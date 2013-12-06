@@ -54,12 +54,10 @@
     [self pause];
 }
 
-- (void)uploader:(CKUploader *)uploader didFailWithError:(NSError *)error
+- (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record didCompleteWithError:(NSError *)error;
 {
     self.error = error;
-    [self pause];
 }
-
 
 - (void)uploader:(CKUploader *)uploader didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler
 {
@@ -98,7 +96,7 @@
     {
         STAssertTrue([self.error.domain isEqualToString:NSURLErrorDomain], @"unexpected error %@", self.error);
         STAssertTrue(self.error.code == kCFURLErrorUserCancelledAuthentication, @"unexpected error %@", self.error);
-        STAssertFalse(self.finished, @"shouldn't be finished");
+        STAssertTrue(self.finished, @"should be finished");
         if (record)
         {
             STAssertTrue([record.error.domain isEqualToString:NSURLErrorDomain], @"unexpected error %@", self.error);
