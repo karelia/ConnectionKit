@@ -15,7 +15,7 @@
 
 @implementation FTPAuthenticationTests
 
-- (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
 {
     NSString* user;
     NSString* password;
@@ -35,7 +35,7 @@
 
     NSLog(@"authenticating as %@ %@", self.user, self.password);
     NSURLCredential* credential = [NSURLCredential credentialWithUser:user password:password persistence:NSURLCredentialPersistenceNone];
-    [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+    completionHandler(CK2AuthChallengeUseCredential, credential);
 }
 
 - (NSString*)protocol
