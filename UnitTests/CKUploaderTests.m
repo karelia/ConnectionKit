@@ -37,10 +37,8 @@
     {
         NSURL* url = [self URLForPath:@"/"];
         NSURLRequest* request = [NSURLRequest requestWithURL:url];
-        NSNumber* permissions = nil;
         CKUploadingOptions options = 0;
-        result = [CKUploader uploaderWithRequest:request filePosixPermissions:permissions options:options];
-        result.delegate = self;
+        result = [CKUploader uploaderWithRequest:request options:options delegate:self];
     }
 
     return result;
@@ -109,7 +107,7 @@
     {
         STAssertTrue(self.finished, @"should be finished");
         STAssertTrue(self.error == nil, @"unexpected error %@", self.error);
-        STAssertFalse([record hasError], @"unexpected error %@", record.error);
+        STAssertNil(record.error, @"unexpected error %@", record.error);
     }
     STAssertTrue(self.uploading == uploading, @"uploading method %@ have been called", uploading ? @"should" : @"shouldn't");
 
@@ -213,12 +211,6 @@
         STAssertTrue(filePerms == 0644, @"unexpected default file perms %lo", filePerms);
         STAssertTrue(dirPerms == 0755, @"unexpected default dir perms %lo", dirPerms);
     }
-}
-
-- (void)testPosixPermissionsForDirectoryFromFilePermissions
-{
-    unsigned long dirPerms = [CKUploader posixPermissionsForDirectoryFromFilePermissions:0644];
-    STAssertTrue(dirPerms == 0755, @"unexpected default dir perms %lo", dirPerms);
 }
 
 @end

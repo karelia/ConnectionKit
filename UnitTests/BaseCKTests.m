@@ -37,11 +37,11 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     return [result autorelease];
 }
 
-- (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
 {
     if (challenge.previousFailureCount > 0)
     {
-        [challenge.sender cancelAuthenticationChallenge:challenge];
+        completionHandler(CK2AuthChallengeCancelAuthenticationChallenge, nil);
     }
     else
     {
@@ -55,7 +55,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         {
             credential = [NSURLCredential credentialWithUser:self.tests.user password:self.tests.password persistence:NSURLCredentialPersistenceNone];
         }
-        [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+        completionHandler(CK2AuthChallengeUseCredential, credential);
     }
 
 }
@@ -247,13 +247,14 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 }
 
 #pragma mark - Delegate
-- (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler
 {
     NSString *authMethod = [[challenge protectionSpace] authenticationMethod];
     if (challenge.previousFailureCount > 0)
     {
         NSLog(@"cancelling authentication");
-        [challenge.sender cancelAuthenticationChallenge:challenge];
+        completionHandler(CK2AuthChallengeCancelAuthenticationChallenge, nil);
     }
     else
     {
@@ -266,18 +267,18 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         {
             NSLog(@"authenticating as %@ %@", self.user, self.password);
             NSURLCredential* credential = [NSURLCredential credentialWithUser:self.user password:self.password persistence:NSURLCredentialPersistenceNone];
-            [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+            completionHandler(CK2AuthChallengeUseCredential, credential);
         }
         else if ([authMethod isEqualToString:CK2AuthenticationMethodHostFingerprint])
         {
             NSLog(@"checking fingerprint");
             NSURLCredential* credential = [NSURLCredential ck2_credentialForKnownHostWithPersistence:NSURLCredentialPersistenceNone];
-            [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+            completionHandler(CK2AuthChallengeUseCredential, credential);
         }
         else
         {
             NSLog(@"performing default authentication");
-            [[challenge sender] performDefaultHandlingForAuthenticationChallenge:challenge];
+            completionHandler(CK2AuthChallengePerformDefaultHandling, nil);
         }
     }
 

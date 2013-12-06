@@ -153,37 +153,25 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 - (CK2FileOperation *)createFileOperationWithURL:(NSURL *)url fromData:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
 {
-    __block CK2FileOperation *result = [self createFileOperationWithURL:url
-                                                               fromData:data
-                                            withIntermediateDirectories:createIntermediates
-                                                      openingAttributes:attributes
-                                                          progressBlock:^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
-                                                              
-                                                              id <CK2FileManagerDelegate> delegate = self.delegate;
-                                                              if ([delegate respondsToSelector:@selector(fileManager:operation:didWriteBodyData:totalBytesWritten:totalBytesExpectedToWrite:)])
-                                                              {
-                                                                  [delegate fileManager:self
-                                                                              operation:result
-                                                                       didWriteBodyData:bytesWritten
-                                                                      totalBytesWritten:totalBytesWritten
-                                                              totalBytesExpectedToWrite:totalBytesExpectedToSend];
-                                                              }
-                                                          }
-                                                      completionHandler:handler];
-    return result;
+    return [self createFileOperationWithURL:url
+                                   fromData:data
+                withIntermediateDirectories:createIntermediates
+                          openingAttributes:attributes
+                              progressBlock:NULL
+                          completionHandler:handler];
 }
 
 - (CK2FileOperation *)createFileOperationWithURL:(NSURL *)url fromData:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *))handler;
 {
-    CK2FileOperation *operation = [[[self classForOperation] alloc] initFileCreationOperationWithURL:url
-                                                                                        data:data
-                                                                 withIntermediateDirectories:createIntermediates
-                                                                           openingAttributes:attributes
-                                                                                     manager:self
-                                                                               progressBlock:progressBlock
-                                                                             completionBlock:handler];
+    CK2FileOperation *result = [[[self classForOperation] alloc] initFileCreationOperationWithURL:url
+                                                                                             data:data
+                                                                      withIntermediateDirectories:createIntermediates
+                                                                                openingAttributes:attributes
+                                                                                          manager:self
+                                                                                    progressBlock:progressBlock
+                                                                                  completionBlock:handler];
     
-    return [operation autorelease];
+    return [result autorelease];
 }
 
 - (CK2FileOperation *)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
