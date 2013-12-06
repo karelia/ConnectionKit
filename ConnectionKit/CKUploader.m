@@ -112,7 +112,10 @@
 
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
 {
-    NSDictionary *attributes = @{ NSFilePosixPermissions : [self posixPermissionsForPath:path isDirectory:NO] };
+    NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+                                [self posixPermissionsForPath:path isDirectory:NO],
+                                NSFilePosixPermissions,
+                                nil];
     
     CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path]
                                                            fromData:data
@@ -128,7 +131,10 @@
     NSNumber *size;
     if (![localURL getResourceValue:&size forKey:NSURLFileSizeKey error:NULL]) size = nil;
     
-    NSDictionary *attributes = @{ NSFilePosixPermissions : [self posixPermissionsForPath:path isDirectory:NO] };
+    NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+                                [self posixPermissionsForPath:path isDirectory:NO],
+                                NSFilePosixPermissions,
+                                nil];
     
     CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path]
                                                            fromFile:localURL
@@ -219,7 +225,11 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     if (_invalidated) [NSException raise:NSInvalidArgumentException format:@"%@ has been invalidated", self];
     
     [_queue addObject:operation];
-    if (_queue.count == 1) [self startNextOperationIfNotSuspended];
+    if (_queue.count == 1)
+    {
+        [self startNextOperationIfNotSuspended];
+        [self retain];  // keep alive until queue is empty
+    }
 }
 
 - (void)removeOperationAndStartNextIfAppropriate:(CK2FileOperation *)operation;
@@ -258,6 +268,8 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
             [_queue removeObjectAtIndex:0];
         }
     }
+    
+    [self release]; // once the queue is empty, can be deallocated
     
     if (_invalidated) [self didBecomeInvalid];
 }
