@@ -44,6 +44,8 @@
     return result;
 }
 
+- (NSString *)protocol; { return @"WebDAV"; }
+
 #pragma mark - Upload Delegate Methods
 
 - (void)uploaderDidBecomeInvalid:(CKUploader *)uploader

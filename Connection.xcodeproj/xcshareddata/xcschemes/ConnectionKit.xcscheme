@@ -60,9 +60,6 @@
                   Identifier = "CK2FileManagerGenericTests">
                </Test>
                <Test
-                  Identifier = "CKUploaderTests">
-               </Test>
-               <Test
                   Identifier = "BaseCKProtocolTests">
                </Test>
                <Test
