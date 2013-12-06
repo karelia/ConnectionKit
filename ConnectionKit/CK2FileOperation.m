@@ -626,7 +626,23 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     self.countOfBytesWritten = totalBytesSent;
     self.countOfBytesExpectedToWrite = totalBytesExpectedToSend;
     
-    _progressBlock(bytesSent, totalBytesSent, totalBytesExpectedToSend);
+    if (_progressBlock)
+    {
+        _progressBlock(bytesSent, totalBytesSent, totalBytesExpectedToSend);
+    }
+    else
+    {
+        CK2FileManager *manager = self.fileManager;
+        id <CK2FileManagerDelegate> delegate = manager.delegate;
+        if ([delegate respondsToSelector:@selector(fileManager:operation:didWriteBodyData:totalBytesWritten:totalBytesExpectedToWrite:)])
+        {
+            [delegate fileManager:manager
+                        operation:self
+                 didWriteBodyData:bytesSent
+                totalBytesWritten:totalBytesSent
+        totalBytesExpectedToWrite:totalBytesExpectedToSend];
+        }
+    }
 }
 
 - (NSInputStream *)protocol:(CK2Protocol *)protocol needNewBodyStream:(NSURLRequest *)request;

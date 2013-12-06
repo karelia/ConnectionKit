@@ -163,30 +163,13 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 - (CK2FileOperation *)createFileOperationWithURL:(NSURL *)url fromData:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *))handler;
 {
-    __block CK2FileOperation *result = nil;
-    if (!progressBlock)
-    {
-        progressBlock = ^(int64_t bytesWritten, int64_t totalBytesWritten, int64_t totalBytesExpectedToSend) {
-            
-            id <CK2FileManagerDelegate> delegate = self.delegate;
-            if ([delegate respondsToSelector:@selector(fileManager:operation:didWriteBodyData:totalBytesWritten:totalBytesExpectedToWrite:)])
-            {
-                [delegate fileManager:self
-                            operation:result
-                     didWriteBodyData:bytesWritten
-                    totalBytesWritten:totalBytesWritten
-            totalBytesExpectedToWrite:totalBytesExpectedToSend];
-            }
-        };
-    }
-    
-    result = [[[self classForOperation] alloc] initFileCreationOperationWithURL:url
-                                                                           data:data
-                                                    withIntermediateDirectories:createIntermediates
-                                                              openingAttributes:attributes
-                                                                        manager:self
-                                                                  progressBlock:progressBlock
-                                                                completionBlock:handler];
+    CK2FileOperation *result = [[[self classForOperation] alloc] initFileCreationOperationWithURL:url
+                                                                                             data:data
+                                                                      withIntermediateDirectories:createIntermediates
+                                                                                openingAttributes:attributes
+                                                                                          manager:self
+                                                                                    progressBlock:progressBlock
+                                                                                  completionBlock:handler];
     
     return [result autorelease];
 }
