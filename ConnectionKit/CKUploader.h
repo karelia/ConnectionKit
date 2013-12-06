@@ -55,7 +55,9 @@ typedef NSUInteger CKUploadingOptions;
 @property (nonatomic, retain, readonly) id <CKUploaderDelegate> delegate; // retained until invalidated
 
 - (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path;
+- (CKTransferRecord *)uploadToURL:(NSURL *)url fromFile:(NSURL *)fileURL;
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
+- (CKTransferRecord *)uploadToURL:(NSURL *)url fromData:(NSData *)data;
 - (void)removeItemAtURL:(NSURL *)url __attribute((nonnull));
 - (void)removeFileAtPath:(NSString *)path;
 

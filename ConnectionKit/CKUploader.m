@@ -112,36 +112,46 @@
 
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
 {
-    NSDictionary *attributes = @{ NSFilePosixPermissions : [self posixPermissionsForPath:path isDirectory:NO] };
+    return [self uploadToURL:[self URLForPath:path] fromData:data];
+}
+
+- (CKTransferRecord *)uploadToURL:(NSURL *)url fromData:(NSData *)data;
+{
+    NSDictionary *attributes = @{ NSFilePosixPermissions : [self posixPermissionsForPath:[_fileManager.class pathOfURL:url] isDirectory:NO] };
     
-    CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path]
+    CK2FileOperation *op = [_fileManager createFileOperationWithURL:url
                                                            fromData:data
                                         withIntermediateDirectories:YES
                                                   openingAttributes:attributes
                                                   completionHandler:NULL];
     
-    return [self uploadToPath:path usingOperation:op];
+    return [self uploadToURL:url usingOperation:op];
 }
 
 - (CKTransferRecord *)uploadFileAtURL:(NSURL *)localURL toPath:(NSString *)path;
 {
+    return [self uploadToURL:[self URLForPath:path] fromFile:localURL];
+}
+
+- (CKTransferRecord *)uploadToURL:(NSURL *)url fromFile:(NSURL *)fileURL;
+{
     NSNumber *size;
-    if (![localURL getResourceValue:&size forKey:NSURLFileSizeKey error:NULL]) size = nil;
+    if (![fileURL getResourceValue:&size forKey:NSURLFileSizeKey error:NULL]) size = nil;
     
-    NSDictionary *attributes = @{ NSFilePosixPermissions : [self posixPermissionsForPath:path isDirectory:NO] };
+    NSDictionary *attributes = @{ NSFilePosixPermissions : [self posixPermissionsForPath:[_fileManager.class pathOfURL:url] isDirectory:NO] };
     
-    CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path]
-                                                           fromFile:localURL
+    CK2FileOperation *op = [_fileManager createFileOperationWithURL:url
+                                                           fromFile:fileURL
                                         withIntermediateDirectories:YES
                                                   openingAttributes:attributes
                                                   completionHandler:NULL];
     
-    return [self uploadToPath:path usingOperation:op];
+    return [self uploadToURL:url usingOperation:op];
 }
 
 static void *sOperationStateObservationContext = &sOperationStateObservationContext;
 
-- (CKTransferRecord *)uploadToPath:(NSString *)path usingOperation:(CK2FileOperation *)operation;
+- (CKTransferRecord *)uploadToURL:(NSURL *)url usingOperation:(CK2FileOperation *)operation;
 {
     NSParameterAssert(operation);
     
@@ -149,10 +159,10 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     if (_options & CKUploadingDeleteExistingFileFirst)
 	{
         // The file might not exist, so will fail in that case. We don't really care since should a deletion fail for a good reason, that ought to then cause the actual upload to fail
-        [self removeItemAtURL:[self URLForPath:path] reportError:NO];
+        [self removeItemAtURL:url reportError:NO];
 	}
     
-    CKTransferRecord *result = [self makeTransferRecordWithPath:path operation:operation];
+    CKTransferRecord *result = [self makeTransferRecordWithURL:url operation:operation];
     [_recordsByOperation setObject:result forKey:operation];
     
     
@@ -286,22 +296,26 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
 
 #pragma mark Transfer Records
 
-- (CKTransferRecord *)makeTransferRecordWithPath:(NSString *)path operation:(CK2FileOperation *)operation;
+- (CKTransferRecord *)makeTransferRecordWithURL:(NSURL *)url operation:(CK2FileOperation *)operation;
 {
-    CKTransferRecord *result = [CKTransferRecord recordWithName:[path lastPathComponent] uploadOperation:operation];
+    NSString *path = [CK2FileManager pathOfURL:url];
     
-    CKTransferRecord *parent = [self directoryTransferRecordWithPath:[path stringByDeletingLastPathComponent]];
+    CKTransferRecord *result = [CKTransferRecord recordWithName:path.lastPathComponent
+                                                uploadOperation:operation];
+    
+    CKTransferRecord *parent = [self directoryTransferRecordWithURL:[url URLByDeletingLastPathComponent]];
     [parent addContent:result];
     
     return result;
 }
 
-- (CKTransferRecord *)directoryTransferRecordWithPath:(NSString *)path;
+- (CKTransferRecord *)directoryTransferRecordWithURL:(NSURL *)url;
 {
-    NSParameterAssert(path);
+    NSParameterAssert(url);
     NSAssert([NSThread isMainThread], @"CKUploader can only be used on main thread");
     
     
+    NSString *path = [CK2FileManager pathOfURL:url];
     if ([path isEqualToString:@"/"] || [path isEqualToString:@""]) // The root for absolute and relative paths
     {
         return [self rootTransferRecord];
@@ -309,8 +323,8 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     
     
     // Recursively find a record we do have!
-    NSString *parentDirectoryPath = [path stringByDeletingLastPathComponent];
-    CKTransferRecord *parent = [self directoryTransferRecordWithPath:parentDirectoryPath];
+    NSURL *parentDirectoryURL = [url URLByDeletingLastPathComponent];
+    CKTransferRecord *parent = [self directoryTransferRecordWithURL:parentDirectoryURL];
     
     
     // Create the record if it hasn't been already
