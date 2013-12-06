@@ -65,6 +65,12 @@
                <Test
                   Identifier = "BaseCKTests">
                </Test>
+               <Test
+                  Identifier = "CKUploaderTests/testRemoveFileAtPath">
+               </Test>
+               <Test
+                  Identifier = "CKUploaderTests/testRemoveFileAtPathNoAuthentication">
+               </Test>
             </SkippedTests>
          </TestableReference>
       </Testables>
