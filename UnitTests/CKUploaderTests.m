@@ -197,19 +197,7 @@
         [uploader finishOperationsAndInvalidate];
         STAssertFalse(self.finished, @"should not be finished");
         [uploader invalidateAndCancel];
-    }
-}
-
-- (void)testPosixPermissionsForPath
-{
-    CKUploader* uploader = [self setupUploader];
-    if (uploader)
-    {
-        unsigned long filePerms = [uploader posixPermissionsForPath:@"test/test.txt" isDirectory:NO];
-        unsigned long dirPerms = [uploader posixPermissionsForPath:@"test/" isDirectory:YES];
-
-        STAssertTrue(filePerms == 0644, @"unexpected default file perms %lo", filePerms);
-        STAssertTrue(dirPerms == 0755, @"unexpected default dir perms %lo", dirPerms);
+        [self runUntilPaused];
     }
 }
 
