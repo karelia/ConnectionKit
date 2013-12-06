@@ -60,8 +60,7 @@
 
 - (void)dealloc
 {
-    NSAssert(_invalidated, @"%@ is being deallocated without being invalidated", self);
-    NSAssert(_delegate == nil, @"%@ is being deallocated while still having a delegate", self);
+    NSAssert(_queue.count == 0, @"%@ is being deallocated while there are still queued operations", self);
     [_fileManager setDelegate:nil];
     
     [_request release];
