@@ -10,18 +10,21 @@
 
 #import "CK2FileOperation.h"
 
+#import <CURLHandle/CURLHandle.h>
+
 
 @implementation CKUploader
 
 #pragma mark Lifecycle
 
-- (id)initWithRequest:(NSURLRequest *)request filePosixPermissions:(unsigned long)customPermissions options:(CKUploadingOptions)options completionHandler:(void (^)(NSError *error))handler;
+- (id)initWithRequest:(NSURLRequest *)request options:(CKUploadingOptions)options delegate:(id<CKUploaderDelegate>)delegate;
 {
     if (self = [self init])
     {
         _request = [request copy];
-        _permissions = customPermissions;
         _options = options;
+        _delegate = [delegate retain];
+        _suspended = NO;
         
         if (!(_options & CKUploadingDryRun))
         {
@@ -29,22 +32,6 @@
             _fileManager = [[CK2FileManager alloc] initWithDelegate:self
                                                       delegateQueue:[NSOperationQueue mainQueue]];
         }
-        
-        
-        // Always have some sort of completion action, one way or another
-        if (!handler)
-        {
-            handler = ^(NSError *error) {
-                
-                id <CKUploaderDelegate> delegate = self.delegate;
-                if ([delegate respondsToSelector:@selector(uploaderDidFinishUploading:)])
-                {
-                    [self.delegate uploaderDidFinishUploading:self];
-                }
-            };
-        }
-        _completionBlock = [handler copy];
-        
         
         _queue = [[NSMutableArray alloc] init];
         _recordsByOperation = [[NSMutableDictionary alloc] init];
@@ -54,37 +41,27 @@
     return self;
 }
 
-+ (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
-               filePosixPermissions:(NSNumber *)customPermissions
-                            options:(CKUploadingOptions)options
-                  completionHandler:(void (^)())handler;
++ (CKUploader *)uploaderWithRequest:(NSURLRequest *)request options:(CKUploadingOptions)options delegate:(id<CKUploaderDelegate>)delegate;
 {
     NSParameterAssert(request);
-    
-    return [[[self alloc] initWithRequest:request
-                     filePosixPermissions:(customPermissions ? [customPermissions unsignedLongValue] : 0644)
-                                  options:options
-                        completionHandler:handler] autorelease];
+
+    return [[[self alloc] initWithRequest:request options:options delegate:delegate] autorelease];
 }
 
-+ (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
-               filePosixPermissions:(NSNumber *)customPermissions
-                            options:(CKUploadingOptions)options;
+- (void)didBecomeInvalid;
 {
-    return [self uploaderWithRequest:request filePosixPermissions:customPermissions options:options completionHandler:NULL];
-}
-
-- (void)complete;
-{
-    if (_completionBlock)
+    id <CKUploaderDelegate> delegate = self.delegate;
+    if ([delegate respondsToSelector:@selector(uploaderDidBecomeInvalid:)])
     {
-        _completionBlock();
-        [_completionBlock release]; _completionBlock = NULL;    // break retain cycle
+        [self.delegate uploaderDidBecomeInvalid:self];
     }
+    
+    [_delegate release]; _delegate = nil;
 }
 
 - (void)dealloc
 {
+    NSAssert(_queue.count == 0, @"%@ is being deallocated while there are still queued operations", self);
     [_fileManager setDelegate:nil];
     
     [_request release];
@@ -92,7 +69,6 @@
     [_rootRecord release];
     [_baseRecord release];
     [_recordsByOperation release];
-    [_completionBlock release];
     
     [super dealloc];
 }
@@ -105,28 +81,29 @@
 @synthesize rootTransferRecord = _rootRecord;
 @synthesize baseTransferRecord = _baseRecord;
 
-- (unsigned long)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
+- (NSNumber *)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
 {
-    unsigned long result = _permissions;
-    if (directory) result = [[self class] posixPermissionsForDirectoryFromFilePermissions:result];
+    NSNumber *result = (directory ?
+                        self.baseRequest.curl_newDirectoryPermissions :
+                        self.baseRequest.curl_newFilePermissions);
     return result;
-}
-
-+ (unsigned long)posixPermissionsForDirectoryFromFilePermissions:(unsigned long)filePermissions;
-{
-    return (filePermissions | 0111);
 }
 
 #pragma mark Publishing
 
-- (void)removeFileAtPath:(NSString *)path;
+- (void)removeItemAtURL:(NSURL *)url;
 {
-    [self removeFileAtPath:path reportError:YES];
+    [self removeItemAtURL:url reportError:YES];
 }
 
-- (void)removeFileAtPath:(NSString *)path reportError:(BOOL)reportError;
+- (void)removeFileAtPath:(NSString *)path;
 {
-    __block CK2FileOperation *op = [_fileManager removeOperationWithURL:[self URLForPath:path] completionHandler:^(NSError *error) {
+    [self removeItemAtURL:[self URLForPath:path]];
+}
+
+- (void)removeItemAtURL:(NSURL *)url reportError:(BOOL)reportError;
+{
+    __block CK2FileOperation *op = [_fileManager removeOperationWithURL:url completionHandler:^(NSError *error) {
         [self operation:op didFinish:(reportError ? error : nil)];
     }];
     
@@ -135,7 +112,10 @@
 
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
 {
-    NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
+    NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+                                [self posixPermissionsForPath:path isDirectory:NO],
+                                NSFilePosixPermissions,
+                                nil];
     
     CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path]
                                                            fromData:data
@@ -151,7 +131,10 @@
     NSNumber *size;
     if (![localURL getResourceValue:&size forKey:NSURLFileSizeKey error:NULL]) size = nil;
     
-    NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
+    NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+                                [self posixPermissionsForPath:path isDirectory:NO],
+                                NSFilePosixPermissions,
+                                nil];
     
     CK2FileOperation *op = [_fileManager createFileOperationWithURL:[self URLForPath:path]
                                                            fromFile:localURL
@@ -162,6 +145,8 @@
     return [self uploadToPath:path usingOperation:op];
 }
 
+static void *sOperationStateObservationContext = &sOperationStateObservationContext;
+
 - (CKTransferRecord *)uploadToPath:(NSString *)path usingOperation:(CK2FileOperation *)operation;
 {
     NSParameterAssert(operation);
@@ -170,11 +155,15 @@
     if (_options & CKUploadingDeleteExistingFileFirst)
 	{
         // The file might not exist, so will fail in that case. We don't really care since should a deletion fail for a good reason, that ought to then cause the actual upload to fail
-        [self removeFileAtPath:path reportError:NO];
+        [self removeItemAtURL:[self URLForPath:path] reportError:NO];
 	}
     
     CKTransferRecord *result = [self makeTransferRecordWithPath:path operation:operation];
     [_recordsByOperation setObject:result forKey:operation];
+    
+    
+    // Watch for it to complete
+    [operation addObserver:self forKeyPath:@"state" options:0 context:sOperationStateObservationContext];
     
     
     // Enqueue upload
@@ -201,39 +190,30 @@
     return [CK2FileManager URLWithPath:path relativeToURL:self.baseRequest.URL];
 }
 
-- (void)finishUploading;
+- (void)finishOperationsAndInvalidate;
 {
-    [self finishUploadingWithCompletionHandler:NULL];
-}
-
-- (void)finishUploadingWithCompletionHandler:(void (^)())handler;
-{
+    if (_invalidated) return;
     _invalidated = YES;
     
-    // Add in the new completion block
-    if (handler)
+    if (!_queue.count)
     {
-        void (^existingHandler)(NSError*) = _completionBlock;
-        
-        _completionBlock = ^(NSError *error) {
-            if (existingHandler) existingHandler(error);
-            handler(error);
-        };
-        _completionBlock = [_completionBlock copy];
-        [existingHandler release];
+        // Slightly delay delivery so it's similar to if there were operations
+        // in the queue
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [self didBecomeInvalid];
+        }];
     }
-    
-    if (!_queue.count) [self startNextOperation];
+}
+
+- (void)invalidateAndCancel;
+{
+    [self.operations makeObjectsPerformSelector:@selector(cancel)];
+    [self finishOperationsAndInvalidate];
 }
 
 #pragma mark Queue
 
 - (NSArray *)operations; { return [[_queue copy] autorelease]; }
-
-- (void)cancel;
-{
-    [self.operations makeObjectsPerformSelector:_cmd];
-}
 
 - (CK2FileOperation *)currentOperation; { return [_queue firstObject]; }
 
@@ -242,10 +222,14 @@
     NSAssert([NSThread isMainThread], @"-addOperation: is only safe to call on the main thread");
     
     // No more operations can go on once finishing up
-    if (_invalidated) return;
+    if (_invalidated) [NSException raise:NSInvalidArgumentException format:@"%@ has been invalidated", self];
     
     [_queue addObject:operation];
-    if (_queue.count == 1) [self startNextOperation];
+    if (_queue.count == 1)
+    {
+        [self startNextOperationIfNotSuspended];
+        [self retain];  // keep alive until queue is empty
+    }
 }
 
 - (void)removeOperationAndStartNextIfAppropriate:(CK2FileOperation *)operation;
@@ -258,11 +242,13 @@
     if (index != NSNotFound) [_queue removeObjectAtIndex:index];
     
     // If was the current op, time to start the next
-    if (index == 0) [self startNextOperation];
+    if (index == 0) [self startNextOperationIfNotSuspended];
 }
 
-- (void)startNextOperation;
+- (void)startNextOperationIfNotSuspended;
 {
+    if (self.suspended) return;
+    
     while (_queue.count)
     {
         CK2FileOperation *operation = [_queue objectAtIndex:0];
@@ -283,7 +269,9 @@
         }
     }
     
-    if (_invalidated) [self complete];
+    [self release]; // once the queue is empty, can be deallocated
+    
+    if (_invalidated) [self didBecomeInvalid];
 }
 
 - (void)operation:(CK2FileOperation *)operation didFinish:(NSError *)error;
@@ -300,28 +288,6 @@
         if (record && [delegate respondsToSelector:@selector(uploader:transferRecord:didCompleteWithError:)])
         {
             [delegate uploader:self transferRecord:record didCompleteWithError:error];
-        }
-        
-        
-        // The delegate has a say in error handling, but there's no point if the op was cancelled
-        if (error && !(error.code == NSURLErrorCancelled && [error.domain isEqualToString:NSURLErrorDomain]))
-        {
-            if ([delegate respondsToSelector:@selector(uploader:transferRecord:shouldProceedAfterError:completionHandler:)])
-            {
-                [delegate uploader:self transferRecord:record shouldProceedAfterError:error completionHandler:^(BOOL proceed) {
-                    
-                    if (proceed)
-                    {
-                        [self removeOperationAndStartNextIfAppropriate:operation];
-                    }
-                    else
-                    {
-                        [self cancel];
-                    }
-                }];
-                
-                return;
-            }
         }
         
         [self removeOperationAndStartNextIfAppropriate:operation];
@@ -377,20 +343,63 @@
     return result;
 }
 
+#pragma mark Suspending Operations
+
+@synthesize suspended = _suspended;
+- (void)setSuspended:(BOOL)suspended;
+{
+    if (suspended == _suspended) return;
+    _suspended = suspended;
+    
+    if (!suspended)
+    {
+        CK2FileOperation *firstOp = _queue.firstObject;
+        if (firstOp.state == CK2FileOperationStateSuspended)
+        {
+            [self startNextOperationIfNotSuspended];
+        }
+    }
+}
+
+#pragma mark KVO
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context;
+{
+    if (context == sOperationStateObservationContext)
+    {
+        CK2FileOperation *op = object;
+        CK2FileOperationState state = op.state;
+        if (state == CK2FileOperationStateCompleted)
+        {
+            [op removeObserver:self forKeyPath:keyPath];
+            [self operation:op didFinish:op.error];
+        }
+    }
+    else
+    {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
+
 #pragma mark CK2FileManager Delegate
 
 - (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)response completionHandler:(void (^)(NSURLRequest *))completionHandler;
 {
     // Apply any customisations
+    // Only allow SSL security to be *up*graded
+    NSURLRequest *base = self.baseRequest;
     NSMutableURLRequest *customized = [request mutableCopy];
     
-    [self.baseRequest.allHTTPHeaderFields enumerateKeysAndObjectsUsingBlock:^(NSString *aField, NSString *aValue, BOOL *stop) {
+    [base.allHTTPHeaderFields enumerateKeysAndObjectsUsingBlock:^(NSString *aField, NSString *aValue, BOOL *stop) {
         
         if (![customized valueForHTTPHeaderField:aField])
         {
             [customized setValue:aValue forHTTPHeaderField:aField];
         }
     }];
+    
+    curl_usessl level = base.curl_desiredSSLLevel;
+    if (level > customized.curl_desiredSSLLevel) [customized curl_setDesiredSSLLevel:level];
     
     completionHandler(customized);
     [customized release];
@@ -429,11 +438,6 @@
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 {
     [[self delegate] uploader:self appendString:info toTranscript:transcript];
-}
-
-- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation didCompleteWithError:(NSError *)error;
-{
-    [self operation:operation didFinish:error];
 }
 
 @end

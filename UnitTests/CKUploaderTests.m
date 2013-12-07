@@ -37,29 +37,27 @@
     {
         NSURL* url = [self URLForPath:@"/"];
         NSURLRequest* request = [NSURLRequest requestWithURL:url];
-        NSNumber* permissions = nil;
         CKUploadingOptions options = 0;
-        result = [CKUploader uploaderWithRequest:request filePosixPermissions:permissions options:options];
-        result.delegate = self;
+        result = [CKUploader uploaderWithRequest:request options:options delegate:self];
     }
 
     return result;
 }
 
+- (NSString *)protocol; { return @"WebDAV"; }
+
 #pragma mark - Upload Delegate Methods
 
-- (void)uploaderDidFinishUploading:(CKUploader *)uploader
+- (void)uploaderDidBecomeInvalid:(CKUploader *)uploader
 {
     self.finished = YES;
     [self pause];
 }
 
-- (void)uploader:(CKUploader *)uploader didFailWithError:(NSError *)error
+- (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record didCompleteWithError:(NSError *)error;
 {
     self.error = error;
-    [self pause];
 }
-
 
 - (void)uploader:(CKUploader *)uploader didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler
 {
@@ -98,7 +96,7 @@
     {
         STAssertTrue([self.error.domain isEqualToString:NSURLErrorDomain], @"unexpected error %@", self.error);
         STAssertTrue(self.error.code == kCFURLErrorUserCancelledAuthentication, @"unexpected error %@", self.error);
-        STAssertFalse(self.finished, @"shouldn't be finished");
+        STAssertTrue(self.finished, @"should be finished");
         if (record)
         {
             STAssertTrue([record.error.domain isEqualToString:NSURLErrorDomain], @"unexpected error %@", self.error);
@@ -109,7 +107,7 @@
     {
         STAssertTrue(self.finished, @"should be finished");
         STAssertTrue(self.error == nil, @"unexpected error %@", self.error);
-        STAssertFalse([record hasError], @"unexpected error %@", record.error);
+        STAssertNil(record.error, @"unexpected error %@", record.error);
     }
     STAssertTrue(self.uploading == uploading, @"uploading method %@ have been called", uploading ? @"should" : @"shouldn't");
 
@@ -132,7 +130,7 @@
         CKTransferRecord *record = [uploader uploadFileAtURL:url toPath:@"test/test.txt"];
         STAssertNotNil(record, @"got a transfer record");
         STAssertTrue(record.size == [[testData dataUsingEncoding:NSUTF8StringEncoding] length], @"unexpected size %ld", record.size);
-        [uploader finishUploading];
+        [uploader finishOperationsAndInvalidate];
 
         [self runUntilPaused];
         [self checkResultForRecord:record uploading:YES];
@@ -154,7 +152,7 @@
         CKTransferRecord *record = [uploader uploadData:testData toPath:@"test/test.txt"];
         STAssertNotNil(record, @"got a transfer record");
         STAssertTrue(record.size == [testData length], @"unexpected size %ld", record.size);
-        [uploader finishUploading];
+        [uploader finishOperationsAndInvalidate];
 
         [self runUntilPaused];
         [self checkResultForRecord:record uploading:YES];
@@ -173,7 +171,7 @@
     if (uploader)
     {
         [uploader removeFileAtPath:@"test/test.txt"];
-        [uploader finishUploading];
+        [uploader finishOperationsAndInvalidate];
 
         [self runUntilPaused];
         [self checkResultForRecord:nil uploading:NO];
@@ -196,29 +194,11 @@
         CKTransferRecord *record = [uploader uploadData:testData toPath:@"test/test.txt"];
         STAssertNotNil(record, @"got a transfer record");
         STAssertTrue(record.size == [testData length], @"unexpected size %ld", record.size);
-        [uploader finishUploading];
+        [uploader finishOperationsAndInvalidate];
         STAssertFalse(self.finished, @"should not be finished");
-        [uploader cancel];
+        [uploader invalidateAndCancel];
+        [self runUntilPaused];
     }
-}
-
-- (void)testPosixPermissionsForPath
-{
-    CKUploader* uploader = [self setupUploader];
-    if (uploader)
-    {
-        unsigned long filePerms = [uploader posixPermissionsForPath:@"test/test.txt" isDirectory:NO];
-        unsigned long dirPerms = [uploader posixPermissionsForPath:@"test/" isDirectory:YES];
-
-        STAssertTrue(filePerms == 0644, @"unexpected default file perms %lo", filePerms);
-        STAssertTrue(dirPerms == 0755, @"unexpected default dir perms %lo", dirPerms);
-    }
-}
-
-- (void)testPosixPermissionsForDirectoryFromFilePermissions
-{
-    unsigned long dirPerms = [CKUploader posixPermissionsForDirectoryFromFilePermissions:0644];
-    STAssertTrue(dirPerms == 0755, @"unexpected default dir perms %lo", dirPerms);
 }
 
 @end

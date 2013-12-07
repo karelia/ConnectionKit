@@ -152,12 +152,18 @@
         // the first time an error occurs, if we were asked to create intermediates, try again with that flag actually set to YES
         CK2WebDAVErrorHandler handleFirstError = ^(NSError *error) {
             // only bother trying again if we actually got a relevant error:
-            // 404 Not Found
             // 409 Conflict - A collection cannot be made at the Request-URI until one or more intermediate collections have been created.
-            if (createIntermediates && [error.domain isEqualToString:DAVClientErrorDomain] && ((error.code == 409) || (error.code == 404)))
+            if ([error.domain isEqualToString:DAVClientErrorDomain] && (error.code == 409))
             {
-                CK2WebDAVLog(@"making directory failed with error %@, retrying making each intermediate %@", error, path);
-                [self addCreateDirectoryRequestForPath:path withIntermediateDirectories:YES errorHandler:handleRealError completionHandler:handleCompletion];
+                if (createIntermediates)
+                {
+                    CK2WebDAVLog(@"making directory failed with error %@, retrying making each intermediate %@", error, path);
+                    [self addCreateDirectoryRequestForPath:path withIntermediateDirectories:YES errorHandler:handleRealError completionHandler:handleCompletion];
+                }
+                else
+                {
+                    handleRealError([self standardFileNotFoundErrorWithUnderlyingError:error]);
+                }
             }
             else
             {
@@ -203,12 +209,18 @@
         // the first time an error occurs, if we were asked to create intermediates, try again with that flag actually set to YES
         CK2WebDAVErrorHandler handleFirstError = ^(NSError *error) {
             // only bother trying again if we actually got a relevant error:
-            // 404 Not Found
             // 409 Conflict - A collection cannot be made at the Request-URI until one or more intermediate collections have been created.
-            if (createIntermediates && [error.domain isEqualToString:DAVClientErrorDomain] && ((error.code == 409) || (error.code == 404)))
+            if ([error.domain isEqualToString:DAVClientErrorDomain] && (error.code == 409))
             {
-                CK2WebDAVLog(@"making directory failed, retrying making each intermediate %@", path);
-                [self addCreateFileRequestForPath:path originalRequest:request withIntermediateDirectories:YES errorHandler:handleRealError completionHandler:handleCompletion];
+                if (createIntermediates)
+                {
+                    CK2WebDAVLog(@"making directory failed, retrying making each intermediate %@", path);
+                    [self addCreateFileRequestForPath:path originalRequest:request withIntermediateDirectories:YES errorHandler:handleRealError completionHandler:handleCompletion];
+                }
+                else
+                {
+                    handleRealError([self standardFileNotFoundErrorWithUnderlyingError:error]);
+                }
             }
             else
             {
@@ -343,7 +355,15 @@
 
 - (NSURLRequest *)request:(DAVRequest *)aRequest willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponse;
 {
-    return [self.client protocol:self willSendRequest:request redirectResponse:redirectResponse];
+    if (redirectResponse)
+    {
+        // Dissallow redirects as we have no security mechanism to manage them currnetly
+        return nil;
+    }
+    else
+    {
+        return [self.client protocol:self willSendRequest:request redirectResponse:redirectResponse];
+    }
 }
 
 - (void)webDAVRequest:(DAVRequest *)request didSendDataOfLength:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite

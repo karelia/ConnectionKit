@@ -11,6 +11,18 @@
 #import <CURLHandle/CURLHandle.h>
 
 
+@interface CK2FTPSProtectionSpace : NSURLProtectionSpace
+{
+  @private
+    SecTrustRef _trust;
+}
+- initWithServerTrust:(SecTrustRef)trust host:(NSString *)host port:(NSInteger)port;
+@end
+
+
+#pragma mark -
+
+
 @implementation CK2FTPProtocol
 
 #pragma mark URLs
@@ -272,14 +284,21 @@
 {
     // If there's no request, that means we were asked to do nothing possible over FTP. Most likely, storing attributes that aren't POSIX permissions
     // So jump straight to completion
-    if (![self request])
+    NSURLRequest *request = self.request;
+    if (!request)
     {
         [[self client] protocol:self didCompleteWithError:nil];
         return;
     }
 
     NSURL *url = [[self request] URL];
-    NSString *protocol = ([@"ftps" caseInsensitiveCompare:[url scheme]] == NSOrderedSame ? @"ftps" : NSURLProtectionSpaceFTP);
+    
+    NSString *protocol = NSURLProtectionSpaceFTP;
+    if (request.curl_desiredSSLLevel >= CURLUSESSL_CONTROL ||
+        [@"ftps" caseInsensitiveCompare:[url scheme]] == NSOrderedSame)
+    {
+        protocol = @"ftps";
+    }
     
     NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:[url host]
                                                                         port:[[url port] integerValue]
@@ -328,16 +347,14 @@
 - (void)transfer:(CURLTransfer *)transfer didCompleteWithError:(NSError *)error;
 {
     // For SSL errors, report extra info
-    if (error.code == CURLE_SSL_CACERT && [error.domain isEqualToString:CURLcodeErrorDomain])
+    SecTrustRef trust = (SecTrustRef)[error.userInfo objectForKey:NSURLErrorFailingURLPeerTrustErrorKey];
+    if (trust)
     {
-        NSString *host = transfer.primaryIPAddress;
-        if (!host) host = self.request.URL.host;
+        NSURL *url = self.request.URL;
         
-        NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:host
-                                                                            port:self.request.URL.port.integerValue
-                                                                        protocol:@"ftps"
-                                                                           realm:nil
-                                                            authenticationMethod:NSURLAuthenticationMethodServerTrust];
+        NSURLProtectionSpace *space = [[CK2FTPSProtectionSpace alloc] initWithServerTrust:trust
+                                                                                     host:url.host
+                                                                            port:url.port.integerValue];
         
         _sslFailures++;
         
@@ -353,10 +370,19 @@
             if (disposition == CK2AuthChallengeUseCredential && credential)
             {
                 // Retry
+                // Ideally we'd adjust libcurl to only accept this one new
+                // certificate, but I can't spot a proper API for that, so we'll
+                // have to live with a minor security flaw for now.
                 NSMutableURLRequest *request = [self.request mutableCopy];
                 [request curl_setShouldVerifySSLCertificate:NO];
                 [self startWithRequest:request credential:_credential];
                 [request release];
+            }
+            else if (disposition == CK2AuthChallengeCancelAuthenticationChallenge)
+            {
+                [super transfer:transfer didCompleteWithError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                                  code:NSURLErrorUserCancelledAuthentication
+                                                                              userInfo:nil]];
             }
             else
             {
@@ -385,5 +411,31 @@
     
     [super transfer:transfer didReceiveDebugInformation:string ofType:type];
 }
+
+@end
+
+
+#pragma mark -
+
+
+@implementation CK2FTPSProtectionSpace
+
+- initWithServerTrust:(SecTrustRef)trust host:(NSString *)host port:(NSInteger)port;
+{
+    if (self = [self initWithHost:host port:port protocol:@"ftps" realm:nil authenticationMethod:NSURLAuthenticationMethodServerTrust])
+    {
+        _trust = trust;
+        CFRetain(_trust);
+    }
+    return self;
+}
+
+- (void)dealloc;
+{
+    CFRelease(_trust);
+    [super dealloc];
+}
+
+- (SecTrustRef)serverTrust; { return _trust; }
 
 @end

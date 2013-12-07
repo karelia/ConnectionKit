@@ -474,6 +474,8 @@
 {
     _user = [credential.user copy];
     
+    request = [self.client protocol:self willSendRequest:request redirectResponse:nil];
+    
     CURLMultiHandle* multi = nil;
     if ([request respondsToSelector:@selector(ck2_multi)])  // should only be a testing/debugging feature
     {

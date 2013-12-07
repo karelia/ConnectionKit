@@ -26,7 +26,6 @@ typedef NSUInteger CKUploadingOptions;
 {
   @private
 	NSURLRequest        *_request;
-    unsigned long       _permissions;
     CKUploadingOptions  _options;
     
     CK2FileManager      *_fileManager;
@@ -37,31 +36,27 @@ typedef NSUInteger CKUploadingOptions;
     CKTransferRecord    *_baseRecord;
     
     BOOL    _invalidated;
+    BOOL    _suspended;
     
     id <CKUploaderDelegate> _delegate;
-    void                    (^_completionBlock)();
 }
 
 /**
- If non-NULL, the handler is called when uploading ends, instead of the `didFinish`
- or `didFail` delegate methods.
+ File permissions are supplied by curl_curl_newFilePermissions. Supply a
+ non-`nil` value if you want something different, or override
+ `-posixPermissionsForPath:isDirectory:`
  */
 + (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
-               filePosixPermissions:(NSNumber *)customPermissions
                             options:(CKUploadingOptions)options
-                  completionHandler:(void (^)())handler;
-
-// File permissions default to 0644. Supply a non-nil value if you want something different, or override -posixPermissionsForPath:isDirectory:
-+ (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
-               filePosixPermissions:(NSNumber *)customPermissions
-                            options:(CKUploadingOptions)options;
+                           delegate:(id <CKUploaderDelegate>)delegate;
 
 @property (nonatomic, copy, readonly) NSURLRequest *baseRequest;
 @property (nonatomic, assign, readonly) CKUploadingOptions options;
-@property (nonatomic, assign) id <CKUploaderDelegate> delegate;
+@property (nonatomic, retain, readonly) id <CKUploaderDelegate> delegate; // retained until invalidated
 
 - (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path;
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
+- (void)removeItemAtURL:(NSURL *)url __attribute((nonnull));
 - (void)removeFileAtPath:(NSString *)path;
 
 /**
@@ -72,13 +67,18 @@ typedef NSUInteger CKUploadingOptions;
 @property (nonatomic, retain, readonly) CKTransferRecord *rootTransferRecord;
 @property (nonatomic, retain, readonly) CKTransferRecord *baseTransferRecord;
 
-- (void)finishUploading;    // will disconnect once all files are uploaded
-- (void)finishUploadingWithCompletionHandler:(void (^)())handler;
-- (void)cancel;             // bails out as quickly as possible
+- (void)finishOperationsAndInvalidate;    // will disconnect once all files are uploaded
+- (void)invalidateAndCancel;             // bails out as quickly as possible
 
+
+#pragma mark Suspending Operations
+@property (nonatomic, getter=isSuspended) BOOL suspended;
+
+
+#pragma mark Permissions
 // The permissions given to uploaded files
-- (unsigned long)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
-+ (unsigned long)posixPermissionsForDirectoryFromFilePermissions:(unsigned long)filePermissions;
+- (NSNumber *)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
+
 
 @end
 
@@ -95,8 +95,6 @@ typedef NSUInteger CKUploadingOptions;
 - (void)uploader:(CKUploader *)uploader appendString:(NSString *)string toTranscript:(CK2TranscriptType)transcript;
 
 @optional
-- (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record shouldProceedAfterError:(NSError *)error completionHandler:(void (^)(BOOL proceed))completionHandler;
-
 - (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record
                                       didWriteBodyData:(int64_t)bytesSent
                                      totalBytesWritten:(int64_t)totalBytesSent
@@ -105,8 +103,8 @@ typedef NSUInteger CKUploadingOptions;
 - (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record
                                   didCompleteWithError:(NSError *)error;
 
-// These are semi-deprecated in favour of completion handler
-- (void)uploaderDidFinishUploading:(CKUploader *)uploader;
+- (void)uploaderDidBecomeInvalid:(CKUploader *)uploader;
+
 - (void)uploader:(CKUploader *)uploader didFailWithError:(NSError *)error;  // never called any more
 
 @end

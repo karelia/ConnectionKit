@@ -15,7 +15,10 @@
 @interface CK2FileOperation () <CK2ProtocolClient>
 @property(readonly) CK2FileManager *fileManager;    // goes to nil once finished/failed
 @property(readonly) NSURL *originalURL;
+@property (readwrite) int64_t countOfBytesWritten;
+@property (readwrite) int64_t countOfBytesExpectedToWrite;
 @property(readwrite) CK2FileOperationState state;
+@property (readwrite, copy) NSError *error;
 @end
 
 
@@ -282,8 +285,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             [_protocol stop];
             
             // Store the error and notify completion handler
-            _error = [error copy];
-            _state = CK2FileOperationStateCompleted;
+            self.error = error;
+            self.state = CK2FileOperationStateCompleted;
             
             void (^block)(NSError*) = _completionBlock;
             
@@ -352,12 +355,14 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)cancel;
 {
-    if (_state >= CK2FileOperationStateCanceling) return;
+    if (self.state >= CK2FileOperationStateCanceling) return;
     
     /*  Any already-enqueued delegate messages will likely still run. That's fine as it seems we might as well report things that are already known to have happened
      */
     
-    _state = CK2FileOperationStateCanceling;
+    // FIXME: There's a race condition here where .state could change after our intitial check of it
+    
+    self.state = CK2FileOperationStateCanceling;
     
     // Report cancellation to completion handler. If protocol has already finished or failed, it'll go ignored
     NSError *cancellationError = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:nil];
@@ -373,9 +378,9 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)resume;
 {
-    if (_state == CK2FileOperationStateSuspended)
+    if (self.state == CK2FileOperationStateSuspended)
     {
-        _state = CK2FileOperationStateRunning;
+        self.state = CK2FileOperationStateRunning;
         NSURL *url = self.originalURL;
         
         [CK2Protocol classForURL:url completionHandler:^(Class protocolClass) {
@@ -639,11 +644,29 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)protocol:(CK2Protocol *)protocol didSendBodyData:(int64_t)bytesSent totalBytesSent:(int64_t)totalBytesSent totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend;
 {
-    _bytesWritten = totalBytesSent;
-    _bytesExpectedToWrite = totalBytesExpectedToSend;
+    self.countOfBytesWritten = totalBytesSent;
+    self.countOfBytesExpectedToWrite = totalBytesExpectedToSend;
     
     [self.fileManager.delegateQueue addOperationWithBlock:^{
+        
+    if (_progressBlock)
+    {
         _progressBlock(bytesSent, totalBytesSent, totalBytesExpectedToSend);
+    }
+    else
+    {
+        CK2FileManager *manager = self.fileManager;
+        id <CK2FileManagerDelegate> delegate = manager.delegate;
+        if ([delegate respondsToSelector:@selector(fileManager:operation:didWriteBodyData:totalBytesWritten:totalBytesExpectedToWrite:)])
+        {
+            [delegate fileManager:manager
+                        operation:self
+                 didWriteBodyData:bytesSent
+                totalBytesWritten:totalBytesSent
+        totalBytesExpectedToWrite:totalBytesExpectedToSend];
+        }
+    }
+        
     }];
 }
 
