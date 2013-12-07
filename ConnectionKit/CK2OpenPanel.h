@@ -128,7 +128,7 @@
  the completion block has fired.
 
  Most commonly, we expect you'll want to show the user's home directory. To get that URL, consult CK2FileManager like so:
-  NSURL *homeDir = [CK2FileManager URLWithPath:@"" relativeToURL:[NSURL URLWithString:@"sftp://example.com"]];
+  NSURL *homeDir = [CK2FileManager URLWithPath:@"" isDirectory:YES hostURL:[NSURL URLWithString:@"sftp://example.com"]];
  
  @param directoryURL        The URL of the host/directory to connect to.
  @param block               The completion block that is called when the operation is complete.
