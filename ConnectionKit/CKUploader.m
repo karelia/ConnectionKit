@@ -95,11 +95,6 @@
     [self removeItemAtURL:url reportError:YES];
 }
 
-- (void)removeFileAtPath:(NSString *)path;
-{
-    [self removeItemAtURL:[self URLForPath:path]];
-}
-
 - (void)removeItemAtURL:(NSURL *)url reportError:(BOOL)reportError;
 {
     __block CK2FileOperation *op = [_fileManager removeOperationWithURL:url completionHandler:^(NSError *error) {
@@ -107,11 +102,6 @@
     }];
     
     [self addOperation:op];
-}
-
-- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
-{
-    return [self uploadToURL:[self URLForPath:path] fromData:data];
 }
 
 - (CKTransferRecord *)uploadToURL:(NSURL *)url fromData:(NSData *)data;
@@ -128,11 +118,6 @@
                                                   completionHandler:NULL];
     
     return [self uploadToURL:url usingOperation:op];
-}
-
-- (CKTransferRecord *)uploadFileAtURL:(NSURL *)localURL toPath:(NSString *)path;
-{
-    return [self uploadToURL:[self URLForPath:path] fromFile:localURL];
 }
 
 - (CKTransferRecord *)uploadToURL:(NSURL *)url fromFile:(NSURL *)fileURL;
@@ -192,11 +177,6 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     {
         [delegate uploader:self didAddTransferRecord:record];
     }
-}
-
-- (NSURL *)URLForPath:(NSString *)path;
-{
-    return [CK2FileManager URLWithPath:path relativeToURL:self.baseRequest.URL];
 }
 
 - (void)finishOperationsAndInvalidate;
