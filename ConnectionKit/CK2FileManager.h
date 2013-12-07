@@ -46,11 +46,6 @@ typedef NS_OPTIONS(NSInteger, CK2DirectoryEnumerationOptions) {
  https  | WebDAV over HTTPS
  sftp   | SFTP
  
- Completion handlers (and other blocks) and delegate methods are called by
- CK2FileManager on arbitrary threads/queues. It is your responsibility not to
- block that thread for too long, and to dispatch work over to another thread if
- required.
- 
  Note that on OS releases where `-[NSURLConnection setDelegateQueue:]` is
  unavailable, WebDAV operations rely on the main thread running its runloop in
  the default mode.
