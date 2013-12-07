@@ -44,6 +44,8 @@
     return result;
 }
 
+- (NSString *)protocol; { return @"WebDAV"; }
+
 #pragma mark - Upload Delegate Methods
 
 - (void)uploaderDidBecomeInvalid:(CKUploader *)uploader
@@ -52,12 +54,10 @@
     [self pause];
 }
 
-- (void)uploader:(CKUploader *)uploader didFailWithError:(NSError *)error
+- (void)uploader:(CKUploader *)uploader transferRecord:(CKTransferRecord *)record didCompleteWithError:(NSError *)error;
 {
     self.error = error;
-    [self pause];
 }
-
 
 - (void)uploader:(CKUploader *)uploader didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler
 {
@@ -96,7 +96,7 @@
     {
         STAssertTrue([self.error.domain isEqualToString:NSURLErrorDomain], @"unexpected error %@", self.error);
         STAssertTrue(self.error.code == kCFURLErrorUserCancelledAuthentication, @"unexpected error %@", self.error);
-        STAssertFalse(self.finished, @"shouldn't be finished");
+        STAssertTrue(self.finished, @"should be finished");
         if (record)
         {
             STAssertTrue([record.error.domain isEqualToString:NSURLErrorDomain], @"unexpected error %@", self.error);
@@ -197,19 +197,7 @@
         [uploader finishOperationsAndInvalidate];
         STAssertFalse(self.finished, @"should not be finished");
         [uploader invalidateAndCancel];
-    }
-}
-
-- (void)testPosixPermissionsForPath
-{
-    CKUploader* uploader = [self setupUploader];
-    if (uploader)
-    {
-        unsigned long filePerms = [uploader posixPermissionsForPath:@"test/test.txt" isDirectory:NO];
-        unsigned long dirPerms = [uploader posixPermissionsForPath:@"test/" isDirectory:YES];
-
-        STAssertTrue(filePerms == 0644, @"unexpected default file perms %lo", filePerms);
-        STAssertTrue(dirPerms == 0755, @"unexpected default dir perms %lo", dirPerms);
+        [self runUntilPaused];
     }
 }
 

@@ -60,8 +60,7 @@
 
 - (void)dealloc
 {
-    NSAssert(_invalidated, @"%@ is being deallocated without being invalidated", self);
-    NSAssert(_delegate == nil, @"%@ is being deallocated while still having a delegate", self);
+    NSAssert(_queue.count == 0, @"%@ is being deallocated while there are still queued operations", self);
     [_fileManager setDelegate:nil];
     
     [_request release];
@@ -117,7 +116,10 @@
 
 - (CKTransferRecord *)uploadToURL:(NSURL *)url fromData:(NSData *)data;
 {
-    NSDictionary *attributes = @{ NSFilePosixPermissions : [self posixPermissionsForPath:[_fileManager.class pathOfURL:url] isDirectory:NO] };
+    NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+                                [self posixPermissionsForPath:[_fileManager.class pathOfURL:url] isDirectory:NO],
+                                NSFilePosixPermissions,
+                                nil];
     
     CK2FileOperation *op = [_fileManager createFileOperationWithURL:url
                                                            fromData:data
@@ -138,7 +140,10 @@
     NSNumber *size;
     if (![fileURL getResourceValue:&size forKey:NSURLFileSizeKey error:NULL]) size = nil;
     
-    NSDictionary *attributes = @{ NSFilePosixPermissions : [self posixPermissionsForPath:[_fileManager.class pathOfURL:url] isDirectory:NO] };
+    NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+                                [self posixPermissionsForPath:[_fileManager.class pathOfURL:url] isDirectory:NO],
+                                NSFilePosixPermissions,
+                                nil];
     
     CK2FileOperation *op = [_fileManager createFileOperationWithURL:url
                                                            fromFile:fileURL
@@ -229,7 +234,11 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     if (_invalidated) [NSException raise:NSInvalidArgumentException format:@"%@ has been invalidated", self];
     
     [_queue addObject:operation];
-    if (_queue.count == 1) [self startNextOperationIfNotSuspended];
+    if (_queue.count == 1)
+    {
+        [self startNextOperationIfNotSuspended];
+        [self retain];  // keep alive until queue is empty
+    }
 }
 
 - (void)removeOperationAndStartNextIfAppropriate:(CK2FileOperation *)operation;
@@ -268,6 +277,8 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
             [_queue removeObjectAtIndex:0];
         }
     }
+    
+    [self release]; // once the queue is empty, can be deallocated
     
     if (_invalidated) [self didBecomeInvalid];
 }
