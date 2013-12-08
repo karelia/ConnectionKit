@@ -200,7 +200,7 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     {
         // Slightly delay delivery so it's similar to if there were operations
         // in the queue
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [_fileManager.delegateQueue addOperationWithBlock:^{
             [self didBecomeInvalid];
         }];
     }
