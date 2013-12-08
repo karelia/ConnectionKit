@@ -29,8 +29,9 @@
         if (!(_options & CKUploadingDryRun))
         {
             // Marshall all callbacks onto main queue, primarily for historical reasons, but also serialisation
-            _fileManager = [[CK2FileManager fileManagerWithDelegate:self
-                                                      delegateQueue:[NSOperationQueue mainQueue]] autorelease];
+            _fileManager = [CK2FileManager fileManagerWithDelegate:self
+                                                     delegateQueue:[NSOperationQueue mainQueue]];
+            [_fileManager retain];
         }
         
         _queue = [[NSMutableArray alloc] init];
