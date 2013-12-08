@@ -104,7 +104,7 @@
 
         _historyManager = [[NSUndoManager alloc] init];
         
-        _fileManager = [[CK2FileManager alloc] initWithDelegate:self delegateQueue:[NSOperationQueue mainQueue]];
+        _fileManager = [[CK2FileManager fileManagerWithDelegate:self delegateQueue:[NSOperationQueue mainQueue]] retain];
         
         [_openPanel addObserver:self forKeyPath:@"prompt" options:NSKeyValueObservingOptionNew context:NULL];
         [_openPanel addObserver:self forKeyPath:@"message" options:NSKeyValueObservingOptionOld context:NULL];

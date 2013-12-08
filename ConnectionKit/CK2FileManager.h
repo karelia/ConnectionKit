@@ -62,12 +62,12 @@ typedef NS_OPTIONS(NSInteger, CK2DirectoryEnumerationOptions) {
 #pragma mark Creating a File Manager
 
 /**
- Initializes a CK2FileManager instance.
+ Creates a CK2FileManager instance.
  
  @param delegate A delegate object that handles authentication etc.
  @param queue A queue for scheduling the delegate calls and completion handlers. If `nil`, ConnectionKit creates a serial operation queue for performing all delegate method calls and completion handler calls.
  */
-- initWithDelegate:(id <CK2FileManagerDelegate>)delegate delegateQueue:(NSOperationQueue *)queue;
++ (CK2FileManager *)fileManagerWithDelegate:(id <CK2FileManagerDelegate>)delegate delegateQueue:(NSOperationQueue *)queue;
 
 
 #pragma mark Discovering Directory Contents

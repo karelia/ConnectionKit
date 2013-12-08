@@ -85,6 +85,11 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 #pragma mark Creating a File Manager
 
++ (CK2FileManager *)fileManagerWithDelegate:(id <CK2FileManagerDelegate>)delegate delegateQueue:(NSOperationQueue *)queue;
+{
+    return [[[self alloc] initWithDelegate:delegate delegateQueue:queue] autorelease];
+}
+
 - initWithDelegate:(id <CK2FileManagerDelegate>)delegate delegateQueue:(NSOperationQueue *)queue;
 {
     if (self = [self init])
