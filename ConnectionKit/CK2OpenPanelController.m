@@ -1071,7 +1071,7 @@
         }
 
         // The homeURL isn't resolved so we resolve it here and also load/cache its children.        
-        homeURL = [[[CK2FileManager URLWithPath:@"" isDirectory:YES hostURL:[self directoryURL]] URLByAppendingPathComponent:@""] absoluteURL];
+        homeURL = [CK2FileManager URLWithPath:@"" isDirectory:YES hostURL:[self directoryURL]];
         
         _currentLoadingOperation = [_fileManager contentsOfDirectoryAtURL:homeURL includingPropertiesForKeys:[self fileProperties] options:CK2DirectoryEnumerationIncludesDirectory completionHandler:
         ^(NSArray *contents, NSError *blockError)
