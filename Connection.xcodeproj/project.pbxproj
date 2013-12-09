@@ -1130,7 +1130,6 @@
 				79CFD12409F702BE00172CDD /* Frameworks */,
 				79CFD12109F702BE00172CDD /* Headers */,
 				79CFD12209F702BE00172CDD /* Resources */,
-				7931260F0B3684B2002FF80D /* Strip UKKQueue */,
 				27282EDA167131150057CCF7 /* CopyFiles */,
 			);
 			buildRules = (
@@ -1325,21 +1324,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
-			showEnvVarsInLog = 0;
-		};
-		7931260F0B3684B2002FF80D /* Strip UKKQueue */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Strip UKKQueue";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "HAS_SYMBOLS=`nm ${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH} |grep .objc_class_name_UKKQueue |grep -w A`\necho $HAS_SYMBOLS\nif [ \"$HAS_SYMBOLS\" == \"\" ]\nthen\n\techo \"No need to strip symbols\"\nelse\n\tnmedit -R \"${SOURCE_ROOT}/UKKQueue_Symbols\" \"${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}\"\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		797CBBEB09F854B60063FF9B /* Generate Localizable.strings */ = {
