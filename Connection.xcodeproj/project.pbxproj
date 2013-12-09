@@ -56,7 +56,6 @@
 		22E67F1B171311C5001ECE34 /* ConnectionKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* ConnectionKit.framework */; };
 		22F6D112165A8A2200443CC9 /* URLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* URLTests.m */; };
 		22FEB6691680818800BB778B /* KMSTranscriptEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 22FEB6671680818800BB778B /* KMSTranscriptEntry.m */; };
-		2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
 		271059521671334500E20511 /* DAVKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		27105953167143D800E20511 /* CURLHandle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
 		271059541671441700E20511 /* libssh2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
@@ -527,7 +526,6 @@
 				796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */,
 				79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */,
 				CEB6FA0B13A696B200C8059F /* libsasl2.dylib in Frameworks */,
-				2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */,
 				220526F8165E9DE400A2BBC9 /* DAVKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
