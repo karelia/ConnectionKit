@@ -25,7 +25,7 @@ A high-level summary:
 * Use of blocks for simple completion and error-handling
 * URLs replace paths throughout the API
 * Management of raw connections is hidden behind the scenes, handling multiple connections and re-connections for you
-* Same authentication workflow as `NSURLConnection` and friends
+* Same authentication workflow as `NSURLSession` and friends
 * No longer tied to the main thread
 * libcurl is used for FTP, instead of custom implementation
 * `NSURLConnection` (via DAVKit) is used for WebDAV, instead of custom HTTP stack
