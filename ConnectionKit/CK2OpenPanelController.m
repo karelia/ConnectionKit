@@ -503,7 +503,7 @@
             
             // The first url returned is the rootURL properly resolved (in case the URL is relative to the user's home
             // directory, for instance).
-            resolvedURL = [[contents objectAtIndex:0] retain];
+            resolvedURL = [contents objectAtIndex:0];
             
             children = [contents subarrayWithRange:NSMakeRange(1, [contents count] - 1)];
             [self setDirectoryURL:resolvedURL];
@@ -521,8 +521,6 @@
                     [self setURLs:@[ resolvedURL ] updateDirectory:YES updateRoot:YES sender:self];
                 }
                 [self validateViews];
-                
-                [resolvedURL release];
             });
         }
         
