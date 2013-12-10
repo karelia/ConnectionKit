@@ -1106,8 +1106,6 @@
                 [self urlDidLoad:resolvedURL];
                                
                 [self setURLs:@[ resolvedURL ] updateDirectory:YES updateRoot:YES sender:self ];
-                
-                [resolvedURL release];
             });
         }];
         
