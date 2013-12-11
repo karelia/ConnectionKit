@@ -362,7 +362,15 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 {
     Class protocolClass = [CK2Protocol classForURL:URL];
     if (!protocolClass) protocolClass = [CK2Protocol class];
-    return [protocolClass pathOfURLRelativeToHomeDirectory:URL];
+    NSString *result = [protocolClass pathOfURLRelativeToHomeDirectory:URL];
+    
+    // Forcefully strip trailing slashes
+    while ([result hasSuffix:@"/"])
+    {
+        result = [result substringToIndex:result.length - 1];
+    }
+    
+    return result;
 }
 
 + (void)setTemporaryResourceValue:(id)value forKey:(NSString *)key inURL:(NSURL *)url;

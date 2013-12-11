@@ -127,7 +127,8 @@
         BOOL ok = [testData writeToURL:url atomically:YES encoding:NSUTF8StringEncoding error:&error];
         STAssertTrue(ok, @"failed to write test file with error %@", error);
 
-        CKTransferRecord *record = [uploader uploadFileAtURL:url toPath:@"test/test.txt"];
+        CKTransferRecord *record = [uploader uploadToURL:[CK2FileManager URLWithPath:@"test/test.txt" relativeToURL:uploader.baseRequest.URL]
+                                                fromFile:url];
         STAssertNotNil(record, @"got a transfer record");
         STAssertTrue(record.size == [[testData dataUsingEncoding:NSUTF8StringEncoding] length], @"unexpected size %ld", record.size);
         [uploader finishOperationsAndInvalidate];
@@ -149,7 +150,8 @@
     if (uploader)
     {
         NSData* testData = [@"Some test content" dataUsingEncoding:NSUTF8StringEncoding];
-        CKTransferRecord *record = [uploader uploadData:testData toPath:@"test/test.txt"];
+        CKTransferRecord *record = [uploader uploadToURL:[CK2FileManager URLWithPath:@"test/test.txt" relativeToURL:uploader.baseRequest.URL]
+                                                fromData:testData];
         STAssertNotNil(record, @"got a transfer record");
         STAssertTrue(record.size == [testData length], @"unexpected size %ld", record.size);
         [uploader finishOperationsAndInvalidate];
@@ -170,7 +172,7 @@
     CKUploader* uploader = [self setupUploader];
     if (uploader)
     {
-        [uploader removeFileAtPath:@"test/test.txt"];
+        [uploader removeItemAtURL:[CK2FileManager URLWithPath:@"test/test.txt" relativeToURL:uploader.baseRequest.URL]];
         [uploader finishOperationsAndInvalidate];
 
         [self runUntilPaused];
@@ -191,7 +193,8 @@
     if (uploader)
     {
         NSData* testData = [@"Some test content" dataUsingEncoding:NSUTF8StringEncoding];
-        CKTransferRecord *record = [uploader uploadData:testData toPath:@"test/test.txt"];
+        CKTransferRecord *record = [uploader uploadToURL:[CK2FileManager URLWithPath:@"test/test.txt" relativeToURL:uploader.baseRequest.URL]
+                                                fromData:testData];
         STAssertNotNil(record, @"got a transfer record");
         STAssertTrue(record.size == [testData length], @"unexpected size %ld", record.size);
         [uploader finishOperationsAndInvalidate];

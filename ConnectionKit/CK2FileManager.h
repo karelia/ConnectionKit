@@ -362,9 +362,11 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  ftp://example.com//absolute     =>  /absolute
  sftp://example.com/absolute     =>  /absolute
  sftp://example.com/~/relative   =>  relative
+ 
+ 
 
  @param URL to extract the path from. 
- @return the URL's path
+ @return the URL's path. If the path has a trailing slash it is stripped.
  */
 + (NSString *)pathOfURL:(NSURL *)URL;
 
