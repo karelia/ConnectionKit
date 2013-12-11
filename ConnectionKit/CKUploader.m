@@ -184,6 +184,9 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     if (_invalidated) return;
     _invalidated = YES;
     
+    // Now transfer records have all their content
+    [self.rootTransferRecord markContentsAsComplete];
+    
     if (!_queue.count)
     {
         // Slightly delay delivery so it's similar to if there were operations
