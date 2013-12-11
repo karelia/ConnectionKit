@@ -42,6 +42,7 @@
 	NSTimeInterval _lastDirectorySpeedUpdate;
 	CGFloat _speed;
 	NSMutableArray *_contents;
+    BOOL            _contentsComplete;
 	CKTransferRecord *_parent; //not retained
 	NSMutableDictionary *_properties;
 	    
@@ -76,8 +77,29 @@
 
 - (NSDictionary *)nameWithProgressAndFileSize;
 
+#pragma mark Contents
+
 - (void)addContent:(CKTransferRecord *)record;
 - (NSArray *)contents;
+
+/**
+ Whether there is the possiblity of any more content being added.
+ 
+ Used to know whether directories should be drawn with a tick mark or not, once
+ their contents have finished uploading. If contents are not yet complete, once
+ all descendant uploads have finished, a pie chart is still drawn, in case new
+ contents arrive.
+ */
+@property(nonatomic, readonly) BOOL contentsAreComplete;
+
+/**
+ Marks the receiver as not expecting any more records to be added to `contents`.
+ 
+ See `contentsAreComplete` for details.
+ */
+- (void)markContentsAsComplete;
+
+#pragma mark
 
 - (CKTransferRecord *)root;
 - (NSString *)path; 

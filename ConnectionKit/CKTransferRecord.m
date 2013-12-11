@@ -37,6 +37,10 @@
 NSString *CKTransferRecordTransferDidBeginNotification = @"CKTransferRecordTransferDidBeginNotification";
 NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTransferDidFinishNotification";
 
+@interface CKTransferRecord ()
+@property(nonatomic, readwrite) BOOL contentsAreComplete;
+@end
+
 @implementation CKTransferRecord
 
 - (NSString *)name { return _name; }
@@ -59,6 +63,9 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 {
     CK2FileOperation *operation = self.uploadOperation;
     if (operation) return (operation.state == CK2FileOperationStateCompleted);
+    
+    // Can't be finished until all contents are present
+    if (!self.contentsAreComplete) return NO;
     
     for (CKTransferRecord *aRecord in self.contents)
     {
@@ -298,6 +305,8 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	}
 }
 
+#pragma mark Contents
+
 - (void)addContent:(CKTransferRecord *)record
 {
 	NSParameterAssert(record);
@@ -315,6 +324,15 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 {
 	return [[_contents copy] autorelease];
 }
+
+@synthesize contentsAreComplete = _contentsComplete;
+
+- (void)markContentsAsComplete;
+{
+    self.contentsAreComplete = YES;
+}
+
+#pragma mark
 
 - (void)appendToDescription:(NSMutableString *)str indentation:(unsigned)indent
 {
