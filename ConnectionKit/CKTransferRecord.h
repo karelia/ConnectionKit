@@ -95,6 +95,9 @@
 /**
  Marks the receiver as not expecting any more records to be added to `contents`.
  
+ The receiver recurses down and marks all its contents as being complete to so
+ you can mark off whole sections of the hierarchy.
+ 
  See `contentsAreComplete` for details.
  */
 - (void)markContentsAsComplete;

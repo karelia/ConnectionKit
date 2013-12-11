@@ -330,6 +330,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 - (void)markContentsAsComplete;
 {
     self.contentsAreComplete = YES;
+    [self.contents makeObjectsPerformSelector:_cmd];    // recurse down
 }
 
 #pragma mark
