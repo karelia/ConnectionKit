@@ -83,6 +83,31 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 @implementation CK2FileManager
 
+#pragma mark Creating a File Manager
+
++ (CK2FileManager *)fileManagerWithDelegate:(id <CK2FileManagerDelegate>)delegate delegateQueue:(NSOperationQueue *)queue;
+{
+    return [[[self alloc] initWithDelegate:delegate delegateQueue:queue] autorelease];
+}
+
+- initWithDelegate:(id <CK2FileManagerDelegate>)delegate delegateQueue:(NSOperationQueue *)queue;
+{
+    if (self = [self init])
+    {
+        // Create our own serial queue if needed
+        _delegateQueue = [queue retain];
+        if (!_delegateQueue)
+        {
+            _delegateQueue = [[NSOperationQueue alloc] init];
+            _delegateQueue.maxConcurrentOperationCount = 1;
+        }
+        
+        self.delegate = delegate;
+    }
+    
+    return self;
+}
+
 #pragma mark Discovering Directory Contents
 
 - (CK2FileOperation *)contentsOfDirectoryAtURL:(NSURL *)url
@@ -266,6 +291,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 #pragma mark Delegate
 
 @synthesize delegate = _delegate;
+@synthesize delegateQueue = _delegateQueue;
 
 #pragma mark Operations
 

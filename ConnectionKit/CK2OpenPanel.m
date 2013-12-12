@@ -140,7 +140,20 @@
 - (void)setDirectoryURL:(NSURL *)directoryURL completionHandler:(void (^)(NSError *))block;
 {
     // Kick off async loading of the URL, but also store our own copy for clients to immediately pull out again if they wish
-    [_viewController changeDirectory:directoryURL completionHandler:block];
+    [_viewController changeDirectory:directoryURL completionHandler:^(NSError *error) {
+        
+        // Re-dispatch using runloop so there's no danger from clients deciding
+        // to call -runModal within it
+        NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
+            block(error);
+        }];
+        
+        [[NSRunLoop currentRunLoop] performSelector:@selector(start)
+                                             target:operation
+                                           argument:nil
+                                              order:0
+                                              modes:@[NSRunLoopCommonModes]];
+    }];
 }
 
 - (NSURL *)URL

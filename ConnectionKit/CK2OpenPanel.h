@@ -121,7 +121,11 @@
  The completion block will not be called until the given URL's contents are fully loaded. That way, if you show the
  panel in the completion block, nothing will be "in progress". You can still show the panel beforehand but much of
  the UI will be disabled until the URL is loaded. The UI will still be responsive in that you'll see progress
- indicators spinning and you can still cancel the panel. The completion block is called on the main thread.
+ indicators spinning and you can still cancel the panel.
+ 
+ The completion block is called on the main thread, and as a nicety,
+ deliberately *avoids* using a dispatch queue to do so, so you can call
+ `-runModal` from within it if desired (see the `-runModal` docs for details).
 
  Note that directoryURL immediately reflects the URL this method was called with but may change when the operation
  is complete as the server may resolve the URL to something else. It's best to not rely on the directoryURL until
@@ -137,6 +141,24 @@
 
 - (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
 - (void)beginWithCompletionHandler:(void (^)(NSInteger result))handler;
+
+/**
+ Displays the panel and begins its event loop with the current working (or last selected) directory as the default starting point.
+ 
+ @return `NSFileHandlingPanelOKButton` (if the user clicks the OK button) or `NSFileHandlingPanelCancelButton` (if the user clicks the Cancel button).
+ 
+ This method invokes `-[NSApplication runModalForWindow:` with `self` as the
+ argument.
+ 
+ You must **NOT** run an open panel modally from the main dispatch
+ queue. Doing so will block the queue, preventing important internal callbacks
+ from arriving, including from ConnectionKit itself, and the springy scrolling
+ behaviour introduced in 10.7+.
+ 
+ Instead, call as part of regular runloop activity, such as directly from a user-
+ generated event, or deferred execution using something like
+ `-performSelector:afterDelay:…`
+ */
 - (NSInteger)runModal;
 
 - (IBAction)ok:(id)sender;

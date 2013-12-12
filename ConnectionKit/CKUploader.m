@@ -28,8 +28,10 @@
         
         if (!(_options & CKUploadingDryRun))
         {
-            _fileManager = [[CK2FileManager alloc] init];
-            _fileManager.delegate = self;
+            // Marshall all callbacks onto main queue, primarily for historical reasons, but also serialisation
+            _fileManager = [CK2FileManager fileManagerWithDelegate:self
+                                                     delegateQueue:[NSOperationQueue mainQueue]];
+            [_fileManager retain];
         }
         
         _queue = [[NSMutableArray alloc] init];
@@ -191,7 +193,7 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     {
         // Slightly delay delivery so it's similar to if there were operations
         // in the queue
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [_fileManager.delegateQueue addOperationWithBlock:^{
             [self didBecomeInvalid];
         }];
     }
@@ -268,11 +270,9 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
 
 - (void)operation:(CK2FileOperation *)operation didFinish:(NSError *)error;
 {
+    NSAssert([NSThread isMainThread], @"Operation broke threading contract");
     NSParameterAssert(operation);
     
-    // This method gets called on all sorts of threads, so marshall back to main queue
-    dispatch_async(dispatch_get_main_queue(), ^{
-        
         // Tell the record & delegate it's finished
         CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
         [record transferDidFinish:record error:error];
@@ -285,7 +285,6 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
         }
         
         [self removeOperationAndStartNextIfAppropriate:operation];
-    });
 }
 
 #pragma mark Transfer Records
@@ -406,24 +405,20 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
 
 - (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
 {
-    // Hand off to the delegate for auth, on the main queue as it expects
-    dispatch_async(dispatch_get_main_queue(), ^{
-        
-        id <CKUploaderDelegate> delegate = [self delegate];
-        if (delegate)
-        {
-            [delegate uploader:self didReceiveChallenge:challenge completionHandler:completionHandler];
-        }
-        else
-        {
-            completionHandler(CK2AuthChallengePerformDefaultHandling, nil);
-        }
-    });
+    // Hand off to the delegate for auth
+    id <CKUploaderDelegate> delegate = [self delegate];
+    if (delegate)
+    {
+        [delegate uploader:self didReceiveChallenge:challenge completionHandler:completionHandler];
+    }
+    else
+    {
+        completionHandler(CK2AuthChallengePerformDefaultHandling, nil);
+    }
 }
 
 - (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation didWriteBodyData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesSent totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToSend;
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
         CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
         NSAssert(record, @"Unknown operation");
         [record transfer:record transferredDataOfLength:bytesWritten];
@@ -436,14 +431,11 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
                   totalBytesWritten:totalBytesSent
           totalBytesExpectedToWrite:totalBytesExpectedToSend];
         }
-    });
 }
 
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
 {
-	dispatch_async(dispatch_get_main_queue(), ^{
-        [[self delegate] uploader:self appendString:info toTranscript:transcript];
-    });
+    [[self delegate] uploader:self appendString:info toTranscript:transcript];
 }
 
 @end

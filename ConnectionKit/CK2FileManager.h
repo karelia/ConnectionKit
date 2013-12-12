@@ -46,11 +46,6 @@ typedef NS_OPTIONS(NSInteger, CK2DirectoryEnumerationOptions) {
  https  | WebDAV over HTTPS
  sftp   | SFTP
  
- Completion handlers (and other blocks) and delegate methods are called by
- CK2FileManager on arbitrary threads/queues. It is your responsibility not to
- block that thread for too long, and to dispatch work over to another thread if
- required.
- 
  Note that on OS releases where `-[NSURLConnection setDelegateQueue:]` is
  unavailable, WebDAV operations rely on the main thread running its runloop in
  the default mode.
@@ -61,7 +56,19 @@ typedef NS_OPTIONS(NSInteger, CK2DirectoryEnumerationOptions) {
 {
   @private
     id <CK2FileManagerDelegate> _delegate;
+    NSOperationQueue            *_delegateQueue;
 }
+
+#pragma mark Creating a File Manager
+
+/**
+ Creates a CK2FileManager instance.
+ 
+ @param delegate A delegate object that handles authentication etc.
+ @param queue A queue for scheduling the delegate calls and completion handlers. If `nil`, ConnectionKit creates a serial operation queue for performing all delegate method calls and completion handler calls.
+ */
++ (CK2FileManager *)fileManagerWithDelegate:(id <CK2FileManagerDelegate>)delegate delegateQueue:(NSOperationQueue *)queue;
+
 
 #pragma mark Discovering Directory Contents
 
@@ -302,6 +309,12 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  */
 @property(assign) id <CK2FileManagerDelegate> delegate;
 
+/**
+ The operation queue provided when this object was created. (read-only)
+ 
+ All delegate method calls and completion handlers are performed on this queue.
+ */
+@property(readonly, retain) NSOperationQueue *delegateQueue;
 
 @end
 

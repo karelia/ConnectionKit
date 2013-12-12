@@ -134,14 +134,11 @@
      {
          NSEvent     *event;
                   
-         dispatch_async(dispatch_get_main_queue(),
-         ^{
              [self setError:blockError];
              [self setFolderURL:url];
              [self endWithCode:NSOKButton];
              
              [_okButton setEnabled:YES];
-         });
          
          // It seems that the run loop doesn't wake up after ending the modal session from a block (also happens with
          // -performSelectorOnMainThread:) so we create a fake event here to "jiggle its rat" (rdar://13079612)

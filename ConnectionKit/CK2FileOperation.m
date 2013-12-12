@@ -284,12 +284,16 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             // It's now safe to stop the protocol as it can't misinterpret the message and issue its own cancellation error (or at least if it does, goes ignored)
             [_protocol stop];
             
-            
             // Store the error and notify completion handler
             self.error = error;
             self.state = CK2FileOperationStateCompleted;
             
-            _completionBlock(error);
+            void (^block)(NSError*) = _completionBlock;
+            
+            [self tryToMessageDelegateSelector:NULL usingBlock:^(id<CK2FileManagerDelegate> delegate) {
+                block(error);
+            }];
+            
             [_completionBlock release]; _completionBlock = nil;
             
             
@@ -297,10 +301,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             [_protocol release];
         }
     });
-    
-    // These ivars are already finished with, so can ditch them early
-    [_enumerationBlock release]; _enumerationBlock = nil;
-    [_manager release]; _manager = nil;
 }
 
 - (void)dealloc
@@ -322,6 +322,20 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 #pragma mark Manager
 
 @synthesize fileManager = _manager;
+
+- (void)tryToMessageDelegateSelector:(SEL)selector usingBlock:(void (^)(id <CK2FileManagerDelegate> delegate))block;
+{
+    CK2FileManager *manager = self.fileManager;
+    NSAssert(manager, @"%@ disconnected from its manager too early", self.class);
+    id <CK2FileManagerDelegate> delegate = manager.delegate;
+    
+    if (!selector || [delegate respondsToSelector:selector])
+    {
+        [manager.delegateQueue addOperationWithBlock:^{
+            block(delegate);
+        }];
+    }
+}
 
 #pragma mark URL & Requests
 
@@ -492,6 +506,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     if ([delegate respondsToSelector:@selector(fileManager:operation:didReceiveChallenge:completionHandler:)])
     {
+        [manager.delegateQueue addOperationWithBlock:^{
+            
         __block BOOL handlerCalled = NO;
         [delegate fileManager:manager operation:self didReceiveChallenge:challenge completionHandler:^(CK2AuthChallengeDisposition disposition, NSURLCredential *credential) {
             
@@ -501,6 +517,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             dispatch_async(_queue, ^{
                 completionHandler(disposition, credential);
             });
+        }];
+            
         }];
     }
     else if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
@@ -525,11 +543,9 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     // Pass straight onto delegate and trust it not to take too long handling it
     // We used to dispatch off onto one of the global queues, but that does have the nasty downside of messages sometimes arriving out-of-order or concurrently
-    id <CK2FileManagerDelegate> delegate = [self.fileManager delegate];
-    if ([delegate respondsToSelector:@selector(fileManager:appendString:toTranscript:)])
-    {
+    [self tryToMessageDelegateSelector:@selector(fileManager:appendString:toTranscript:) usingBlock:^(id<CK2FileManagerDelegate> delegate) {
         [delegate fileManager:self.fileManager appendString:info toTranscript:transcript];
-    }
+    }];
 }
 
 - (void)protocol:(CK2Protocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
@@ -540,7 +556,12 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     // Provide ancestry and other fairly generic keys on-demand
     [self.class setResourceValueBlocksForURL:url protocolClass:protocol.class];
     
-    if (_enumerationBlock) _enumerationBlock(url);
+    if (_enumerationBlock)
+    {
+        [self tryToMessageDelegateSelector:NULL usingBlock:^(id<CK2FileManagerDelegate> delegate) {
+            _enumerationBlock(url);
+        }];
+    }
     
     // It seems poor security to vend out passwords here, so have a quick sanity check
     if (CFURLGetByteRangeForComponent((CFURLRef)url, kCFURLComponentPassword, NULL).location != kCFNotFound)
@@ -626,6 +647,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     self.countOfBytesWritten = totalBytesSent;
     self.countOfBytesExpectedToWrite = totalBytesExpectedToSend;
     
+    [self.fileManager.delegateQueue addOperationWithBlock:^{
+        
     if (_progressBlock)
     {
         _progressBlock(bytesSent, totalBytesSent, totalBytesExpectedToSend);
@@ -643,6 +666,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         totalBytesExpectedToWrite:totalBytesExpectedToSend];
         }
     }
+        
+    }];
 }
 
 - (NSInputStream *)protocol:(CK2Protocol *)protocol needNewBodyStream:(NSURLRequest *)request;

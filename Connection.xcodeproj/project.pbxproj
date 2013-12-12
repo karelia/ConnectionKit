@@ -106,8 +106,6 @@
 		2791182D178B5D59006BF857 /* CK2BrowserPreviewView.m in Sources */ = {isa = PBXBuildFile; fileRef = 324D22BE16AE1740001CFDE6 /* CK2BrowserPreviewView.m */; };
 		2791182E178B5D59006BF857 /* CK2FileSizeFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22C316AE1754001CFDE6 /* CK2FileSizeFormatter.h */; };
 		2791182F178B5D59006BF857 /* CK2FileSizeFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 324D22C416AE1754001CFDE6 /* CK2FileSizeFormatter.m */; };
-		27911830178B5D59006BF857 /* NSObject+CK2OpenPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B46228171DE27F00FFFAAE /* NSObject+CK2OpenPanel.h */; };
-		27911831178B5D59006BF857 /* NSObject+CK2OpenPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B46229171DE27F00FFFAAE /* NSObject+CK2OpenPanel.m */; };
 		27911832178B5D59006BF857 /* NSURL+CK2OpenPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592A716A4960B0020FFE9 /* NSURL+CK2OpenPanel.h */; };
 		27911833178B5D59006BF857 /* NSURL+CK2OpenPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592A816A4960B0020FFE9 /* NSURL+CK2OpenPanel.m */; };
 		27911834178B5D59006BF857 /* NSImage+CK2OpenPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B3EA7C16B58FFA003D4836 /* NSImage+CK2OpenPanel.h */; };
@@ -403,8 +401,6 @@
 		3274F1CC170888430049DDE5 /* CK2PathFieldWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2PathFieldWindowController.m; sourceTree = "<group>"; };
 		32B3EA7C16B58FFA003D4836 /* NSImage+CK2OpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSImage+CK2OpenPanel.h"; sourceTree = "<group>"; };
 		32B3EA7D16B58FFB003D4836 /* NSImage+CK2OpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSImage+CK2OpenPanel.m"; sourceTree = "<group>"; };
-		32B46228171DE27F00FFFAAE /* NSObject+CK2OpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+CK2OpenPanel.h"; sourceTree = "<group>"; };
-		32B46229171DE27F00FFFAAE /* NSObject+CK2OpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+CK2OpenPanel.m"; sourceTree = "<group>"; };
 		32B592A116A4960B0020FFE9 /* CK2OpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanel.h; sourceTree = "<group>"; };
 		32B592A216A4960B0020FFE9 /* CK2OpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2OpenPanel.m; sourceTree = "<group>"; };
 		32B592A316A4960B0020FFE9 /* CK2OpenPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanelController.h; sourceTree = "<group>"; };
@@ -928,8 +924,6 @@
 				324D22BE16AE1740001CFDE6 /* CK2BrowserPreviewView.m */,
 				324D22C316AE1754001CFDE6 /* CK2FileSizeFormatter.h */,
 				324D22C416AE1754001CFDE6 /* CK2FileSizeFormatter.m */,
-				32B46228171DE27F00FFFAAE /* NSObject+CK2OpenPanel.h */,
-				32B46229171DE27F00FFFAAE /* NSObject+CK2OpenPanel.m */,
 				32B592A716A4960B0020FFE9 /* NSURL+CK2OpenPanel.h */,
 				32B592A816A4960B0020FFE9 /* NSURL+CK2OpenPanel.m */,
 				32B3EA7C16B58FFA003D4836 /* NSImage+CK2OpenPanel.h */,
@@ -995,7 +989,6 @@
 				27911818178B5D59006BF857 /* CK2OpenPanelListViewController.h in Headers */,
 				27911828178B5D59006BF857 /* CK2IconView.h in Headers */,
 				27911810178B5D33006BF857 /* CK2OpenPanel.h in Headers */,
-				27911830178B5D59006BF857 /* NSObject+CK2OpenPanel.h in Headers */,
 				27911832178B5D59006BF857 /* NSURL+CK2OpenPanel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1407,7 +1400,6 @@
 				2791181B178B5D59006BF857 /* CK2OpenPanelColumnViewController.m in Sources */,
 				27911815178B5D59006BF857 /* CK2OpenPanelViewController.m in Sources */,
 				2791181D178B5D59006BF857 /* CK2NewFolderWindowController.m in Sources */,
-				27911831178B5D59006BF857 /* NSObject+CK2OpenPanel.m in Sources */,
 				27911825178B5D59006BF857 /* CK2IconViewItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
