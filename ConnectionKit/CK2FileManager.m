@@ -92,7 +92,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 - initWithDelegate:(id <CK2FileManagerDelegate>)delegate delegateQueue:(NSOperationQueue *)queue;
 {
-    if (self = [self init])
+    if (self = [super init])
     {
         // Create our own serial queue if needed
         _delegateQueue = [queue retain];
@@ -106,6 +106,11 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     }
     
     return self;
+}
+
+- init;
+{
+    return [self initWithDelegate:nil delegateQueue:nil];
 }
 
 #pragma mark Discovering Directory Contents
