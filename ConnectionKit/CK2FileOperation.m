@@ -647,7 +647,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     self.countOfBytesWritten = totalBytesSent;
     self.countOfBytesExpectedToWrite = totalBytesExpectedToSend;
     
-    [self.fileManager.delegateQueue addOperationWithBlock:^{
+    CK2FileManager *manager = self.fileManager;
+    [manager.delegateQueue addOperationWithBlock:^{
         
     if (_progressBlock)
     {
@@ -655,7 +656,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     }
     else
     {
-        CK2FileManager *manager = self.fileManager;
         id <CK2FileManagerDelegate> delegate = manager.delegate;
         if ([delegate respondsToSelector:@selector(fileManager:operation:didWriteBodyData:totalBytesWritten:totalBytesExpectedToWrite:)])
         {
