@@ -445,7 +445,9 @@ typedef NS_ENUM(NSUInteger, CK2TranscriptType) {
  @param info The received transcript line(s). Should end in a newline character.
  @param transcript The type of transcript received.
  */
-- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation
+                                           appendString:(NSString *)info
+                                           toTranscript:(CK2TranscriptType)transcript;
 
 /**
  * Sent as the last message related to a specific operation. Error may be
