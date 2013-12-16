@@ -432,11 +432,9 @@ typedef NS_ENUM(NSInteger, CK2AuthChallengeDisposition) {
                               totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToSend;
 
 
-typedef NS_ENUM(NSUInteger, CK2TranscriptType) {
-	CK2TranscriptText,
-	CK2TranscriptHeaderIn,
-	CK2TranscriptHeaderOut,
-};    // deliberately aligned with curl_infotype for convenience
+extern NSString * const CK2TranscriptText;
+extern NSString * const CK2TranscriptHeaderIn;
+extern NSString * const CK2TranscriptHeaderOut;
 
 /**
  Reports received transcript info.
@@ -447,7 +445,7 @@ typedef NS_ENUM(NSUInteger, CK2TranscriptType) {
  */
 - (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation
                                            appendString:(NSString *)info
-                                           toTranscript:(CK2TranscriptType)transcript;
+                                           toTranscript:(NSString *)transcript;
 
 /**
  * Sent as the last message related to a specific operation. Error may be

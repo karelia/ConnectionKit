@@ -433,7 +433,7 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
         }
 }
 
-- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
+- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation appendString:(NSString *)info toTranscript:(NSString *)transcript;
 {
     [[self delegate] uploader:self appendString:info toTranscript:transcript];
 }

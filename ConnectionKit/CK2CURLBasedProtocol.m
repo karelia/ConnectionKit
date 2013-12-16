@@ -685,26 +685,26 @@
 
 - (void)transfer:(CURLTransfer *)transfer didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
 {
-    CK2TranscriptType ckType;
+    NSString *transcript;
     switch (type)
     {
         case CURLINFO_HEADER_IN:
-            ckType = CK2TranscriptHeaderIn;
+            transcript = CK2TranscriptHeaderIn;
             break;
 
         case CURLINFO_HEADER_OUT:
-            ckType = CK2TranscriptHeaderOut;
+            transcript = CK2TranscriptHeaderOut;
             break;
 
         case CURLINFO_TEXT:
-            ckType = CK2TranscriptText;
+            transcript = CK2TranscriptText;
             break;
             
         default:
             return;
     }
 
-    [[self client] protocol:self appendString:string toTranscript:ckType];
+    [[self client] protocol:self appendString:string toTranscript:transcript];
 }
 
 #pragma mark Customization

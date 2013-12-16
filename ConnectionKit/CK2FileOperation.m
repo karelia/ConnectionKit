@@ -536,7 +536,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     // TODO: Cache credentials per protection space
 }
 
-- (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
+- (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(NSString *)transcript;
 {
     NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     
