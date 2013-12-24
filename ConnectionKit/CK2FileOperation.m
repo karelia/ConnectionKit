@@ -543,12 +543,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     
     [[CK2Transcript sharedTranscript] addEntryOfType:transcript text:info];
-    
-    // Pass straight onto delegate and trust it not to take too long handling it
-    // We used to dispatch off onto one of the global queues, but that does have the nasty downside of messages sometimes arriving out-of-order or concurrently
-    [self tryToMessageDelegateSelector:@selector(fileManager:operation:appendString:toTranscript:) usingBlock:^(id<CK2FileManagerDelegate> delegate) {
-        [delegate fileManager:self.fileManager operation:self appendString:info toTranscript:transcript];
-    }];
 }
 
 - (void)protocol:(CK2Protocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
