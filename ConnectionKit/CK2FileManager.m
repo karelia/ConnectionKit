@@ -15,10 +15,6 @@
 
 NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
 
-NSString * const CK2TranscriptText = @"Info";
-NSString * const CK2TranscriptHeaderIn = @"Received";
-NSString * const CK2TranscriptHeaderOut = @"Sent";
-
 
 #pragma mark -
 
