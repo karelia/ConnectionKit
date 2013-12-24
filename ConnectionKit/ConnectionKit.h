@@ -31,6 +31,7 @@
 #import <ConnectionKit/CK2FileManager.h>
 #import <ConnectionKit/CK2Authentication.h>
 #import <ConnectionKit/CK2FileOperation.h>
+#import <ConnectionKit/CK2Transcript.h>
 
 // Legacy
 #import <ConnectionKit/CKUploader.h>

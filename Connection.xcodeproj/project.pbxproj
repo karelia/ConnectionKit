@@ -56,7 +56,7 @@
 		22FEB6691680818800BB778B /* KMSTranscriptEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 22FEB6671680818800BB778B /* KMSTranscriptEntry.m */; };
 		271059521671334500E20511 /* DAVKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		27105953167143D800E20511 /* CURLHandle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
-		273605911869A93600A32419 /* CK2Transcript.h in Headers */ = {isa = PBXBuildFile; fileRef = 2736058F1869A93600A32419 /* CK2Transcript.h */; };
+		273605911869A93600A32419 /* CK2Transcript.h in Headers */ = {isa = PBXBuildFile; fileRef = 2736058F1869A93600A32419 /* CK2Transcript.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		273605921869A93600A32419 /* CK2Transcript.m in Sources */ = {isa = PBXBuildFile; fileRef = 273605901869A93600A32419 /* CK2Transcript.m */; };
 		27431CA01630381D00F6FB58 /* CK2FileProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */; };
 		27431CA11630381D00F6FB58 /* CK2FileProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */; };
