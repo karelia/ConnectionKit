@@ -537,12 +537,12 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     // TODO: Cache credentials per protection space
 }
 
-- (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(NSString *)transcript;
+- (void)protocol:(CK2Protocol *)protocol appendStringToTranscript:(NSString *)info isCommand:(BOOL)isCommand;
 {
     NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     
     
-    [[CK2Transcript sharedTranscript] addEntryOfType:transcript text:info];
+    [[CK2Transcript sharedTranscript] addEntryWithText:info isCommand:isCommand];
 }
 
 - (void)protocol:(CK2Protocol *)protocol didDiscoverItemAtURL:(NSURL *)url;

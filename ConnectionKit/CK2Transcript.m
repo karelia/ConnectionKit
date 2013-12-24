@@ -11,12 +11,12 @@
 
 @implementation CK2TranscriptEntry
 
-- initWithText:(NSString *)text type:(NSString *)type;
+- initWithText:(NSString *)text isCommand:(BOOL)isCommand;
 {
     if (self = [self init])
     {
         _text = [text copy];
-        _type = [type copy];
+        _isCommand = isCommand;
     }
     return self;
 }
@@ -24,13 +24,11 @@
 - (void)dealloc;
 {
     [_text release];
-    [_type release];
-    
     [super dealloc];
 }
 
 @synthesize text = _text;
-@synthesize entryType = _type;
+@synthesize isCommand = _isCommand;
 
 @end
 
@@ -92,9 +90,9 @@
     return [result autorelease];
 }
 
-- (void)addEntryOfType:(NSString *)type text:(NSString *)text;
+- (void)addEntryWithText:(NSString *)text isCommand:(BOOL)command;
 {
-    CK2TranscriptEntry *entry = [[CK2TranscriptEntry alloc] initWithText:text type:type];
+    CK2TranscriptEntry *entry = [[CK2TranscriptEntry alloc] initWithText:text isCommand:command];
     
     dispatch_async(_queue, ^{
         [_entries addObject:entry];

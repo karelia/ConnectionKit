@@ -19,11 +19,11 @@
 {
   @private
     NSString    *_text;
-    NSString    *_type;
+    BOOL        _isCommand;
 }
 
 @property(nonatomic, copy, readonly) NSString *text;
-@property(nonatomic, copy, readonly) NSString *entryType;
+@property(nonatomic, readonly) BOOL isCommand;
 
 @end
 
@@ -46,7 +46,7 @@
 
 
 #pragma mark Adding Entries
-- (void)addEntryOfType:(NSString *)type text:(NSString *)format;
+- (void)addEntryWithText:(NSString *)text isCommand:(BOOL)command;
 
 
 #pragma mark Removing Entries

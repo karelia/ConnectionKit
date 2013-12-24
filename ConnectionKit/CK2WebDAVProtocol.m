@@ -412,7 +412,7 @@
     // Tack on a newline to match libcurl output
     string = [string stringByAppendingString:@"\n"];
     
-    [[self client] protocol:self appendString:string toTranscript:(sent ? CK2TranscriptHeaderOut : CK2TranscriptHeaderIn)];
+    [[self client] protocol:self appendStringToTranscript:string isCommand:sent];
 }
 
 #pragma mark - Utilities
