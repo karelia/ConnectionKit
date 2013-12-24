@@ -94,13 +94,17 @@
 
 - (void)addEntryOfType:(NSString *)type text:(NSString *)text;
 {
+    CK2TranscriptEntry *entry = [[CK2TranscriptEntry alloc] initWithText:text type:type];
+    
     dispatch_async(_queue, ^{
-        CK2TranscriptEntry *entry = [[CK2TranscriptEntry alloc] initWithText:text type:type];
         [_entries addObject:entry];
-        [entry release];
     });
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:CK2TranscriptChangedNotification object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CK2TranscriptChangedNotification
+                                                        object:self
+                                                      userInfo:@{ CK2TranscriptAddedEntryKey : entry }];
+    
+    [entry release];
 }
 
 - (void)removeAllEntries;
@@ -116,3 +120,4 @@
 
 
 NSString * const CK2TranscriptChangedNotification = @"CK2TranscriptChanged";
+NSString * const CK2TranscriptAddedEntryKey = @"entry";

@@ -60,3 +60,11 @@
  Posted on whichever thread modified the transcript
  */
 extern NSString * const CK2TranscriptChangedNotification;
+
+
+/**
+ Key in `CK2TranscriptChangedNotification`'s `userInfo` for the entry (if there
+ was one) that was added.
+ */
+extern NSString * const CK2TranscriptAddedEntryKey;
+
