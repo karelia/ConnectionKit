@@ -91,8 +91,6 @@
 
 - (void)addEntryWithText:(NSString *)text isCommand:(BOOL)command;
 {
-    CK2TranscriptEntry *entry = [[CK2TranscriptEntry alloc] initWithText:text isCommand:command];
-    
     dispatch_async(_queue, ^{
         
         if (!_entries)
@@ -113,14 +111,12 @@
             [entry release];
         }
         
+        CK2TranscriptEntry *entry = [[CK2TranscriptEntry alloc] initWithText:text isCommand:command];
         [_entries addObject:entry];
+        [entry release];
     });
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:CK2TranscriptChangedNotification
-                                                        object:self
-                                                      userInfo:@{ CK2TranscriptAddedEntryKey : entry }];
-    
-    [entry release];
+    [[NSNotificationCenter defaultCenter] postNotificationName:CK2TranscriptChangedNotification object:self];
 }
 
 - (void)removeAllEntries;
@@ -136,4 +132,3 @@
 
 
 NSString * const CK2TranscriptChangedNotification = @"CK2TranscriptChanged";
-NSString * const CK2TranscriptAddedEntryKey = @"entry";
