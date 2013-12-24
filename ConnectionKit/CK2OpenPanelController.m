@@ -1215,16 +1215,4 @@
     }
 }
 
-- (void)fileManager:(CK2FileManager *)manager operation:(CK2FileOperation *)operation appendString:(NSString *)info toTranscript:(NSString *)transcript;
-{
-    id <CK2OpenPanelDelegate>        delegate;
-    
-    delegate = [[self openPanel] delegate];
-    
-    if ([delegate respondsToSelector:@selector(panel:appendString:toTranscript:)])
-    {
-        [delegate panel:[self openPanel] appendString:info toTranscript:transcript];
-    }
-}
-
 @end
