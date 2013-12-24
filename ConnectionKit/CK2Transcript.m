@@ -49,7 +49,6 @@
 {
     if (self = [super init])
     {
-        _entries = [[NSMutableArray alloc] init];
         _queue = dispatch_queue_create("com.karelia.ConnectionKit.transcript", NULL);
     }
     return self;
@@ -95,6 +94,25 @@
     CK2TranscriptEntry *entry = [[CK2TranscriptEntry alloc] initWithText:text isCommand:command];
     
     dispatch_async(_queue, ^{
+        
+        if (!_entries)
+        {
+            _entries = [[NSMutableArray alloc] init];
+            
+            // Start off with details of the host machine
+            NSBundle *bundle = [NSBundle mainBundle];
+            NSString *transcriptHeader = [NSString stringWithFormat:
+                                          @"%@ %@ (architecture unknown) Session Transcript [%@] (%@)",
+                                          [bundle objectForInfoDictionaryKey:(NSString *)kCFBundleNameKey],
+                                          [bundle objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey],
+                                          [[NSProcessInfo processInfo] operatingSystemVersionString],
+                                          [NSDate date]];
+            
+            CK2TranscriptEntry *entry = [[CK2TranscriptEntry alloc] initWithText:transcriptHeader isCommand:NO];
+            [_entries addObject:entry];
+            [entry release];
+        }
+        
         [_entries addObject:entry];
     });
     
