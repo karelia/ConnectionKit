@@ -8,6 +8,7 @@
 
 #import "CK2FileOperation.h"
 #import "CK2Protocol.h"
+#import "CK2Transcript.h"
 
 #import <AppKit/AppKit.h>   // so icon handling can use NSImage and NSWorkspace for now
 
@@ -540,6 +541,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     
+    
+    [[CK2Transcript sharedTranscript] addEntryOfType:transcript text:info];
     
     // Pass straight onto delegate and trust it not to take too long handling it
     // We used to dispatch off onto one of the global queues, but that does have the nasty downside of messages sometimes arriving out-of-order or concurrently
