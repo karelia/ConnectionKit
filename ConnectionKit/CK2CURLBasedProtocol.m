@@ -112,6 +112,19 @@
 
 - (NSError*)processData:(NSMutableData*)data request:(NSURLRequest *)request url:(NSURL*)directoryURL path:(NSString*)directoryPath keys:(NSArray*)keys options:(NSDirectoryEnumerationOptions)mask
 {
+    NSString *listing = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    if (listing)
+    {
+        [self.client protocol:self appendStringToTranscript:listing isCommand:NO];
+    }
+    else
+    {
+        listing = [[NSString alloc] initWithFormat:@"Unable to stringify listing: %@", data];
+        [self.client protocol:self appendStringToTranscript:listing isCommand:NO];
+    }
+    [listing release];
+    
+    
     NSError* result = nil;
 
     // Process the data to make a directory listing
