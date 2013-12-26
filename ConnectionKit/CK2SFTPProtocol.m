@@ -53,6 +53,16 @@
 
 #pragma mark Operations
 
+- (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
+{
+    if (self = [super initForEnumeratingDirectoryWithRequest:request includingPropertiesForKeys:keys options:mask client:client])
+    {
+        NSString *path = [self.class pathOfURLRelativeToHomeDirectory:request.URL];
+        _transcriptMessage = [[NSString alloc] initWithFormat:@"Listing %@", path];
+    }
+    return self;
+}
+
 - (id)initForCreatingDirectoryWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
 {
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
