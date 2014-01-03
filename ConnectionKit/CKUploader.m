@@ -370,6 +370,8 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
         }
         else if (state == CK2FileOperationStateRunning)
         {
+            NSAssert([NSThread isMainThread], @"Only want to notify delegate on the main thread");
+            
             CKTransferRecord *record = [_recordsByOperation objectForKey:op];
             [record transferDidBegin:record];
             if (record) [self.delegate uploader:self didBeginUploadToPath:record.path];
