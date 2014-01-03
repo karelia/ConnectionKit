@@ -99,16 +99,13 @@
 
 - (void)removeItemAtURL:(NSURL *)url;
 {
-    [self removeItemAtURL:url reportError:YES];
+    [self removeItemAtURL:url transferRecord:nil];
 }
 
-- (void)removeItemAtURL:(NSURL *)url reportError:(BOOL)reportError;
+- (void)removeItemAtURL:(NSURL *)url transferRecord:(CKTransferRecord *)record;
 {
-    __block CK2FileOperation *op = [_fileManager removeOperationWithURL:url completionHandler:^(NSError *error) {
-        [self operation:op didFinish:(reportError ? error : nil)];
-    }];
-    
-    [self addOperation:op];
+    CK2FileOperation *op = [_fileManager removeOperationWithURL:url completionHandler:NULL];
+    [self addOperation:op transferRecord:record];
 }
 
 - (CKTransferRecord *)uploadToURL:(NSURL *)url fromData:(NSData *)data;
@@ -153,18 +150,19 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     NSParameterAssert(operation);
     
     // Create transfer record
+    CKTransferRecord *result = [self makeTransferRecordWithURL:url operation:operation];
+    
+    
+    // Delete first if requested
     if (_options & CKUploadingDeleteExistingFileFirst)
 	{
-        // The file might not exist, so will fail in that case. We don't really care since should a deletion fail for a good reason, that ought to then cause the actual upload to fail
-        [self removeItemAtURL:url reportError:NO];
+        [self removeItemAtURL:url
+               transferRecord:nil]; // don't want failure to be reported
 	}
-    
-    CKTransferRecord *result = [self makeTransferRecordWithURL:url operation:operation];
-    [_recordsByOperation setObject:result forKey:operation];
     
     
     // Enqueue upload
-    [self addOperation:operation];
+    [self addOperation:operation transferRecord:result];
     
     
     // Notify delegate
@@ -212,12 +210,15 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
 
 - (CK2FileOperation *)currentOperation; { return [_queue firstObject]; }
 
-- (void)addOperation:(CK2FileOperation *)operation;
+- (void)addOperation:(CK2FileOperation *)operation transferRecord:(CKTransferRecord *)record;
 {
     NSAssert([NSThread isMainThread], @"-addOperation: is only safe to call on the main thread");
     
     // No more operations can go on once finishing up
     if (_invalidated) [NSException raise:NSInvalidArgumentException format:@"%@ has been invalidated", self];
+    
+    // Note the transfer record this op corresponds to
+    if (record) [_recordsByOperation setObject:record forKey:operation];
     
     // Watch for it to complete
     [operation addObserver:self forKeyPath:@"state" options:NSKeyValueObservingOptionNew context:sOperationStateObservationContext];
