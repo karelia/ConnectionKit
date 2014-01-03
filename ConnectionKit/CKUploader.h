@@ -56,7 +56,7 @@ typedef NSUInteger CKUploadingOptions;
 
 - (CKTransferRecord *)uploadToURL:(NSURL *)url fromFile:(NSURL *)fileURL;
 - (CKTransferRecord *)uploadToURL:(NSURL *)url fromData:(NSData *)data;
-- (void)removeItemAtURL:(NSURL *)url __attribute((nonnull));
+- (void)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *))handler __attribute((nonnull(1)));
 
 /**
  The underlying `CK2FileOperation`s that are in the queue.

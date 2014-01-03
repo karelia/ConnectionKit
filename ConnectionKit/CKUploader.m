@@ -97,14 +97,14 @@
 
 #pragma mark Publishing
 
-- (void)removeItemAtURL:(NSURL *)url;
+- (void)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *))handler;
 {
-    [self removeItemAtURL:url transferRecord:nil];
+    [self removeItemAtURL:url transferRecord:nil completionHandler:handler];
 }
 
-- (void)removeItemAtURL:(NSURL *)url transferRecord:(CKTransferRecord *)record;
+- (void)removeItemAtURL:(NSURL *)url transferRecord:(CKTransferRecord *)record completionHandler:(void (^)(NSError *))handler;
 {
-    CK2FileOperation *op = [_fileManager removeOperationWithURL:url completionHandler:NULL];
+    CK2FileOperation *op = [_fileManager removeOperationWithURL:url completionHandler:handler];
     [self addOperation:op transferRecord:record];
 }
 
@@ -157,7 +157,8 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     if (_options & CKUploadingDeleteExistingFileFirst)
 	{
         [self removeItemAtURL:url
-               transferRecord:nil]; // don't want failure to be reported
+               transferRecord:nil // don't want failure to be reported
+            completionHandler:NULL];
 	}
     
     
