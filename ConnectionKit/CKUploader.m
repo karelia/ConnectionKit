@@ -158,10 +158,6 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     [_recordsByOperation setObject:result forKey:operation];
     
     
-    // Watch for it to complete
-    [operation addObserver:self forKeyPath:@"state" options:NSKeyValueObservingOptionNew context:sOperationStateObservationContext];
-    
-    
     // Enqueue upload
     [self addOperation:operation];
     
@@ -218,6 +214,10 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     // No more operations can go on once finishing up
     if (_invalidated) [NSException raise:NSInvalidArgumentException format:@"%@ has been invalidated", self];
     
+    // Watch for it to complete
+    [operation addObserver:self forKeyPath:@"state" options:NSKeyValueObservingOptionNew context:sOperationStateObservationContext];
+    
+    // Add to the queue
     [_queue addObject:operation];
     if (_queue.count == 1)
     {
