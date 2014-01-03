@@ -159,7 +159,7 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     
     
     // Watch for it to complete
-    [operation addObserver:self forKeyPath:@"state" options:0 context:sOperationStateObservationContext];
+    [operation addObserver:self forKeyPath:@"state" options:NSKeyValueObservingOptionNew context:sOperationStateObservationContext];
     
     
     // Enqueue upload
@@ -361,7 +361,8 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     if (context == sOperationStateObservationContext)
     {
         CK2FileOperation *op = object;
-        CK2FileOperationState state = op.state;
+        CK2FileOperationState state = [[change objectForKey:NSKeyValueChangeNewKey] integerValue];
+        
         if (state == CK2FileOperationStateCompleted)
         {
             [op removeObserver:self forKeyPath:keyPath];
