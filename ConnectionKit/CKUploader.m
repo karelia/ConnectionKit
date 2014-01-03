@@ -13,6 +13,11 @@
 #import <CURLHandle/CURLHandle.h>
 
 
+@interface CK2FileOperation (SecretsIKnow)
+- (NSURL *)originalURL;
+@end
+
+
 @implementation CKUploader
 
 #pragma mark Lifecycle
@@ -374,7 +379,19 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
             
             CKTransferRecord *record = [_recordsByOperation objectForKey:op];
             [record transferDidBegin:record];
-            if (record) [self.delegate uploader:self didBeginUploadToPath:record.path];
+            if (record)
+            {
+                [self.delegate uploader:self didBeginUploadToPath:record.path];
+            }
+            else
+            {
+                // Assume record-less operations are for deleting items
+                id <CKUploaderDelegate> delegate = self.delegate;
+                if ([delegate respondsToSelector:@selector(uploader:didBeginRemovingItemAtURL:)])
+                {
+                    [delegate uploader:self didBeginRemovingItemAtURL:op.originalURL];
+                }
+            }
         }
     }
     else
