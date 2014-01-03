@@ -249,11 +249,6 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
         if (operation.state == CK2FileOperationStateSuspended)
         {
             [operation resume];
-            
-            CKTransferRecord *record = [_recordsByOperation objectForKey:operation];
-            [record transferDidBegin:record];
-            if (record) [self.delegate uploader:self didBeginUploadToPath:record.path];
-            
             return;
         }
         else
@@ -371,6 +366,12 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
         {
             [op removeObserver:self forKeyPath:keyPath];
             [self operation:op didFinish:op.error];
+        }
+        else if (state == CK2FileOperationStateRunning)
+        {
+            CKTransferRecord *record = [_recordsByOperation objectForKey:op];
+            [record transferDidBegin:record];
+            if (record) [self.delegate uploader:self didBeginUploadToPath:record.path];
         }
     }
     else
