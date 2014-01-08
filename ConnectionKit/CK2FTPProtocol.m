@@ -374,7 +374,7 @@
                 // certificate, but I can't spot a proper API for that, so we'll
                 // have to live with a minor security flaw for now.
                 NSMutableURLRequest *request = [self.request mutableCopy];
-                [request curl_setShouldVerifySSLCertificate:NO];
+                [request curl_setShouldVerifySSLHost:NO];   // disabling host check is all Sandvox needs
                 [self startWithRequest:request credential:_credential];
                 [request release];
             }
