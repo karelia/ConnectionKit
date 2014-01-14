@@ -222,7 +222,7 @@
                         }
 
                         // Trying to access a constant not available on an old platform will crash. Runtime check seems to be our best bet
-                        else if (NSFoundationVersionNumber >= NSFoundationVersionNumber10_6)
+                        else if (NSFoundationVersionNumber >= NSFoundationVersionNumber10_7)
                         {
                             if ([aKey isEqualToString:NSURLFileResourceTypeKey])
                             {
