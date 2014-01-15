@@ -709,7 +709,8 @@
 
 #pragma mark Customization
 
-// Much to my annoyance, async backend doesn't seem to be working right at the moment
-+ (BOOL)usesMultiHandle; { return NO; }
+// Much to my annoyance, multi-socket backend doesn't seem to be working right at the moment
+// But we're now using the regular multi API, which seems to be working a treat
++ (BOOL)usesMultiHandle; { return YES; }
 
 @end
