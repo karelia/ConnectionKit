@@ -370,9 +370,23 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     NSString *result = [protocolClass pathOfURLRelativeToHomeDirectory:URL];
     
     // Forcefully strip trailing slashes
-    while ([result hasSuffix:@"/"])
+    NSUInteger length = result.length;
+    if (length >= 2) // ignore leading slash
     {
-        result = [result substringToIndex:result.length - 1];
+        NSRange searchRange = NSMakeRange(1, length - 1);   // ignore leading slash
+        
+        do
+        {
+            NSRange trailingSlashRange = [result rangeOfString:@"/"
+                                                       options:NSBackwardsSearch|NSAnchoredSearch
+                                                         range:searchRange];
+            
+            if (trailingSlashRange.location == NSNotFound) break;
+            
+            result = [result substringToIndex:trailingSlashRange.location];
+            searchRange.length -= trailingSlashRange.length;
+        }
+        while (searchRange.length);
     }
     
     return result;
