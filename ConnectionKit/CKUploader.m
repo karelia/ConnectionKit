@@ -311,7 +311,7 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     
     
     NSString *path = [CK2FileManager pathOfURL:url];
-    if ([path isEqualToString:@"/"] || [path isEqualToString:@""]) // The root for absolute and relative paths
+    if ([path isEqualToString:@"/"] || path.length == 0) // the root for absolute and relative paths
     {
         return [self rootTransferRecord];
     }
