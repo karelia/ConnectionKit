@@ -83,7 +83,7 @@
 {
     NSURL* testURL = [NSURL URLWithString:@"ftp://user:pass@test.ftp.com/%2F/"];
     NSString* path = [CK2FileManager pathOfURL:testURL];
-    STAssertTrue([path isEqualToString:@"//"], @"path should start with slash");
+    STAssertTrue([path isEqualToString:@"/"], @"trailing slashes should be trimmed");
 }
 
 - (void)testHTTPEmptyNoTrailingSlash
