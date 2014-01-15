@@ -172,7 +172,8 @@
     CKUploader* uploader = [self setupUploader];
     if (uploader)
     {
-        [uploader removeItemAtURL:[CK2FileManager URLWithPath:@"test/test.txt" relativeToURL:uploader.baseRequest.URL]];
+        NSURL *url = [CK2FileManager URLWithPath:@"test/test.txt" relativeToURL:uploader.baseRequest.URL];
+        [uploader removeItemAtURL:url completionHandler:NULL];
         [uploader finishOperationsAndInvalidate];
 
         [self runUntilPaused];
