@@ -332,7 +332,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     if (!selector || [delegate respondsToSelector:selector])
     {
         [manager.delegateQueue addOperationWithBlock:^{
-            block(delegate);
+            block(manager.delegate);    // I have a suspicion delegate is occasionally a zombie otherwise https://karelia.fogbugz.com/f/cases/236528
         }];
     }
 }
