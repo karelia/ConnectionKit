@@ -291,7 +291,7 @@
         return;
     }
 
-    NSURL *url = [[self request] URL];
+    NSURL *url = request.URL;
     
     NSString *protocol = NSURLProtectionSpaceFTP;
     if (request.curl_desiredSSLLevel >= CURLUSESSL_CONTROL ||
