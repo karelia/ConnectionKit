@@ -292,16 +292,23 @@
     }
 
     NSURL *url = request.URL;
+    NSString *scheme = url.scheme;
+    
+    NSNumber *port = url.port;
+    if (!port)
+    {
+        port = ([scheme isEqualToString:@"ftps"] ? @(990) : @(21));
+    }
     
     NSString *protocol = NSURLProtectionSpaceFTP;
     if (request.curl_desiredSSLLevel >= CURLUSESSL_CONTROL ||
-        [@"ftps" caseInsensitiveCompare:[url scheme]] == NSOrderedSame)
+        [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame)
     {
         protocol = @"ftps";
     }
     
     NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:[url host]
-                                                                        port:[[url port] integerValue]
+                                                                        port:port.integerValue
                                                                     protocol:protocol
                                                                        realm:nil
                                                         authenticationMethod:NSURLAuthenticationMethodDefault];
