@@ -298,7 +298,14 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     CKTransferRecord *result = [CKTransferRecord recordWithName:path.lastPathComponent
                                                 uploadOperation:operation];
     
-    CKTransferRecord *parent = [self directoryTransferRecordWithURL:[url URLByDeletingLastPathComponent]];
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
+    NSURL *parentURL = [url URLByDeletingLastPathComponent];
+#else
+    // 10.6's -URLByDeletingLastPathComponent can't handle double slashes should it encounter them
+    NSURL *parentURL = [CK2FileManager URLWithPath:[path stringByDeletingLastPathComponent] isDirectory:YES hostURL:url];
+#endif
+    
+    CKTransferRecord *parent = [self directoryTransferRecordWithURL:parentURL];
     [parent addContent:result];
     
     return result;
