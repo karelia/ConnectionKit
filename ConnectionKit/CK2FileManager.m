@@ -320,6 +320,12 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 + (NSURL *)URLWithPath:(NSString *)path isDirectory:(BOOL)isDir hostURL:(NSURL *)baseURL;
 {
+    // Make a directory if demanded
+    if (isDir && ![path hasSuffix:@"/"])
+    {
+        path = [path stringByAppendingString:@"/"];
+    }
+    
     // Strip down to just host URL
     CFIndex length = CFURLGetBytes((CFURLRef)baseURL, NULL, 0);
     CFRange pathRange = CFURLGetByteRangeForComponent((CFURLRef)baseURL, kCFURLComponentPath, NULL);
@@ -339,11 +345,8 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     
     NSURL *result = [self URLWithPath:path relativeToURL:baseURL].absoluteURL;
     
-    // Turn path into a directory if requested (matches +fileURLWithPath:isDirectory: behaviour)
-    if (isDir && !CFURLHasDirectoryPath((CFURLRef)result))
-    {
-        result = [result URLByAppendingPathComponent:@""];  // http://www.mikeabdullah.net/guaranteeing-directory-urls.html
-    }
+    // Make sure is a directory if requested
+    if (isDir) NSAssert(CFURLHasDirectoryPath((CFURLRef)result), @"Not a directory: %@", result);
     
     return result;
 }

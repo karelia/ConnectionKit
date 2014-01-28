@@ -232,4 +232,18 @@
     STAssertEqualObjects([url absoluteString], @"scp://user@test.scp.com/absolute/path/file.txt", @"path should be normal");
 }
 
+#pragma mark file
+
+- (void)testMakingLocalDirectoryURL;
+{
+    // My standard trick of making a directory by appending path component of @"" turns out to
+    // have a caveat: http://www.mikeabdullah.net/guaranteeing-directory-urls.html
+    // This isn't too good for our clients as an inconsistency
+    NSURL *url = [CK2FileManager URLWithPath:@"/Users/Shared"
+                                 isDirectory:YES
+                                     hostURL:[NSURL URLWithString:@"file:///foo/bar"]];
+    
+    STAssertEqualObjects(url.absoluteString, @"file:///Users/Shared/", @"URL should not have double trailing slash");
+}
+
 @end
