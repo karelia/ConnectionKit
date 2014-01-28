@@ -184,6 +184,18 @@
     STAssertEqualObjects(url.relativeString, @"sftp://user:pass@test.ftp.com/~/relative/path/file.txt", nil);
 }
 
+- (void)testSFTPRelativeDirectory
+{
+    NSURL *url = [CK2FileManager URLWithPath:@"relative/path/directory"
+                                                                relativeToURL:[NSURL URLWithString:@"sftp://user@test.sftp.com"]];
+    STAssertEqualObjects([url absoluteString], @"sftp://user@test.sftp.com/~/relative/path/directory", @"path should start with ~");
+    
+    url = [CK2FileManager URLWithPath:@"relative/path/directory"
+                          isDirectory:YES
+                              hostURL:[NSURL URLWithString:@"sftp://user@test.sftp.com"]];
+    STAssertEqualObjects(url.relativeString, @"sftp://user@test.sftp.com/~/relative/path/directory/", @"path should start with ~ and end with /");
+}
+
 - (void)testSFTPAbsolute
 {
     NSURL *url = [CK2FileManager URLWithPath:@"/absolute/path/file.txt"

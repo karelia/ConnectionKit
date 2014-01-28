@@ -28,7 +28,7 @@
     // SCP and SFTP represent the home directory using ~/ at the start of the path <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
     if (![path isAbsolutePath] && [[baseURL path] length] <= 1)
     {
-        path = [@"/~" stringByAppendingPathComponent:path];
+        path = [@"/~/" stringByAppendingString:path];   // stringByAppendingPathComponent: will strip out any trailing slash; want to keep them
     }
     
     return [super URLWithPath:path relativeToURL:baseURL];
