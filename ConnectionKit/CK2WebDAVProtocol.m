@@ -372,7 +372,7 @@
 
     [self.client protocol:self
           didSendBodyData:bytesWritten
-           totalBytesSent:totalBytesExpectedToWrite
+           totalBytesSent:totalBytesWritten
  totalBytesExpectedToSend:totalBytesExpectedToWrite];
 }
 
