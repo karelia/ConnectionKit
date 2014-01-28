@@ -30,6 +30,18 @@
     STAssertTrue([url.relativeString isEqualToString:@"ftp://user:pass@test.ftp.com/relative/path/file.txt"], @"path should start with slash");
 }
 
+- (void)testFTPRelativeDirectory
+{
+    NSURL *url = [CK2FileManager URLWithPath:@"relative/path/directory"
+                               relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com"]];
+    STAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com/relative/path/directory"], @"path should start with slash");
+    
+    url = [CK2FileManager URLWithPath:@"relative/path/directory"
+                          isDirectory:YES
+                              hostURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com"]];
+    STAssertTrue([url.relativeString isEqualToString:@"ftp://user:pass@test.ftp.com/relative/path/directory/"], @"path should end with slash");
+}
+
 - (void)testFTPAbsolute
 {
     NSURL *url = [CK2FileManager URLWithPath:@"/absolute/path/file.txt"
@@ -104,6 +116,18 @@
                           isDirectory:NO
                               hostURL:[NSURL URLWithString:@"http://www.test.com:8080"]];
     STAssertEqualObjects(url.relativeString, @"http://www.test.com:8080/relative/path/file.txt", @"path should be normal");
+}
+
+- (void)testHTTPRelativeDirectory
+{
+    NSURL *url = [CK2FileManager URLWithPath:@"relative/path/directory"
+                                                                relativeToURL:[NSURL URLWithString:@"http://www.test.com:8080"]];
+    STAssertEqualObjects([url absoluteString], @"http://www.test.com:8080/relative/path/directory", @"path should be normal");
+    
+    url = [CK2FileManager URLWithPath:@"relative/path/directory"
+                          isDirectory:YES
+                              hostURL:[NSURL URLWithString:@"http://www.test.com:8080"]];
+    STAssertEqualObjects(url.relativeString, @"http://www.test.com:8080/relative/path/directory/", @"path should be normal");
 }
 
 - (void)testHTTPAbsolute
