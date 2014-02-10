@@ -53,8 +53,6 @@
         return result;
     }
     
-    if (path.length == 0) path = @"/";  // special case
-    
     return [super URLWithPath:path relativeToURL:baseURL];
 }
 

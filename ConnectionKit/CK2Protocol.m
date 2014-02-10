@@ -89,6 +89,8 @@
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 {
+    if (path.length == 0) path = @"/";  // special case
+    
     CFStringRef encodedPath = CFURLCreateStringByAddingPercentEscapes(NULL,
                                                                       (CFStringRef)path,
                                                                       NULL,
