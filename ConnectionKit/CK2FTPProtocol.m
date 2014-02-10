@@ -45,8 +45,11 @@
     // Happily it also simplifies our code, as coaxing a double slash into NSURL is a mite tricky
     if ([path isAbsolutePath])
     {
-        NSURL *result = [[NSURL URLWithString:@"/" relativeToURL:baseURL] absoluteURL];
-        result = [result URLByAppendingPathComponent:path];
+        // Pare it back to just a plain path of @"/" and no latter components
+        NSString *urlString = [[NSURL URLWithString:@"/" relativeToURL:baseURL] absoluteString];
+        
+        // Tack on the path given to us
+        NSURL *result = [NSURL URLWithString:[urlString stringByAppendingString:path]];
         return result;
     }
     
