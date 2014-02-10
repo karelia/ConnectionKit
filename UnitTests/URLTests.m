@@ -42,6 +42,14 @@
     STAssertTrue([url.relativeString isEqualToString:@"ftp://user:pass@test.ftp.com/relative/path/directory/"], @"path should end with slash");
 }
 
+- (void)testFTPHome
+{
+    NSURL *url = [CK2FileManager URLWithPath:@""
+                                 isDirectory:YES
+                                     hostURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com:21"]];
+    STAssertEqualObjects(url.absoluteString, @"ftp://user:pass@test.ftp.com:21/", nil);
+}
+
 - (void)testFTPAbsolute
 {
     NSURL *url = [CK2FileManager URLWithPath:@"/absolute/path/file.txt"
