@@ -96,6 +96,10 @@
                 {
                     title = [tempURL host];
                 }
+                else if (title == nil)   // happens for URLs like ftpes://user@example.com
+                {
+                    title = @"";
+                }
                 
                 item = [[NSMenuItem alloc] initWithTitle:title action:@selector(urlSelected:) keyEquivalent:@""];
                 [item setTarget:self];
