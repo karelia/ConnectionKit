@@ -92,13 +92,10 @@
                 image = [[[tempURL ck2_icon] copy] autorelease];
                 title = [tempURL ck2_displayName];
                 
-                if ([title isEqual:@"/"])
+                if ([title isEqual:@"/"] ||
+                    title.length == 0)      // happens for URLs like ftpes://user@example.com
                 {
                     title = [tempURL host];
-                }
-                else if (title == nil)   // happens for URLs like ftpes://user@example.com
-                {
-                    title = @"";
                 }
                 
                 item = [[NSMenuItem alloc] initWithTitle:title action:@selector(urlSelected:) keyEquivalent:@""];
