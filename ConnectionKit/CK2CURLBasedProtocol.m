@@ -220,12 +220,9 @@
                                 [CK2FileManager setTemporaryResourceValue:[self.class URLWithPath:path relativeToURL:directoryURL] forKey:aKey inURL:aURL];
                             }
                         }
-
-                        // Trying to access a constant not available on an old platform will crash. Runtime check seems to be our best bet
-                        else if (NSFoundationVersionNumber >= NSFoundationVersionNumber10_7)
+                        else if (&NSURLFileResourceTypeKey &&   // not available till 10.7
+                                 [aKey isEqualToString:NSURLFileResourceTypeKey])
                         {
-                            if ([aKey isEqualToString:NSURLFileResourceTypeKey])
-                            {
                                 NSString *typeValue;
                                 switch ([type integerValue])
                                 {
@@ -252,9 +249,9 @@
                                 }
 
                                 [CK2FileManager setTemporaryResourceValue:typeValue forKey:aKey inURL:aURL];
-                            }
-                            else if ([aKey isEqualToString:NSURLFileSecurityKey])
-                            {
+                        }
+                        else if (&NSURLFileSecurityKey && [aKey isEqualToString:NSURLFileSecurityKey])
+                        {
                                 CFFileSecurityRef security = CFFileSecurityCreate(NULL);
 
                                 NSNumber *mode = CFDictionaryGetValue(parsedDict, kCFFTPResourceMode);
@@ -264,7 +261,6 @@
                                 }
 
                                 CFRelease(security);
-                            }
                         }
                     }
 
@@ -376,12 +372,8 @@
                         NSURLFileSizeKey,
                         CK2URLSymbolicLinkDestinationKey];
     
-    if (NSFoundationVersionNumber >= NSFoundationVersionNumber10_6)
-    {
-        result = [result arrayByAddingObjectsFromArray:@[
-                  NSURLFileResourceTypeKey,
-                  NSURLFileSecurityKey]];
-    }
+    if (&NSURLFileResourceTypeKey) result = [result arrayByAddingObject:NSURLFileResourceTypeKey];
+    if (&NSURLFileSecurityKey) result = [result arrayByAddingObject:NSURLFileSecurityKey];
     
     return result;
 }
