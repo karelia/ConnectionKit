@@ -64,5 +64,77 @@
     "hostURL" : "ftp:\/\/user:pass@test.ftp.com\/example\/path\/",
     "Output" : "ftp:\/\/user:pass@test.ftp.com\/\/",
     "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path\/file.txt",
+    "hostURL" : "http:\/\/www.test.com:8080",
+    "Output" : "http:\/\/www.test.com:8080\/relative\/path\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path\/directory",
+    "Output" : "http:\/\/www.test.com:8080\/relative\/path\/directory\/",
+    "hostURL" : "http:\/\/www.test.com:8080",
+    "isDirectory" : 1
+  },
+  {
+    "path" : "\/absolute\/path\/file.txt",
+    "hostURL" : "http:\/\/www.test.com:8080",
+    "Output" : "http:\/\/www.test.com:8080\/absolute\/path\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path\/file.txt",
+    "hostURL" : "http:\/\/www.test.com:8080\/example\/path\/",
+    "Output" : "http:\/\/www.test.com:8080\/relative\/path\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path\/file.txt",
+    "hostURL" : "http:\/\/www.test.com:8080\/example\/file",
+    "Output" : "http:\/\/www.test.com:8080\/relative\/path\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path\/file.txt",
+    "hostURL" : "sftp:\/\/user@test.sftp.com",
+    "Output" : "sftp:\/\/user@test.sftp.com\/~\/relative\/path\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path\/file.txt",
+    "hostURL" : "sftp:\/\/user@test.sftp.com\/",
+    "Output" : "sftp:\/\/user@test.sftp.com\/~\/relative\/path\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path\/file.txt",
+    "hostURL" : "sftp:\/\/user:pass@test.ftp.com\/example\/path\/",
+    "Output" : "sftp:\/\/user:pass@test.ftp.com\/~\/relative\/path\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path\/file.txt",
+    "hostURL" : "sftp:\/\/user:pass@test.ftp.com\/example\/file",
+    "Output" : "sftp:\/\/user:pass@test.ftp.com\/~\/relative\/path\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path\/directory",
+    "hostURL" : "sftp:\/\/user@test.sftp.com",
+    "Output" : "sftp:\/\/user@test.sftp.com\/~\/relative\/path\/directory\/",
+    "isDirectory" : 1
+  },
+  {
+    "path" : "\/absolute\/path\/file.txt",
+    "hostURL" : "sftp:\/\/user@test.sftp.com",
+    "Output" : "sftp:\/\/user@test.sftp.com\/absolute\/path\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path\/file.txt",
+    "hostURL" : "scp:\/\/user@test.scp.com",
+    "Output" : "scp:\/\/user@test.scp.com\/~\/relative\/path\/file.txt",
+    "isDirectory" : 0
   }
 ]
