@@ -1,0 +1,8 @@
+[
+  {
+    "path" : "relative\/path\/file.txt",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/relative\/path\/file.txt",
+    "isDirectory" : 0
+  }
+]

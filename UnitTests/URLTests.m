@@ -16,6 +16,22 @@
 
 @implementation URLTests
 
+- (void)testURLs {
+    NSURL *suiteURL = [[NSBundle bundleForClass:self.class] URLForResource:@"URLs" withExtension:@"testdata"];
+    NSArray *suite = [NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfURL:suiteURL] options:0 error:NULL];
+    STAssertTrue(suite.count >= 1, nil);
+    
+    for (NSDictionary *values in suite) {
+        NSString *path = values[@"path"];
+        BOOL directory = [values[@"isDirectory"] boolValue];
+        NSURL *base = [NSURL URLWithString:values[@"hostURL"]];
+        
+        NSURL *url = [CK2FileManager URLWithPath:path isDirectory:directory hostURL:base];
+        STAssertEqualObjects(url.absoluteString, values[@"Output"], nil);
+        STAssertNil(url.baseURL, @"+URLWithPath:isDirectory:hostURL: should always return an absolute URL");
+    }
+}
+
 #pragma mark FTP
 
 - (void)testFTPRelative
