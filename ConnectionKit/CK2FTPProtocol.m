@@ -49,7 +49,16 @@
         NSString *urlString = [[NSURL URLWithString:@"/" relativeToURL:baseURL] absoluteString];
         
         // Tack on the path given to us
-        NSURL *result = [NSURL URLWithString:[urlString stringByAppendingString:path]];
+        // http://www.mikeabdullah.net/escaping-url-paths-in-cocoa.html
+        CFStringRef escaped = CFURLCreateStringByAddingPercentEscapes(NULL,
+                                                                      (CFStringRef)path,
+                                                                      NULL,
+                                                                      CFSTR(";?#"),
+                                                                      kCFStringEncodingUTF8);
+        
+        NSURL *result = [NSURL URLWithString:[urlString stringByAppendingString:(NSString *)escaped]];
+        CFRelease(escaped);
+        
         return result;
     }
     
