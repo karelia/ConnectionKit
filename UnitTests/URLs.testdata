@@ -4,5 +4,65 @@
     "hostURL" : "ftp:\/\/user:pass@test.ftp.com",
     "Output" : "ftp:\/\/user:pass@test.ftp.com\/relative\/path\/file.txt",
     "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path\/directory",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/relative\/path\/directory\/",
+    "isDirectory" : 1
+  },
+  {
+    "path" : "",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com:21",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com:21\/",
+    "isDirectory" : 1
+  },
+  {
+    "path" : "\/absolute\/path\/file.txt",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/\/absolute\/path\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "\/absolute\/path\/file.txt",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com\/example\/path\/",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/\/absolute\/path\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path\/file.txt",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com\/example\/path\/",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/relative\/path\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path\/file.txt",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com\/example\/file",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/relative\/path\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "\/",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/\/",
+    "isDirectory" : 1
+  },
+  {
+    "path" : "\/",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/\/",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "\/",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com\/example\/path\/",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/\/",
+    "isDirectory" : 1
+  },
+  {
+    "path" : "\/",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com\/example\/path\/",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/\/",
+    "isDirectory" : 0
   }
 ]
