@@ -120,6 +120,7 @@
 		27999BB7170B4BA200A54BEE /* CK2FileManagerWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */; };
 		27A2072B1671634800D8284D /* CK2CURLBasedProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27A207291671634800D8284D /* CK2CURLBasedProtocol.h */; };
 		27A2072C1671634800D8284D /* CK2CURLBasedProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27A2072A1671634800D8284D /* CK2CURLBasedProtocol.m */; };
+		27CFEC7218E73526007158A4 /* URLs.testdata in Resources */ = {isa = PBXBuildFile; fileRef = 27CFEC7118E73526007158A4 /* URLs.testdata */; };
 		27D03B421471787000FEA588 /* CKUploader.h in Headers */ = {isa = PBXBuildFile; fileRef = 27D03B401471787000FEA588 /* CKUploader.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27D03B431471787000FEA588 /* CKUploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 27D03B411471787000FEA588 /* CKUploader.m */; };
 		27F3372B16BC1FB100E70511 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27F3372A16BC1FB100E70511 /* Cocoa.framework */; };
@@ -365,6 +366,7 @@
 		27A207291671634800D8284D /* CK2CURLBasedProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2CURLBasedProtocol.h; sourceTree = "<group>"; };
 		27A2072A1671634800D8284D /* CK2CURLBasedProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2CURLBasedProtocol.m; sourceTree = "<group>"; };
 		27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CURLHandle.xcodeproj; path = ../CurlHandle/CURLHandleSource/CURLHandle.xcodeproj; sourceTree = "<group>"; };
+		27CFEC7118E73526007158A4 /* URLs.testdata */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = URLs.testdata; sourceTree = "<group>"; };
 		27D03B401471787000FEA588 /* CKUploader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CKUploader.h; path = ConnectionKit/CKUploader.h; sourceTree = "<group>"; };
 		27D03B411471787000FEA588 /* CKUploader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CKUploader.m; path = ConnectionKit/CKUploader.m; sourceTree = "<group>"; };
 		27F3372816BC1FB100E70511 /* AuthTester.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AuthTester.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -549,6 +551,7 @@
 				278CFE1216BADE030018A14B /* URLCanonicalizationTests.m */,
 				22AC1C1A17429FAA00AB09E1 /* URLDirectoryTests.m */,
 				22F6D102165A8A2200443CC9 /* URLTests.m */,
+				27CFEC7118E73526007158A4 /* URLs.testdata */,
 				22AC1C131742980000AB09E1 /* WebDAVTests.m */,
 				22AC1C1717429F1500AB09E1 /* Test Support */,
 			);
@@ -1236,6 +1239,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27CFEC7218E73526007158A4 /* URLs.testdata in Resources */,
 				22662EF3165D2EEC005FCC4A /* ftp.json in Resources */,
 				22662EF4165D2EEC005FCC4A /* webdav.json in Resources */,
 			);

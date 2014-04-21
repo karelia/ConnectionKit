@@ -1,0 +1,148 @@
+[
+  {
+    "path" : "relative\/path to\/file.txt",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/relative\/path%20to\/file.txt",
+    "isDirectory" : 0,
+    "Notes" : "Where possible, test with a space in the path to ensure percent encoding is doing its job properly"
+  },
+  {
+    "path" : "relative\/path to\/directory",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/relative\/path%20to\/directory\/",
+    "isDirectory" : 1
+  },
+  {
+    "path" : "",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com:21",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com:21\/",
+    "isDirectory" : 1
+  },
+  {
+    "path" : "\/absolute\/path to\/file.txt",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/\/absolute\/path%20to\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "\/absolute\/path to\/file.txt",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com\/example\/path\/",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/\/absolute\/path%20to\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path to\/file.txt",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com\/example\/path\/",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/relative\/path%20to\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path to\/file.txt",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com\/example\/file",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/relative\/path%20to\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "\/",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/\/",
+    "isDirectory" : 1
+  },
+  {
+    "path" : "\/",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/\/",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "\/",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com\/example\/path\/",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/\/",
+    "isDirectory" : 1
+  },
+  {
+    "path" : "\/",
+    "hostURL" : "ftp:\/\/user:pass@test.ftp.com\/example\/path\/",
+    "Output" : "ftp:\/\/user:pass@test.ftp.com\/\/",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path to\/file.txt",
+    "hostURL" : "http:\/\/www.test.com:8080",
+    "Output" : "http:\/\/www.test.com:8080\/relative\/path%20to\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path to\/directory",
+    "Output" : "http:\/\/www.test.com:8080\/relative\/path%20to\/directory\/",
+    "hostURL" : "http:\/\/www.test.com:8080",
+    "isDirectory" : 1
+  },
+  {
+    "path" : "\/absolute\/path to\/file.txt",
+    "hostURL" : "http:\/\/www.test.com:8080",
+    "Output" : "http:\/\/www.test.com:8080\/absolute\/path%20to\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path to\/file.txt",
+    "hostURL" : "http:\/\/www.test.com:8080\/example\/path\/",
+    "Output" : "http:\/\/www.test.com:8080\/relative\/path%20to\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path to\/file.txt",
+    "hostURL" : "http:\/\/www.test.com:8080\/example\/file",
+    "Output" : "http:\/\/www.test.com:8080\/relative\/path%20to\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path to\/file.txt",
+    "hostURL" : "sftp:\/\/user@test.sftp.com",
+    "Output" : "sftp:\/\/user@test.sftp.com\/~\/relative\/path%20to\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path to\/file.txt",
+    "hostURL" : "sftp:\/\/user@test.sftp.com\/",
+    "Output" : "sftp:\/\/user@test.sftp.com\/~\/relative\/path%20to\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path to\/file.txt",
+    "hostURL" : "sftp:\/\/user:pass@test.ftp.com\/example\/path\/",
+    "Output" : "sftp:\/\/user:pass@test.ftp.com\/~\/relative\/path%20to\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path to\/file.txt",
+    "hostURL" : "sftp:\/\/user:pass@test.ftp.com\/example\/file",
+    "Output" : "sftp:\/\/user:pass@test.ftp.com\/~\/relative\/path%20to\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path to\/directory",
+    "hostURL" : "sftp:\/\/user@test.sftp.com",
+    "Output" : "sftp:\/\/user@test.sftp.com\/~\/relative\/path%20to\/directory\/",
+    "isDirectory" : 1
+  },
+  {
+    "path" : "\/absolute\/path to\/file.txt",
+    "hostURL" : "sftp:\/\/user@test.sftp.com",
+    "Output" : "sftp:\/\/user@test.sftp.com\/absolute\/path%20to\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "relative\/path to\/file.txt",
+    "hostURL" : "scp:\/\/user@test.scp.com",
+    "Output" : "scp:\/\/user@test.scp.com\/~\/relative\/path%20to\/file.txt",
+    "isDirectory" : 0
+  },
+  {
+    "path" : "\/Users\/Shared",
+    "hostURL" : "file:\/\/\/foo\/bar",
+    "Output" : "file:\/\/\/Users\/Shared\/",
+    "isDirectory" : 1,
+    "Notes" : "My standard trick of making a directory by appending path component of @\"\" turns out to have a caveat: http:\/\/www.mikeabdullah.net\/guaranteeing-directory-urls.html. This isn't too good for our clients as an inconsistency"
+  }
+]
