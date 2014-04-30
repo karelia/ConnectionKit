@@ -165,9 +165,9 @@ WebDAV servers can selectively choose whether to require authentication (e.g. pu
 
 FTP is very similar to plain WebDAV, except it always asks for authentication. Usually, you respond with a username and password, but can pass a `nil` credential for anonymous FTP login.
 
-### WebDAV over HTTPS
+### WebDAV and FTP with TLS/SSL
 
-The validity of the server is checked first. This takes the form of potentially multiple challenges with the either of the following authentication methods:
+The authenticity of the server is checked by examining its certificate during connection. This takes the form of potentially multiple challenges with the either of the following authentication methods:
 
 * `NSURLAuthenticationMethodServerTrust`
 * `NSURLAuthenticationMethodClientCertificate`
