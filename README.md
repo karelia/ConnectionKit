@@ -144,9 +144,18 @@ Delegate methods are used to handle authentication (more on that below) and tran
 
 ## Authentication
 
-ConnectionKit follows a similar pattern to `NSURLConnection`: During an operation, it may vend out as many authentication challenges as it sees fit. Your delegate is responsible for replying to the challenges, instructing the connection how it ought to behave. Replying is asynchronous, giving you a chance to present some UI asking the user what they'd like to do if necessary.
+ConnectionKit follows the same approach as `NSURLSession`: During an operation, it vends out as many authentication challenges as it sees fit. Your delegate should implement this method to reply to the challenges:
 
-Authentication challenges carry a great deal of information, including `.previousFailureCount` and `.protectionSpace` which are very useful for determining how to treat an individual challenge. When responding to a challenge, supplying a credential set to `NSURLCredentialPersistencePermanent` will cause ConnectionKit to add it to the keychain if successful.
+	- (void)fileManager:(CK2FileManager *)manager
+	          operation:(CK2FileOperation *)operation
+	didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge
+	  completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential*))completionHandler;
+
+Replies are made by calling `completionHandler` with your preferred disposition, and, if needed, a credential to use. This is asynchronous, giving you a chance to present some UI asking the user what they'd like to do if necessary.
+
+Supplying a credential set to `NSURLCredentialPersistencePermanent` will cause ConnectionKit to add it to the keychain if successful.
+
+Authentication challenges carry a great deal of information, including `.previousFailureCount` and `.protectionSpace` which are very useful for determining how to treat an individual challenge.
 
 ### WebDAV over HTTP
 
@@ -154,7 +163,7 @@ WebDAV servers can selectively choose whether to require authentication (e.g. pu
 
 ### FTP 
 
-FTP is very similar to plain WebDAV, except it always asks for authentication. Usually, you respond with a username and password, but can ask to `-continueWithoutCredentialForAuthenticationChallenge:` for anonymous FTP login.
+FTP is very similar to plain WebDAV, except it always asks for authentication. Usually, you respond with a username and password, but can pass a `nil` credential for anonymous FTP login.
 
 ### WebDAV over HTTPS
 
