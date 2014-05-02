@@ -144,26 +144,35 @@ Delegate methods are used to handle authentication (more on that below) and tran
 
 ## Authentication
 
-ConnectionKit follows a similar pattern to `NSURLConnection`: During an operation, it may vend out as many authentication challenges as it sees fit. Your delegate is responsible for replying to the challenges, instructing the connection how it ought to behave. Replying is asynchronous, giving you a chance to present some UI asking the user what they'd like to do if necessary.
+ConnectionKit follows the same approach as `NSURLSession`: During an operation, it vends out as many authentication challenges as it sees fit. Your delegate should implement this method to reply to the challenges:
 
-Authentication challenges carry a great deal of information, including `.previousFailureCount` and `.protectionSpace` which are very useful for determining how to treat an individual challenge. When responding to a challenge, supplying a credential set to `NSURLCredentialPersistencePermanent` will cause ConnectionKit to add it to the keychain if successful.
+	- (void)fileManager:(CK2FileManager *)manager
+	          operation:(CK2FileOperation *)operation
+	didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge
+	  completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential*))completionHandler;
+
+Replies are made by calling `completionHandler` with your preferred disposition, and, if needed, a credential to use. This is asynchronous, giving you a chance to present some UI asking the user what they'd like to do if necessary.
+
+Supplying a credential set to `NSURLCredentialPersistencePermanent` will cause ConnectionKit to add it to the keychain if successful.
+
+Authentication challenges carry a great deal of information, including `.previousFailureCount` and `.protectionSpace` which are very useful for determining how to treat an individual challenge.
 
 ### WebDAV over HTTP
 
 WebDAV servers can selectively choose whether to require authentication (e.g. public servers have no need to). If authentication is requested, you'll receive an authentication challenge encapsulating the auth method to be used (e.g. HTTP Digest). Respond with a username and password credential. ConnectionKit will do its best to supply `-proposedCredential` from the user's keychain.
 
-### FTP 
+### FTP
 
-FTP is very similar to plain WebDAV, except it always asks for authentication. Usually, you respond with a username and password, but can ask to `-continueWithoutCredentialForAuthenticationChallenge:` for anonymous FTP login.
+FTP is very similar to plain WebDAV, except it always asks for authentication. Usually, you respond with a username and password, but can pass a `nil` credential for anonymous FTP login.
 
-### WebDAV over HTTPS
+### WebDAV and FTP with TLS/SSL
 
-The validity of the server is checked first. This takes the form of potentially multiple challenges with the either of the following authentication methods:
+The authenticity of the server is checked by examining its certificate during connection. This takes the form of potentially multiple challenges with the either of the following authentication methods:
 
 * `NSURLAuthenticationMethodServerTrust`
 * `NSURLAuthenticationMethodClientCertificate`
 	
-Generally it's best to call use `-performDefaultHandlingForAuthenticationChallenge:` to let Cocoa decide what to do.
+Generally it's best to use `CK2AuthChallengePerformDefaultHandling` to let Cocoa decide what to do.
 
 ### SFTP
 
@@ -173,11 +182,11 @@ SFTP is a tricky blighter. You can opt to supply a username and password like ot
 
 The public key is generally optional, as ConnectionKit can derive it from the private key. It's also possible to use SSH-Agent, but Apple discourage this, and it is unavailable to sandboxed apps. Detailed documentation on the above method can be found in `CK2Authentication.h`.
 
-Once connected to the server, ConnectionKit checks its fingerprint against the `~/.ssh/known_hosts` file. Note that for sandboxed apps this is inside of your container! An authentication challenge (`CK2AuthenticationMethodHostFingerprint`) is issued with the result of this. Your delegate can call `-cancelAuthenticationChallenge:` to reject the fingerprint, or reply with a credential for acceptance, constructed using:
+Once connected to the server, ConnectionKit checks its fingerprint against the `~/.ssh/known_hosts` file. Note that for sandboxed apps this is inside of your container! An authentication challenge (`CK2AuthenticationMethodHostFingerprint`) is issued with the result of this. Your delegate can use `CK2AuthChallengeCancelAuthenticationChallenge` to reject the fingerprint, or reply with a credential for acceptance, constructed using:
 
 	+[NSURLCredential ck2_credentialForKnownHostWithPersistence:]
 
-The default behaviour (`-performDefaultHandlingForAuthenticationChallenge:`) accepts new fingerprints, adding them to the `known_hosts` file, and causes the operation to fail with an error for mismatched fingerprints.
+The default behaviour (`CK2AuthChallengePerformDefaultHandling`) accepts new fingerprints, adding them to the `known_hosts` file, and causes the operation to fail with an error for mismatched fingerprints.
 
 After checking the host fingerprint, SFTP moves on to actually authenticating the client.
 
