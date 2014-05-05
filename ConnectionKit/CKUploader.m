@@ -39,6 +39,9 @@
             [_fileManager retain];
         }
         
+        // Keep alive until invalidated. Hopefully one day CK2FileManager will do this for us.
+        [self retain];
+        
         _queue = [[NSMutableArray alloc] init];
         _recordsByOperation = [[NSMutableDictionary alloc] init];
         _rootRecord = [[CKTransferRecord rootRecordWithPath:[[request URL] path]] retain];
@@ -63,6 +66,7 @@
     }
     
     [_delegate release]; _delegate = nil;
+    [self release]; // balance out the retain during -init…
 }
 
 - (void)dealloc
