@@ -233,7 +233,6 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     if (_queue.count == 1)
     {
         [self startNextOperationIfNotSuspended];
-        [self retain];  // keep alive until queue is empty
     }
 }
 
@@ -268,8 +267,6 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
             [_queue removeObjectAtIndex:0];
         }
     }
-    
-    [self release]; // once the queue is empty, can be deallocated
     
     if (_invalidated) [self didBecomeInvalid];
 }
