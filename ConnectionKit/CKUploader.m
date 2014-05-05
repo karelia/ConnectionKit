@@ -253,22 +253,23 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
 {
     if (self.suspended) return;
     
-    while (_queue.count)
+    if (_queue.count)
     {
+        // We don't actually know what state the operation is in at this point. Normally, it should
+        // be suspended, waiting for us to start it. Ideally, nothing outside of CKUploader should
+        // start the operation itself (similar contract as to NSOperationQueue).
+        // But if operations are being bulk-canceled (e.g. `invalidateAndCancel`), many of them may
+        // have moved on from the suspended state to be cancelling, or completed. We trust that
+        // we'll receive a KVO notification for each operation as it finishes cancelling (i.e. completes)
+        // and remove it from the queue in due course, until there's nothing left and we become
+        // invalid.
         CK2FileOperation *operation = [_queue objectAtIndex:0];
-        if (operation.state == CK2FileOperationStateSuspended)
-        {
-            [operation resume];
-            return;
-        }
-        else
-        {
-            // Something other than us must have started the op
-            [_queue removeObjectAtIndex:0];
-        }
+        [operation resume];
     }
-    
-    if (_invalidated) [self didBecomeInvalid];
+    else if (_invalidated)
+    {
+        [self didBecomeInvalid];
+    }
 }
 
 - (void)operation:(CK2FileOperation *)operation didFinish:(NSError *)error;
