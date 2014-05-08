@@ -47,6 +47,11 @@
 - (void)startWithRequest:(NSURLRequest *)request credential:(NSURLCredential *)credential;
 
 
+#pragma mark Progress
+@property(nonatomic, readonly) NSUInteger totalBytesWritten;
+@property(nonatomic, readonly) NSUInteger totalBytesExpectedToWrite;
+
+
 #pragma mark Customization
 + (BOOL)usesMultiHandle;    // defaults to YES. Subclasses can override to be NO and fall back to the old synchronous "easy" backend
 - (void)popCompletionHandlerByExecutingWithError:(NSError *)error;

@@ -135,10 +135,33 @@
 {
     return [self initForCreatingFileWithRequest:request size:size withIntermediateDirectories:createIntermediates client:client completionHandler:^(NSError *error) {
         
-        // Long FTP uploads have a tendency to have the control connection cutoff for idling. As a hack, assume that if we reached the end of the body stream, a timeout is likely because of that
-        if (error && _atEnd && [error code] == NSURLErrorTimedOut && [[error domain] isEqualToString:NSURLErrorDomain])
-        {
-            error = nil;
+        if (error) {
+            // Long FTP uploads have a tendency to have the control connection cutoff for idling. As a hack, assume that if we reached the end of the body stream, a timeout is likely because of that
+            if (_atEnd && [error code] == NSURLErrorTimedOut && [[error domain] isEqualToString:NSURLErrorDomain])
+            {
+                error = nil;
+            }
+            // Give a bit of a clue for debugging how far we got through
+            else if (self.totalBytesWritten) {
+                NSMutableDictionary *info = [error.userInfo mutableCopy];
+                
+                NSString *description;
+                if (self.totalBytesExpectedToWrite == NSURLResponseUnknownLength) {
+                    description = [[info objectForKey:NSLocalizedDescriptionKey] stringByAppendingFormat:
+                                   @" (%@ KB sent.)",
+                                   @(self.totalBytesWritten / 1024)];
+                }
+                else {
+                    description = [[info objectForKey:NSLocalizedDescriptionKey] stringByAppendingFormat:
+                                   @" (%@ of %@ KB sent.)",
+                                   @(self.totalBytesWritten / 1024),
+                                   @(self.totalBytesExpectedToWrite / 1024)];
+                }
+                
+                [info setObject:description forKey:NSLocalizedDescriptionKey];
+                error = [NSError errorWithDomain:error.domain code:error.code userInfo:info];
+                [info release];
+            }
         }
         
         [client protocol:self didCompleteWithError:error];
