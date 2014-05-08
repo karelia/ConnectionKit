@@ -537,6 +537,11 @@
     [_transfer cancel];
 }
 
+#pragma mark Progress
+
+@synthesize totalBytesWritten = _totalBytesWritten;
+@synthesize totalBytesExpectedToWrite = _totalBytesExpectedToWrite;
+
 #pragma mark Managing the Completion Handler
 
 /*  This code is devious and perhaps even evil. Manages a "stack" of completion
@@ -667,7 +672,7 @@
     [self.client protocol:self
           didSendBodyData:bytesWritten
            totalBytesSent:_totalBytesWritten
- totalBytesExpectedToSend:_totalBytesExpectedToWrite];
+ totalBytesExpectedToSend:self.totalBytesExpectedToWrite];
 }
 
 - (void)transfer:(CURLTransfer *)transfer didCompleteWithError:(NSError *)error;
