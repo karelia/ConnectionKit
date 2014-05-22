@@ -357,7 +357,7 @@
 {
     if (redirectResponse)
     {
-        // Dissallow redirects as we have no security mechanism to manage them currnetly
+        // Disallow redirects as we have no security mechanism to manage them currently
         return nil;
     }
     else
