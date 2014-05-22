@@ -22,8 +22,8 @@
     void    (^_completionHandler)(NSError *error);
     void    (^_dataBlock)(NSData *data);
     
-    NSUInteger _totalBytesWritten;
-    NSUInteger _totalBytesExpectedToWrite;
+    int64_t _totalBytesWritten;
+    int64_t _totalBytesExpectedToWrite;
 }
 
 #pragma mark Initialisation
@@ -48,8 +48,8 @@
 
 
 #pragma mark Progress
-@property(nonatomic, readonly) NSUInteger totalBytesWritten;
-@property(nonatomic, readonly) NSUInteger totalBytesExpectedToWrite;
+@property(nonatomic, readonly) int64_t totalBytesWritten;
+@property(nonatomic, readonly) int64_t totalBytesExpectedToWrite;
 
 
 #pragma mark Customization
