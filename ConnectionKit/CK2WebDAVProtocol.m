@@ -440,10 +440,6 @@
     {
         switch (error.code)
         {
-            case 403:
-                error = [self standardAuthenticationErrorWithUnderlyingError:error];
-                break;
-
             case 404:
                 error = [self standardFileNotFoundErrorWithUnderlyingError:error];
                 break;
