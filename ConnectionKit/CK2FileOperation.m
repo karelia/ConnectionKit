@@ -480,9 +480,14 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         NSString *password = self.originalURL.password;
         
         NSURLCredential *credential;
-        if (user && password)
+        if (user)
         {
-            credential = [NSURLCredential credentialWithUser:user password:password persistence:NSURLCredentialPersistenceNone];
+            if (password) {
+                credential = [NSURLCredential credentialWithUser:user password:password persistence:NSURLCredentialPersistenceNone];
+            }
+            else {
+                credential = [[NSURLCredentialStorage.sharedCredentialStorage credentialsForProtectionSpace:space] objectForKey:user];
+            }
         }
         else
         {
