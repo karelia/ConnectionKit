@@ -373,6 +373,7 @@
                 case CK2AuthChallengeUseCredential:
                     if (credential)
                     {
+                        [self.client protocol:self appendString:@"Host fingerprint is fine" toTranscript:CK2TranscriptHeaderIn];
                         [self useKnownHostsStat:(credential.persistence == NSURLCredentialPersistencePermanent ? CURLKHSTAT_FINE_ADD_TO_FILE : CURLKHSTAT_FINE)];
                     }
                     else
