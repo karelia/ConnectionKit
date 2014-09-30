@@ -328,6 +328,9 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     
     // Recursively find a record we do have!
     NSURL *parentDirectoryURL = [url URLByDeletingLastPathComponent];
+    // need a sanity check to hunt down URLs being passed in like ftp://example.com//./
+    NSAssert(parentDirectoryURL.absoluteString.length < url.absoluteString.length, @"URLByDeletingLastPathComponent for %@ gives a longer result: %@", url.absoluteString, parentDirectoryURL.absoluteString);
+    
     CKTransferRecord *parent = [self directoryTransferRecordWithURL:parentDirectoryURL];
     
     

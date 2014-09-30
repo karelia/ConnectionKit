@@ -54,8 +54,16 @@ typedef NSUInteger CKUploadingOptions;
 @property (nonatomic, assign, readonly) CKUploadingOptions options;
 @property (nonatomic, retain, readonly) id <CKUploaderDelegate> delegate; // retained until invalidated
 
+/**
+ @param url Must not contain any `.` or `..` path components; the uploader will choke on those at present.
+ */
 - (CKTransferRecord *)uploadToURL:(NSURL *)url fromFile:(NSURL *)fileURL;
+
+/**
+ @param url Must not contain any `.` or `..` path components; the uploader will choke on those at present.
+ */
 - (CKTransferRecord *)uploadToURL:(NSURL *)url fromData:(NSData *)data;
+
 - (void)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *))handler __attribute((nonnull(1)));
 
 /**
