@@ -136,8 +136,7 @@
     return [self initForCreatingFileWithRequest:request size:size withIntermediateDirectories:createIntermediates client:client completionHandler:^(NSError *error) {
         
         if (error) {
-            // Long FTP uploads have a tendency to have the control connection cutoff for idling. As a hack, assume that if we reached the end of the body stream, a timeout is likely because of that
-            if (_atEnd && [error code] == NSURLErrorTimedOut && [[error domain] isEqualToString:NSURLErrorDomain])
+            if ([self looksLikeFTPIdleTimeoutProblem:error])
             {
                 error = nil;
             }
@@ -303,6 +302,31 @@
     }
 
     return error;
+}
+
+/**
+ FTP suffers a fairly notorious problem. During a long upload, the control connection is completely
+ idle. As such, there's a tendency for internet routers to then cut it off. When the data connection
+ completes, Curl goes to use the control connection to finish up and finds that it no longer can,
+ thanks to that cutoff. The really nasty thing is Curl can't know for sure if the cutoff was because
+ of idling (and the upload finished successfully), or if there was a proper connection problem while
+ the last packet of data was being sent.
+ 
+ Understandably, users can be rather annoyed if they keep being told their long uploads have failed
+ (particularly in an app like Sandvox where a failure will result in the upload being retried on
+ another occasion until it does succeed).
+ 
+ So our best bet seems to be a heuristic: If all file data was *transmitted* (not necessarily *received*)
+ and the failure could be caused by an idle timeout, assume the upload was actually a success.
+ */
+- (BOOL)looksLikeFTPIdleTimeoutProblem:(NSError *)error {
+    if (!_atEnd) return NO;
+    
+    // We've seen more than a single error code so far!
+    if (error.code == NSURLErrorTimedOut && [error.domain isEqualToString:NSURLErrorDomain]) return YES;
+    if (error.code == CURLE_RECV_ERROR && [error.domain isEqualToString:CURLcodeErrorDomain]) return YES; // https://karelia.fogbugz.com/f/cases/248867/
+    
+    return NO;
 }
 
 #pragma mark Lifecycle
