@@ -168,14 +168,6 @@
     }];
 }
 
-- (void)transfer:(CURLTransfer *)transfer willSendBodyDataOfLength:(NSUInteger)bytesWritten;
-{
-    // Watch for the file end being reached before passing onto the original requester
-    if (bytesWritten == 0) _atEnd = YES;
-    
-    [super transfer:transfer willSendBodyDataOfLength:bytesWritten];
-}
-
 - (id)initForRenamingItemWithRequest:(NSURLRequest *)request newName:(NSString *)newName client:(id<CK2ProtocolClient>)client
 {
     NSString* sourcePath = [[request URL] lastPathComponent];
@@ -439,6 +431,14 @@
     }
     
     [super transfer:transfer didCompleteWithError:error];
+}
+
+- (void)transfer:(CURLTransfer *)transfer willSendBodyDataOfLength:(NSUInteger)bytesWritten;
+{
+    // Watch for the file end being reached before passing onto the original requester
+    if (bytesWritten == 0) _atEnd = YES;
+    
+    [super transfer:transfer willSendBodyDataOfLength:bytesWritten];
 }
 
 - (void)transfer:(CURLTransfer *)transfer didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
