@@ -170,6 +170,8 @@
 {
     // Default to root if no-one's supplied anything better
     if (![self directoryURL]) [self setDirectoryURL:[NSURL fileURLWithPath:@"/"]];
+    
+    [_viewController reload];
 }
 
 - (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler

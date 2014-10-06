@@ -115,6 +115,7 @@
 - (BOOL)URLCanHazChildren:(NSURL *)url;
 - (NSArray *)childrenForURL:(NSURL *)url;
 - (void)addToHistory;
+- (void)reload;
 
 - (void)validateVisibleColumns;
 

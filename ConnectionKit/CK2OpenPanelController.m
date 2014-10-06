@@ -428,11 +428,6 @@
     [_historyManager removeAllActions];
 
     [self setURLs:nil];
-    
-    [_browserController reload];
-    [_iconViewController reload];
-    [_listViewController reload];
-
     [self validateViews];
 }
 
@@ -783,6 +778,13 @@
     [self validateOKButton];
     [self validateProgressIndicator];
     [self validateHomeButton];
+}
+
+- (void)reload
+{
+    [_browserController reload];
+    [_iconViewController reload];
+    [_listViewController reload];
 }
 
 - (void)validateProgressIndicator
