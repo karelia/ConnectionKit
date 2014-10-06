@@ -220,7 +220,6 @@
 - (void)endWithCode:(NSInteger)code
 {
     [self close];
-    [_viewController resetSession];
     
     if ([self isModalPanel])
     {
@@ -242,6 +241,8 @@
             [self setCompletionBlock:nil];
         }
     }
+    
+    [_viewController resetSession];
 }
 
 - (IBAction)ok:(id)sender

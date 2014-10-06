@@ -428,7 +428,6 @@
     [_historyManager removeAllActions];
 
     [self setURLs:nil];
-    [self validateViews];
 }
 
 - (NSArray *)URLs
@@ -785,6 +784,8 @@
     [_browserController reload];
     [_iconViewController reload];
     [_listViewController reload];
+    
+    [self validateViews];
 }
 
 - (void)validateProgressIndicator
