@@ -777,6 +777,7 @@
     [self validateOKButton];
     [self validateProgressIndicator];
     [self validateHomeButton];
+    [self validateNewFolderButton];
 }
 
 - (void)reload
@@ -916,13 +917,20 @@
 
 - (void)validateNewFolderButton
 {
-    NSArray     *children;
-    BOOL        childrenLoaded;
+    if (_currentLoadingOperation != nil)
+    {
+        [_newFolderButton setEnabled:NO];
+    }
+    else
+    {
+        NSArray     *children;
+        BOOL        childrenLoaded;
     
-    children = [self childrenForURL:[self directoryURL]];
+        children = [self childrenForURL:[self directoryURL]];
     
-    childrenLoaded = (children != nil) && (([children count] != 1) || ![[children objectAtIndex:0] ck2_isPlaceholder]);
-    [_newFolderButton setEnabled:childrenLoaded];
+        childrenLoaded = (children != nil) && (([children count] != 1) || ![[children objectAtIndex:0] ck2_isPlaceholder]);
+        [_newFolderButton setEnabled:childrenLoaded];
+    }
 }
 
 - (IBAction)newFolder:(id)sender
