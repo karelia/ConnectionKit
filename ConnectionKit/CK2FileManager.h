@@ -296,6 +296,8 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  */
 - (CK2FileOperation *)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
 
+- (CK2FileOperation *)setAttributesOperationWithURL:(NSURL *)url attributes:(NSDictionary *)keyedValues completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
+
 // To retrieve attributes, instead perform a listing of the *parent* directory, and pick out resource properties from the returned URLs that you're interested in
 
 
