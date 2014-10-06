@@ -15,6 +15,15 @@
 enum {
     CKUploadingDeleteExistingFileFirst = 1 << 0,
     CKUploadingDryRun = 1 << 1,
+    
+    /**
+     Normally we rely on servers to respect the opening permissions we ask for. But some servers
+     choose not to (e.g. a handful of SFTP setups). Or some server types (FTP, mainly) have no concept
+     of opening permissions, so just do whatever is the OS default.
+     In those cases, we need to followup an upload with setting permissions explicitly.
+     `CKUploadingSetFilePermissionsAfterWriting` does just that.
+     */
+    CKUploadingSetFilePermissionsAfterWriting = 1 << 2,
 };
 typedef NSUInteger CKUploadingOptions;
 

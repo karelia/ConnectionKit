@@ -125,7 +125,7 @@
                                                   openingAttributes:attributes
                                                   completionHandler:NULL];
     
-    return [self uploadToURL:url usingOperation:op];
+    return [self uploadToURL:url attributes:attributes usingOperation:op];
 }
 
 - (CKTransferRecord *)uploadToURL:(NSURL *)url fromFile:(NSURL *)fileURL;
@@ -144,12 +144,12 @@
                                                   openingAttributes:attributes
                                                   completionHandler:NULL];
     
-    return [self uploadToURL:url usingOperation:op];
+    return [self uploadToURL:url attributes:attributes usingOperation:op];
 }
 
 static void *sOperationStateObservationContext = &sOperationStateObservationContext;
 
-- (CKTransferRecord *)uploadToURL:(NSURL *)url usingOperation:(CK2FileOperation *)operation;
+- (CKTransferRecord *)uploadToURL:(NSURL *)url attributes:(NSDictionary *)attributes usingOperation:(CK2FileOperation *)operation;
 {
     NSParameterAssert(operation);
     
@@ -172,6 +172,17 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     
     // Notify delegate
     [self didAddTransferRecord:result];
+    
+    
+    // Set permissions after if requested
+    if (self.options & CKUploadingSetFilePermissionsAfterWriting) {
+        CK2FileOperation *op = [_fileManager setAttributesOperationWithURL:url
+                                                                attributes:attributes
+                                                         completionHandler:NULL];   // nothing really to do; don't care if fails
+        
+        [self addOperation:op
+            transferRecord:nil];  // ignore failures
+    }
     
     return result;
 }
