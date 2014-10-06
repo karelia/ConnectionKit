@@ -414,11 +414,15 @@
     
     [self.client protocol:self didReceiveChallenge:challenge completionHandler:^(CK2AuthChallengeDisposition disposition, NSURLCredential *credential) {
         
+        // By default, try once with proposed credential, then give up
+        // Otherwise, can go round in a loop of failed auth https://karelia.fogbugz.com/f/cases/248882
+        if (disposition == CK2AuthChallengePerformDefaultHandling && challenge.previousFailureCount == 0) {
+            credential = challenge.proposedCredential;
+            disposition = CK2AuthChallengeUseCredential;
+        }
+        
         switch (disposition)
         {
-            case CK2AuthChallengePerformDefaultHandling:
-                credential = challenge.proposedCredential;
-                
             case CK2AuthChallengeUseCredential:
             {
                 // Swap out existing handler for one that retries after an auth failure. Stores credential if requested upon success
