@@ -280,12 +280,6 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 #pragma mark Getting and Setting Attributes
 
-- (CK2FileOperation *)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler {
-    CK2FileOperation *operation = [self setAttributesOperationWithURL:url attributes:keyedValues completionHandler:handler];
-    [operation resume];
-    return operation;
-}
-
 - (CK2FileOperation *)setAttributesOperationWithURL:(NSURL *)url attributes:(NSDictionary *)keyedValues completionHandler:(void (^)(NSError *))handler {
     NSParameterAssert(url);
     NSParameterAssert(keyedValues);
