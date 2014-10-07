@@ -299,7 +299,6 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 #pragma mark Operations
 
-
 - (Class)classForOperation
 {
     return [CK2FileOperation class];
