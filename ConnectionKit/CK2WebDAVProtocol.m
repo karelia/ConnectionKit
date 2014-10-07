@@ -490,7 +490,7 @@
 
     CK2WebDAVErrorHandler errorBlock = Block_copy(^(NSError* error) {
         CK2WebDAVLog(@"create directory (during create file) failed for %@ with %@", path, error);
-        if (([error.domain isEqualToString:DAVClientErrorDomain]) && (error.code == 405))
+        if ([self shouldCreateIntermediateDirectoriesAfterError:error])
         {
             // ignore failure to create the directories
             createFileBlock(nil);
@@ -520,6 +520,24 @@
 
     Block_release(errorHandler);
     Block_release(createFileBlock);
+}
+
+/**
+ When creating a file, it might fail because an intermediate directory doesn't exist yet. If so, we
+ need to detect and handle that error.
+ */
+- (BOOL)shouldCreateIntermediateDirectoriesAfterError:(NSError *)error {
+    
+    NSString *domain = error.domain;
+    if (![domain isEqualToString:DAVClientErrorDomain]) return NO;
+    
+    switch (error.code) {
+        case 405:   // as per the WebDAV spec
+            return YES;
+            
+        default:
+            return NO;
+    }
 }
 
 /**
