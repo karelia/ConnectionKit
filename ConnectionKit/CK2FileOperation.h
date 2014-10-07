@@ -19,6 +19,9 @@ typedef NS_ENUM(NSInteger, CK2FileOperationState) {
 };
 
 
+/**
+ All @properties are KVO-compliant.
+*/
 @interface CK2FileOperation : NSObject <NSCopying>  // retains self when copying
 {
   @private
@@ -41,8 +44,6 @@ typedef NS_ENUM(NSInteger, CK2FileOperationState) {
     CK2FileOperationState   _state;
     NSError                 *_error;
 }
-
-// All @properties are KVO-compliant.
 
 /**
  * Number of body bytes already written.
