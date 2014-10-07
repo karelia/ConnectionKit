@@ -171,7 +171,8 @@
     CFStringRef user = (CFStringRef)nsUser;
     if (user)
     {
-        // -stringByAddingPercentEscapesUsingEncoding: doesn't cover things like the @ symbol, so drop down CoreFoundation
+        // -stringByAddingPercentEscapesUsingEncoding: doesn't cover things like the @ symbol, so
+        // drop down to CoreFoundation
         user = CFURLCreateStringByAddingPercentEscapes(NULL,
                                                        user,
                                                        NULL,
