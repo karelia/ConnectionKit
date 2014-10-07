@@ -533,6 +533,7 @@
     
     switch (error.code) {
         case 405:   // as per the WebDAV spec
+        case 404:   // be lenient https://github.com/karelia/ConnectionKit/issues/76
             return YES;
             
         default:
