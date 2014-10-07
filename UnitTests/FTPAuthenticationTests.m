@@ -56,7 +56,7 @@
 
         NSURL* url = [self URLForTestFolder];
         [self.manager createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
+            XCTAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];
         }];

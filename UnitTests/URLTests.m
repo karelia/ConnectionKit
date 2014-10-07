@@ -8,9 +8,9 @@
 
 #import "CK2FileManager.h"
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 
-@interface URLTests : SenTestCase
+@interface URLTests : XCTestCase
 
 @end
 
@@ -19,7 +19,7 @@
 - (void)testURLs {
     NSURL *suiteURL = [[NSBundle bundleForClass:self.class] URLForResource:@"URLs" withExtension:@"testdata"];
     NSArray *suite = [NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfURL:suiteURL] options:0 error:NULL];
-    STAssertTrue(suite.count >= 1, nil);
+    XCTAssertTrue(suite.count >= 1);
     
     for (NSDictionary *values in suite) {
         NSString *path = values[@"path"];
@@ -27,8 +27,8 @@
         NSURL *base = [NSURL URLWithString:values[@"hostURL"]];
         
         NSURL *url = [CK2FileManager URLWithPath:path isDirectory:directory hostURL:base];
-        STAssertEqualObjects(url.absoluteString, values[@"Output"], nil);
-        STAssertNil(url.baseURL, @"+URLWithPath:isDirectory:hostURL: should always return an absolute URL");
+        XCTAssertEqualObjects(url.absoluteString, values[@"Output"]);
+        XCTAssertNil(url.baseURL, @"+URLWithPath:isDirectory:hostURL: should always return an absolute URL");
     }
 }
 
@@ -38,56 +38,56 @@
 {
     NSURL *url = [CK2FileManager URLWithPath:@"relative/path/file.txt"
                                                                 relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com"]];
-    STAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com/relative/path/file.txt"], @"path should start with slash");
+    XCTAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com/relative/path/file.txt"], @"path should start with slash");
 }
 
 - (void)testFTPRelativeDirectory
 {
     NSURL *url = [CK2FileManager URLWithPath:@"relative/path/directory"
                                relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com"]];
-    STAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com/relative/path/directory"], @"path should start with slash");
+    XCTAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com/relative/path/directory"], @"path should start with slash");
 }
 
 - (void)testFTPAbsolute
 {
     NSURL *url = [CK2FileManager URLWithPath:@"/absolute/path/file.txt"
                                                                 relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com"]];
-    STAssertEqualObjects([url absoluteString], @"ftp://user:pass@test.ftp.com//absolute/path/file.txt", nil);
+    XCTAssertEqualObjects([url absoluteString], @"ftp://user:pass@test.ftp.com//absolute/path/file.txt");
 }
 
 - (void)testFTPAbsoluteNonRootURL
 {
     NSURL *url = [CK2FileManager URLWithPath:@"/absolute/path/file.txt"
                                relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com/example/path/"]];
-    STAssertEqualObjects([url absoluteString], @"ftp://user:pass@test.ftp.com//absolute/path/file.txt", nil);
+    XCTAssertEqualObjects([url absoluteString], @"ftp://user:pass@test.ftp.com//absolute/path/file.txt");
 }
 
 - (void)testFTPRelativeNonRootFolderURL
 {
     NSURL *url = [CK2FileManager URLWithPath:@"relative/path/file.txt"
                                relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com/example/path/"]];
-    STAssertEqualObjects(url.absoluteString, @"ftp://user:pass@test.ftp.com/example/path/relative/path/file.txt", nil);
+    XCTAssertEqualObjects(url.absoluteString, @"ftp://user:pass@test.ftp.com/example/path/relative/path/file.txt");
 }
 
 - (void)testFTPRelativeNonRootFileURL
 {
     NSURL *url = [CK2FileManager URLWithPath:@"relative/path/file.txt"
                                relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com/example/file"]];
-    STAssertEqualObjects(url.absoluteString, @"ftp://user:pass@test.ftp.com/example/relative/path/file.txt", nil);
+    XCTAssertEqualObjects(url.absoluteString, @"ftp://user:pass@test.ftp.com/example/relative/path/file.txt");
 }
 
 - (void)testFTPRoot
 {
     NSURL *url = [CK2FileManager URLWithPath:@"/"
                                                                 relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com"]];
-    STAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com//"], nil);
+    XCTAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com//"]);
 }
 
 - (void)testFTPRootNonRootURL
 {
     NSURL *url = [CK2FileManager URLWithPath:@"/"
                                relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com/example/path/"]];
-    STAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com//"], nil);
+    XCTAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com//"]);
 }
 
 #pragma mark WebDAV
@@ -96,35 +96,35 @@
 {
     NSURL *url = [CK2FileManager URLWithPath:@"relative/path/file.txt"
                                                                 relativeToURL:[NSURL URLWithString:@"http://www.test.com:8080"]];
-    STAssertEqualObjects([url absoluteString], @"http://www.test.com:8080/relative/path/file.txt", @"path should be normal");
+    XCTAssertEqualObjects([url absoluteString], @"http://www.test.com:8080/relative/path/file.txt", @"path should be normal");
 }
 
 - (void)testHTTPRelativeDirectory
 {
     NSURL *url = [CK2FileManager URLWithPath:@"relative/path/directory"
                                                                 relativeToURL:[NSURL URLWithString:@"http://www.test.com:8080"]];
-    STAssertEqualObjects([url absoluteString], @"http://www.test.com:8080/relative/path/directory", @"path should be normal");
+    XCTAssertEqualObjects([url absoluteString], @"http://www.test.com:8080/relative/path/directory", @"path should be normal");
 }
 
 - (void)testHTTPAbsolute
 {
     NSURL *url = [CK2FileManager URLWithPath:@"/absolute/path/file.txt"
                                                                 relativeToURL:[NSURL URLWithString:@"http://www.test.com:8080"]];
-    STAssertEqualObjects([url absoluteString], @"http://www.test.com:8080/absolute/path/file.txt", @"path should be normal");
+    XCTAssertEqualObjects([url absoluteString], @"http://www.test.com:8080/absolute/path/file.txt", @"path should be normal");
 }
 
 - (void)testHTTPRelativeNonRootFolderURL
 {
     NSURL *url = [CK2FileManager URLWithPath:@"relative/path/file.txt"
                                relativeToURL:[NSURL URLWithString:@"http://www.test.com:8080/example/path/"]];
-    STAssertEqualObjects([url absoluteString], @"http://www.test.com:8080/example/path/relative/path/file.txt", nil);
+    XCTAssertEqualObjects([url absoluteString], @"http://www.test.com:8080/example/path/relative/path/file.txt");
 }
 
 - (void)testHTTPRelativeNonRootFileURL
 {
     NSURL *url = [CK2FileManager URLWithPath:@"relative/path/file.txt"
                                relativeToURL:[NSURL URLWithString:@"http://www.test.com:8080/example/file"]];
-    STAssertEqualObjects([url absoluteString], @"http://www.test.com:8080/example/relative/path/file.txt", nil);
+    XCTAssertEqualObjects([url absoluteString], @"http://www.test.com:8080/example/relative/path/file.txt");
 }
 
 #pragma mark SSH
@@ -133,21 +133,21 @@
 {
     NSURL *url = [CK2FileManager URLWithPath:@"relative/path/file.txt"
                                                                 relativeToURL:[NSURL URLWithString:@"sftp://user@test.sftp.com"]];
-    STAssertEqualObjects([url absoluteString], @"sftp://user@test.sftp.com/~/relative/path/file.txt", @"path should start with ~");
+    XCTAssertEqualObjects([url absoluteString], @"sftp://user@test.sftp.com/~/relative/path/file.txt", @"path should start with ~");
 }
 
 - (void)testSFTPRelativeTrailingSlash
 {
     NSURL *url = [CK2FileManager URLWithPath:@"relative/path/file.txt"
                                                                 relativeToURL:[NSURL URLWithString:@"sftp://user@test.sftp.com/"]];
-    STAssertEqualObjects([url absoluteString], @"sftp://user@test.sftp.com/~/relative/path/file.txt", @"path should start with ~");
+    XCTAssertEqualObjects([url absoluteString], @"sftp://user@test.sftp.com/~/relative/path/file.txt", @"path should start with ~");
 }
 
 - (void)testSFTPRelativeDirectory
 {
     NSURL *url = [CK2FileManager URLWithPath:@"relative/path/directory"
                                                                 relativeToURL:[NSURL URLWithString:@"sftp://user@test.sftp.com"]];
-    STAssertEqualObjects([url absoluteString], @"sftp://user@test.sftp.com/~/relative/path/directory", @"path should start with ~");
+    XCTAssertEqualObjects([url absoluteString], @"sftp://user@test.sftp.com/~/relative/path/directory", @"path should start with ~");
 }
 
 - (void)testSFTPAbsolute
@@ -155,7 +155,7 @@
     NSURL *url = [CK2FileManager URLWithPath:@"/absolute/path/file.txt"
                                                                 relativeToURL:[NSURL URLWithString:@"sftp://user@test.sftp.com"]];
     
-    STAssertEqualObjects([url absoluteString], @"sftp://user@test.sftp.com/absolute/path/file.txt", @"path should be normal");
+    XCTAssertEqualObjects([url absoluteString], @"sftp://user@test.sftp.com/absolute/path/file.txt", @"path should be normal");
 }
 
 - (void)testSFTPAbsoluteTrailingSlash
@@ -163,7 +163,7 @@
     NSURL *url = [CK2FileManager URLWithPath:@"/absolute/path/file.txt"
                                                                 relativeToURL:[NSURL URLWithString:@"sftp://user@test.sftp.com/"]];
     
-    STAssertEqualObjects([url absoluteString], @"sftp://user@test.sftp.com/absolute/path/file.txt", @"path should be normal");
+    XCTAssertEqualObjects([url absoluteString], @"sftp://user@test.sftp.com/absolute/path/file.txt", @"path should be normal");
 }
 
 - (void)testSCPRelative
@@ -171,7 +171,7 @@
     NSURL *url = [CK2FileManager URLWithPath:@"relative/path/file.txt"
                                                                 relativeToURL:[NSURL URLWithString:@"scp://user@test.scp.com"]];
     
-    STAssertEqualObjects([url absoluteString], @"scp://user@test.scp.com/~/relative/path/file.txt", @"path should start with ~");
+    XCTAssertEqualObjects([url absoluteString], @"scp://user@test.scp.com/~/relative/path/file.txt", @"path should start with ~");
 }
 
 - (void)testSCPRelativeTrailingSlash
@@ -179,7 +179,7 @@
     NSURL *url = [CK2FileManager URLWithPath:@"relative/path/file.txt"
                                                                 relativeToURL:[NSURL URLWithString:@"scp://user@test.scp.com/"]];
     
-    STAssertEqualObjects([url absoluteString], @"scp://user@test.scp.com/~/relative/path/file.txt", @"path should start with ~");
+    XCTAssertEqualObjects([url absoluteString], @"scp://user@test.scp.com/~/relative/path/file.txt", @"path should start with ~");
 }
 
 - (void)testSCPAbsolute
@@ -187,7 +187,7 @@
     NSURL *url = [CK2FileManager URLWithPath:@"/absolute/path/file.txt"
                                                                 relativeToURL:[NSURL URLWithString:@"scp://user@test.scp.com"]];
     
-    STAssertEqualObjects([url absoluteString], @"scp://user@test.scp.com/absolute/path/file.txt", @"path should be normal");
+    XCTAssertEqualObjects([url absoluteString], @"scp://user@test.scp.com/absolute/path/file.txt", @"path should be normal");
 }
 
 - (void)testSCPAbsoluteTrailingSlash
@@ -195,7 +195,7 @@
     NSURL *url = [CK2FileManager URLWithPath:@"/absolute/path/file.txt"
                                                                 relativeToURL:[NSURL URLWithString:@"scp://user@test.scp.com/"]];
     
-    STAssertEqualObjects([url absoluteString], @"scp://user@test.scp.com/absolute/path/file.txt", @"path should be normal");
+    XCTAssertEqualObjects([url absoluteString], @"scp://user@test.scp.com/absolute/path/file.txt", @"path should be normal");
 }
 
 @end

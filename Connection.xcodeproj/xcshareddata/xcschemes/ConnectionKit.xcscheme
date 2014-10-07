@@ -33,32 +33,11 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "220AD7971509019B00748655"
-               BuildableName = "UnitTests.octest"
+               BuildableName = "UnitTests.xctest"
                BlueprintName = "UnitTests"
                ReferencedContainer = "container:Connection.xcodeproj">
             </BuildableReference>
             <SkippedTests>
-               <Test
-                  Identifier = "MockServerTests">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFTPTests/testFolder">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFTPTests/testFile2">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFTPTests/testFile1">
-               </Test>
-               <Test
-                  Identifier = "KMSTestCase">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerBaseTests">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerGenericTests">
-               </Test>
                <Test
                   Identifier = "BaseCKProtocolTests">
                </Test>
@@ -66,10 +45,31 @@
                   Identifier = "BaseCKTests">
                </Test>
                <Test
+                  Identifier = "CK2FileManagerBaseTests">
+               </Test>
+               <Test
+                  Identifier = "CK2FileManagerFTPTests/testFile1">
+               </Test>
+               <Test
+                  Identifier = "CK2FileManagerFTPTests/testFile2">
+               </Test>
+               <Test
+                  Identifier = "CK2FileManagerFTPTests/testFolder">
+               </Test>
+               <Test
+                  Identifier = "CK2FileManagerGenericTests">
+               </Test>
+               <Test
                   Identifier = "CKUploaderTests/testRemoveFileAtPath">
                </Test>
                <Test
                   Identifier = "CKUploaderTests/testRemoveFileAtPathNoAuthentication">
+               </Test>
+               <Test
+                  Identifier = "KMSTestCase">
+               </Test>
+               <Test
+                  Identifier = "MockServerTests">
                </Test>
             </SkippedTests>
          </TestableReference>
@@ -84,6 +84,15 @@
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "79CFD12509F702BE00172CDD"
+            BuildableName = "ConnectionKit.framework"
+            BlueprintName = "ConnectionKit"
+            ReferencedContainer = "container:Connection.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>

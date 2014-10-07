@@ -95,7 +95,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     NSURL* result = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:[NSString stringWithFormat:@"%@Tests", self.protocol]];
     NSError* error = nil;
     BOOL ok = [[NSFileManager defaultManager] createDirectoryAtURL:result withIntermediateDirectories:YES attributes:nil error:&error];
-    STAssertTrue(ok, @"failed to make temporary folder with error %@", error);
+    XCTAssertTrue(ok, @"failed to make temporary folder with error %@", error);
 
     return result;
 }
@@ -114,7 +114,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     NSFileManager* fm = [NSFileManager defaultManager];
     NSURL* tempFolder = [self temporaryFolder];
     BOOL ok = [fm createDirectoryAtURL:tempFolder withIntermediateDirectories:YES attributes:nil error:&error];
-    STAssertTrue(ok, @"couldn't make temporary directory: %@", error);
+    XCTAssertTrue(ok, @"couldn't make temporary directory: %@", error);
 
     return ok;
 }
@@ -178,7 +178,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     {
         NSString* key = [NSString stringWithFormat:@"CK%@TestURL", protocol];
         setting = [[NSUserDefaults standardUserDefaults] objectForKey:key];
-        STAssertNotNil(setting, @"You need to set a test server address for %@ tests. Use the defaults command on the command line: defaults write otest %@ \"server-url-here\". Use \"MockServer\" instead of a url to use a mock server instead. Use \"Off\" instead of a url to disable %@ tests", protocol, key, key, protocol);
+        XCTAssertNotNil(setting, @"You need to set a test server address for %@ tests. Use the defaults command on the command line: defaults write otest %@ \"server-url-here\". Use \"MockServer\" instead of a url to use a mock server instead. Use \"Off\" instead of a url to disable %@ tests", protocol, key, key, protocol);
     }
 
     BOOL ok;
@@ -409,16 +409,16 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         // make the folder if necessary
         NSURL* url = [self URLForTestFolder];
         [session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertTrue([self checkIsCreationError:error nilAllowed:YES], @"expected no error or file exists error, got %@", error);
+            XCTAssertTrue([self checkIsCreationError:error nilAllowed:YES], @"expected no error or file exists error, got %@", error);
 
             // if we want the files, make them too
             if (withFiles)
             {
                 NSData* contents = [@"This is a test file" dataUsingEncoding:NSUTF8StringEncoding];
                 [session createFileAtURL:[self URLForTestFile1] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-                    STAssertTrue([self checkIsCreationError:error nilAllowed:YES], @"expected no error or file exists error, got %@", error);
+                    XCTAssertTrue([self checkIsCreationError:error nilAllowed:YES], @"expected no error or file exists error, got %@", error);
                     [session createFileAtURL:[self URLForTestFile2] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-                        STAssertTrue([self checkIsCreationError:error nilAllowed:YES], @"expected no error or file exists error, got %@", error);
+                        XCTAssertTrue([self checkIsCreationError:error nilAllowed:YES], @"expected no error or file exists error, got %@", error);
                         [self pause];
                         LogHousekeeping(@"<<<< Made Test Files");
                     }];
@@ -469,7 +469,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 - (void)checkURL:(NSURL*)url isNamed:(NSString*)name
 {
-    STAssertTrue([[url lastPathComponent] isEqualToString:name], @"URL %@ name was wrong, expected %@", url, name);
+    XCTAssertTrue([[url lastPathComponent] isEqualToString:name], @"URL %@ name was wrong, expected %@", url, name);
 }
 
 - (void)checkURLs:(NSMutableArray*)urls containItemNamed:(NSString*)name
@@ -487,7 +487,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         }
     }
 
-    STAssertTrue(found, @"unexpected item with name %@", name);
+    XCTAssertTrue(found, @"unexpected item with name %@", name);
 }
 
 - (BOOL)checkIsAuthenticationError:(NSError*)error log:(BOOL)log

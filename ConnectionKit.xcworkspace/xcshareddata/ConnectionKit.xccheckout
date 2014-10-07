@@ -2,67 +2,69 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>B17EBC03-BF5F-4554-92AC-2085C09F277F</string>
+	<string>8FBC02BE-89A6-4E66-A86A-2F30763D8732</string>
 	<key>IDESourceControlProjectName</key>
 	<string>ConnectionKit</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>4A98FC02-A9AA-4171-AA31-C823C2C6BF25</key>
-		<string>ssh://github.com/karelia/DAVKit.git</string>
-		<key>4C91D32D-D34C-4AB8-8492-6685C0C9482B</key>
-		<string>ssh://github.com/karelia/ConnectionKit.git</string>
-		<key>82B70F9A-593F-443D-B405-E4288BF3DB31</key>
-		<string>git://github.com/bagder/c-ares.git</string>
-		<key>9F060D92-E0D7-4CCE-BE24-7AA2A97C0E55</key>
-		<string>ssh://github.com/karelia/CurlHandle.git</string>
+		<key>196ECB9D-DC69-481A-BC41-10BC9371E262</key>
+		<string>https://github.com/karelia/libssh2_sftp-Cocoa-wrapper.git</string>
+		<key>30181585-7835-4792-AA71-78979C5DC7E4</key>
+		<string>https://github.com/bagder/c-ares.git</string>
+		<key>3D0A7752-D915-4708-BED7-84F5752E91D0</key>
+		<string>https://github.com/karelia/curl.git</string>
+		<key>55929339-0664-4A1B-8A28-A403FA1A187E</key>
+		<string>https://github.com/karelia/ConnectionKit.git</string>
+		<key>84801443-6FFF-4DB0-B4CE-0DA862E773E6</key>
+		<string>https://github.com/karelia/CurlHandle.git</string>
+		<key>966871D2-8C9C-44C2-BE6E-5FE45C4F558E</key>
+		<string>https://github.com/karelia/DAVKit.git</string>
 		<key>A83B07BE-C454-4AD2-884C-BC9377EDC056</key>
 		<string>https://github.com/boredzo/iso-8601-date-formatter.git</string>
-		<key>BE003F79-356E-4EB2-B741-F49BB6BEEF22</key>
-		<string>git://github.com/bagder/curl.git</string>
-		<key>E450EA78-53AE-467D-A719-ABF6B8569F3C</key>
-		<string>ssh://github.com/karelia/MockServer.git</string>
+		<key>EEF81E40-A006-4B24-AC4D-3B4A9499A316</key>
+		<string>https://github.com/karelia/iso-8601-date-formatter.git</string>
 		<key>F057D5F2-EC7E-4CBA-9D9D-03960D2DC437</key>
 		<string>https://github.com/karelia/MockServer.git</string>
-		<key>F27F4775-53A9-4AAF-978A-C0DF07748D2D</key>
-		<string>ssh://github.com/karelia/libssh2_sftp-Cocoa-wrapper.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>ConnectionKit.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>4A98FC02-A9AA-4171-AA31-C823C2C6BF25</key>
-		<string>../DAVKit</string>
-		<key>4C91D32D-D34C-4AB8-8492-6685C0C9482B</key>
-		<string>..</string>
-		<key>82B70F9A-593F-443D-B405-E4288BF3DB31</key>
+		<key>196ECB9D-DC69-481A-BC41-10BC9371E262</key>
+		<string>../CurlHandle/SFTP</string>
+		<key>30181585-7835-4792-AA71-78979C5DC7E4</key>
 		<string>../CurlHandle/c-ares</string>
-		<key>9F060D92-E0D7-4CCE-BE24-7AA2A97C0E55</key>
+		<key>3D0A7752-D915-4708-BED7-84F5752E91D0</key>
+		<string>../CurlHandle/curl</string>
+		<key>55929339-0664-4A1B-8A28-A403FA1A187E</key>
+		<string>..</string>
+		<key>84801443-6FFF-4DB0-B4CE-0DA862E773E6</key>
 		<string>../CurlHandle</string>
+		<key>966871D2-8C9C-44C2-BE6E-5FE45C4F558E</key>
+		<string>../DAVKit</string>
 		<key>A83B07BE-C454-4AD2-884C-BC9377EDC056</key>
 		<string>../DAVKit/iso-8601-date-formatter</string>
-		<key>BE003F79-356E-4EB2-B741-F49BB6BEEF22</key>
-		<string>../CurlHandle/curl</string>
-		<key>E450EA78-53AE-467D-A719-ABF6B8569F3C</key>
-		<string>../CurlHandle/CURLHandleSource/Tests/MockServer</string>
+		<key>EEF81E40-A006-4B24-AC4D-3B4A9499A316</key>
+		<string>../DAVKit/Sources/iso-8601-date-formatter</string>
 		<key>F057D5F2-EC7E-4CBA-9D9D-03960D2DC437</key>
-		<string>../DAVKit/Tests/MockServer</string>
-		<key>F27F4775-53A9-4AAF-978A-C0DF07748D2D</key>
-		<string>../CurlHandle/SFTP</string>
+		<string>../CurlHandle/CURLHandleSource/Tests/MockServer</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>ssh://github.com/karelia/ConnectionKit.git</string>
+	<string>https://github.com/karelia/ConnectionKit.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>110</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>4C91D32D-D34C-4AB8-8492-6685C0C9482B</string>
+	<string>55929339-0664-4A1B-8A28-A403FA1A187E</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>82B70F9A-593F-443D-B405-E4288BF3DB31</string>
+			<string>30181585-7835-4792-AA71-78979C5DC7E4</string>
 			<key>IDESourceControlWCCName</key>
 			<string>c-ares</string>
 		</dict>
@@ -70,23 +72,15 @@
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>F27F4775-53A9-4AAF-978A-C0DF07748D2D</string>
+			<string>55929339-0664-4A1B-8A28-A403FA1A187E</string>
 			<key>IDESourceControlWCCName</key>
-			<string>SFTP</string>
+			<string>ConnectionKit</string>
 		</dict>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>4A98FC02-A9AA-4171-AA31-C823C2C6BF25</string>
-			<key>IDESourceControlWCCName</key>
-			<string>DAVKit</string>
-		</dict>
-		<dict>
-			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
-			<string>public.vcs.git</string>
-			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>BE003F79-356E-4EB2-B741-F49BB6BEEF22</string>
+			<string>3D0A7752-D915-4708-BED7-84F5752E91D0</string>
 			<key>IDESourceControlWCCName</key>
 			<string>curl</string>
 		</dict>
@@ -94,9 +88,17 @@
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>F057D5F2-EC7E-4CBA-9D9D-03960D2DC437</string>
+			<string>84801443-6FFF-4DB0-B4CE-0DA862E773E6</string>
 			<key>IDESourceControlWCCName</key>
-			<string>MockServer</string>
+			<string>CurlHandle</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>966871D2-8C9C-44C2-BE6E-5FE45C4F558E</string>
+			<key>IDESourceControlWCCName</key>
+			<string>DAVKit</string>
 		</dict>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
@@ -110,25 +112,33 @@
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>9F060D92-E0D7-4CCE-BE24-7AA2A97C0E55</string>
+			<string>EEF81E40-A006-4B24-AC4D-3B4A9499A316</string>
 			<key>IDESourceControlWCCName</key>
-			<string>CurlHandle</string>
+			<string>iso-8601-date-formatter</string>
 		</dict>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>4C91D32D-D34C-4AB8-8492-6685C0C9482B</string>
-			<key>IDESourceControlWCCName</key>
-			<string>ConnectionKit</string>
-		</dict>
-		<dict>
-			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
-			<string>public.vcs.git</string>
-			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>E450EA78-53AE-467D-A719-ABF6B8569F3C</string>
+			<string>F057D5F2-EC7E-4CBA-9D9D-03960D2DC437</string>
 			<key>IDESourceControlWCCName</key>
 			<string>MockServer</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>F057D5F2-EC7E-4CBA-9D9D-03960D2DC437</string>
+			<key>IDESourceControlWCCName</key>
+			<string>MockServer</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>196ECB9D-DC69-481A-BC41-10BC9371E262</string>
+			<key>IDESourceControlWCCName</key>
+			<string>SFTP</string>
 		</dict>
 	</array>
 </dict>

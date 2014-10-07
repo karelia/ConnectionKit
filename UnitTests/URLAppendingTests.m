@@ -6,9 +6,9 @@
 //
 //
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 
-@interface URLAppendingTests : SenTestCase
+@interface URLAppendingTests : XCTestCase
 
 @end
 
@@ -17,102 +17,92 @@
 
 - (void)testFTPAppendToRoot;
 {
-    STAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com/%2F"] URLByAppendingPathComponent:@"test1.txt"],
-                         [NSURL URLWithString:@"ftp://example.com/%2F/test1.txt"],
-                         nil);
+    XCTAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com/%2F"] URLByAppendingPathComponent:@"test1.txt"],
+                         [NSURL URLWithString:@"ftp://example.com/%2F/test1.txt"]);
     
-    STAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com//"] URLByAppendingPathComponent:@"test1.txt"],
-                         [NSURL URLWithString:@"ftp://example.com//test1.txt"],
-                         nil);
+    XCTAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com//"] URLByAppendingPathComponent:@"test1.txt"],
+                         [NSURL URLWithString:@"ftp://example.com//test1.txt"]);
 }
 
 - (void)testFTPAppendToAbsoluteDirectory;
 {
-    STAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com/%2Ftest/"] URLByAppendingPathComponent:@"test1.txt"],
-                         [NSURL URLWithString:@"ftp://example.com/%2Ftest/test1.txt"],
-                         nil);
+    XCTAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com/%2Ftest/"] URLByAppendingPathComponent:@"test1.txt"],
+                         [NSURL URLWithString:@"ftp://example.com/%2Ftest/test1.txt"]);
     
-    STAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com//test/"] URLByAppendingPathComponent:@"test1.txt"],
-                         [NSURL URLWithString:@"ftp://example.com//test/test1.txt"],
-                         nil);
+    XCTAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com//test/"] URLByAppendingPathComponent:@"test1.txt"],
+                         [NSURL URLWithString:@"ftp://example.com//test/test1.txt"]);
 }
 
 - (void)testFTPAppendToHome;
 {
-    STAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com/"] URLByAppendingPathComponent:@"test1.txt"],
-                         [NSURL URLWithString:@"ftp://example.com/test1.txt"],
-                         nil);
+    XCTAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com/"] URLByAppendingPathComponent:@"test1.txt"],
+                         [NSURL URLWithString:@"ftp://example.com/test1.txt"]);
 }
 
 - (void)testFTPAppendToHomeSubdirectory;
 {
-    STAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com/test/"] URLByAppendingPathComponent:@"test1.txt"],
-                         [NSURL URLWithString:@"ftp://example.com/test/test1.txt"],
-                         nil);
+    XCTAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com/test/"] URLByAppendingPathComponent:@"test1.txt"],
+                         [NSURL URLWithString:@"ftp://example.com/test/test1.txt"]);
 }
 
 - (void)testSFTPAppendToRoot;
 {
-    STAssertEqualObjects([[NSURL URLWithString:@"sftp://example.com/"] URLByAppendingPathComponent:@"test1.txt"],
-                         [NSURL URLWithString:@"sftp://example.com/test1.txt"],
-                         nil);
+    XCTAssertEqualObjects([[NSURL URLWithString:@"sftp://example.com/"] URLByAppendingPathComponent:@"test1.txt"],
+                         [NSURL URLWithString:@"sftp://example.com/test1.txt"]);
 }
 
 - (void)testSFTPAppendToAbsoluteDirectory;
 {
-    STAssertEqualObjects([[NSURL URLWithString:@"sftp://example.com/test/"] URLByAppendingPathComponent:@"test1.txt"],
-                         [NSURL URLWithString:@"sftp://example.com/test/test1.txt"],
-                         nil);
+    XCTAssertEqualObjects([[NSURL URLWithString:@"sftp://example.com/test/"] URLByAppendingPathComponent:@"test1.txt"],
+                         [NSURL URLWithString:@"sftp://example.com/test/test1.txt"]);
 }
 
 - (void)testSFTPAppendToHome;
 {
-    STAssertEqualObjects([[NSURL URLWithString:@"sftp://example.com/~/"] URLByAppendingPathComponent:@"test1.txt"],
-                         [NSURL URLWithString:@"sftp://example.com/~/test1.txt"],
-                         nil);
+    XCTAssertEqualObjects([[NSURL URLWithString:@"sftp://example.com/~/"] URLByAppendingPathComponent:@"test1.txt"],
+                         [NSURL URLWithString:@"sftp://example.com/~/test1.txt"]);
 }
 
 - (void)testSFTPAppendToHomeSubdirectory;
 {
-    STAssertEqualObjects([[NSURL URLWithString:@"sftp://example.com/~/test/"] URLByAppendingPathComponent:@"test1.txt"],
-                         [NSURL URLWithString:@"sftp://example.com/~/test/test1.txt"],
-                         nil);
+    XCTAssertEqualObjects([[NSURL URLWithString:@"sftp://example.com/~/test/"] URLByAppendingPathComponent:@"test1.txt"],
+                         [NSURL URLWithString:@"sftp://example.com/~/test/test1.txt"]);
 }
 
 - (void)testFTPRootIsDirectory;
 {
     BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com/%2F"]);
-    STAssertFalse(isDirectory, nil);
+    XCTAssertFalse(isDirectory);
 }
 
 - (void)testFTPRootWithTrailingSlashIsDirectory;
 {
     BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com/%2F/"]);
-    STAssertTrue(isDirectory, nil);
+    XCTAssertTrue(isDirectory);
 }
 
 - (void)testFTPHomeIsDirectory;
 {
     BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com/"]);
-    STAssertTrue(isDirectory, nil);
+    XCTAssertTrue(isDirectory);
 }
 
 - (void)testFTPHomeWithoutTrailingSlashIsDirectory;
 {
     BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com"]);
-    STAssertFalse(isDirectory, nil);
+    XCTAssertFalse(isDirectory);
 }
 
 - (void)testFTPAbsoluteFileIsDirectory;
 {
     BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com/%2F/test.txt"]);
-    STAssertFalse(isDirectory, nil);
+    XCTAssertFalse(isDirectory);
 }
 
 - (void)testFTPRelativeFileIsDirectory;
 {
     BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com/test.txt"]);
-    STAssertFalse(isDirectory, nil);
+    XCTAssertFalse(isDirectory);
 }
 
 @end

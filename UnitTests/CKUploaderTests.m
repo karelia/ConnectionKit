@@ -8,7 +8,7 @@
 
 #import "CKUploader.h"
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 #import <curl/curl.h>
 
 
@@ -94,22 +94,22 @@
 {
     if (self.failAuthentication)
     {
-        STAssertTrue([self.error.domain isEqualToString:NSURLErrorDomain], @"unexpected error %@", self.error);
-        STAssertTrue(self.error.code == kCFURLErrorUserCancelledAuthentication, @"unexpected error %@", self.error);
-        STAssertTrue(self.finished, @"should be finished");
+        XCTAssertTrue([self.error.domain isEqualToString:NSURLErrorDomain], @"unexpected error %@", self.error);
+        XCTAssertTrue(self.error.code == kCFURLErrorUserCancelledAuthentication, @"unexpected error %@", self.error);
+        XCTAssertTrue(self.finished, @"should be finished");
         if (record)
         {
-            STAssertTrue([record.error.domain isEqualToString:NSURLErrorDomain], @"unexpected error %@", self.error);
-            STAssertTrue(record.error.code == kCFURLErrorUserCancelledAuthentication, @"unexpected error %@", self.error);
+            XCTAssertTrue([record.error.domain isEqualToString:NSURLErrorDomain], @"unexpected error %@", self.error);
+            XCTAssertTrue(record.error.code == kCFURLErrorUserCancelledAuthentication, @"unexpected error %@", self.error);
         }
     }
     else
     {
-        STAssertTrue(self.finished, @"should be finished");
-        STAssertTrue(self.error == nil, @"unexpected error %@", self.error);
-        STAssertNil(record.error, @"unexpected error %@", record.error);
+        XCTAssertTrue(self.finished, @"should be finished");
+        XCTAssertTrue(self.error == nil, @"unexpected error %@", self.error);
+        XCTAssertNil(record.error, @"unexpected error %@", record.error);
     }
-    STAssertTrue(self.uploading == uploading, @"uploading method %@ have been called", uploading ? @"should" : @"shouldn't");
+    XCTAssertTrue(self.uploading == uploading, @"uploading method %@ have been called", uploading ? @"should" : @"shouldn't");
 
 }
 
@@ -125,12 +125,12 @@
         NSString* testData = @"Some test content";
         NSError* error = nil;
         BOOL ok = [testData writeToURL:url atomically:YES encoding:NSUTF8StringEncoding error:&error];
-        STAssertTrue(ok, @"failed to write test file with error %@", error);
+        XCTAssertTrue(ok, @"failed to write test file with error %@", error);
 
         CKTransferRecord *record = [uploader uploadToURL:[CK2FileManager URLWithPath:@"test/test.txt" relativeToURL:uploader.baseRequest.URL]
                                                 fromFile:url];
-        STAssertNotNil(record, @"got a transfer record");
-        STAssertTrue(record.size == [[testData dataUsingEncoding:NSUTF8StringEncoding] length], @"unexpected size %ld", record.size);
+        XCTAssertNotNil(record, @"got a transfer record");
+        XCTAssertTrue(record.size == [[testData dataUsingEncoding:NSUTF8StringEncoding] length], @"unexpected size %ld", record.size);
         [uploader finishOperationsAndInvalidate];
 
         [self runUntilPaused];
@@ -152,8 +152,8 @@
         NSData* testData = [@"Some test content" dataUsingEncoding:NSUTF8StringEncoding];
         CKTransferRecord *record = [uploader uploadToURL:[CK2FileManager URLWithPath:@"test/test.txt" relativeToURL:uploader.baseRequest.URL]
                                                 fromData:testData];
-        STAssertNotNil(record, @"got a transfer record");
-        STAssertTrue(record.size == [testData length], @"unexpected size %ld", record.size);
+        XCTAssertNotNil(record, @"got a transfer record");
+        XCTAssertTrue(record.size == [testData length], @"unexpected size %ld", record.size);
         [uploader finishOperationsAndInvalidate];
 
         [self runUntilPaused];
@@ -196,10 +196,10 @@
         NSData* testData = [@"Some test content" dataUsingEncoding:NSUTF8StringEncoding];
         CKTransferRecord *record = [uploader uploadToURL:[CK2FileManager URLWithPath:@"test/test.txt" relativeToURL:uploader.baseRequest.URL]
                                                 fromData:testData];
-        STAssertNotNil(record, @"got a transfer record");
-        STAssertTrue(record.size == [testData length], @"unexpected size %ld", record.size);
+        XCTAssertNotNil(record, @"got a transfer record");
+        XCTAssertTrue(record.size == [testData length], @"unexpected size %ld", record.size);
         [uploader finishOperationsAndInvalidate];
-        STAssertFalse(self.finished, @"should not be finished");
+        XCTAssertFalse(self.finished, @"should not be finished");
         [uploader invalidateAndCancel];
         [self runUntilPaused];
     }

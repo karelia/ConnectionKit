@@ -12,7 +12,7 @@
 
 #import "CK2Authentication.h"
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 #import <curl/curl.h>
 
 @implementation BaseCKProtocolTests
@@ -23,7 +23,7 @@
     BOOL result;
     if ([self isMemberOfClass:[BaseCKProtocolTests class]])
     {
-        STFail(@"Are you trying to run the tests on BaseCKProtocolTests? They should be run by subclasses.");
+        XCTFail(@"Are you trying to run the tests on BaseCKProtocolTests? They should be run by subclasses.");
         result = NO;
     }
     else
@@ -86,12 +86,12 @@
 
             if (error)
             {
-                STFail(@"got error %@", error);
+                XCTFail(@"got error %@", error);
             }
             else
             {
                 NSUInteger count = [contents count];
-                STAssertTrue(count == 2, @"should have two results, had %ld", count);
+                XCTAssertTrue(count == 2, @"should have two results, had %ld", count);
                 if (count == 2)
                 {
                     [self checkURL:contents[0] isNamed:[[self URLForTestFile1] lastPathComponent]];
@@ -111,7 +111,7 @@
     [self enumerateWithBadURLS:^(NSURL *url) {
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
         [self.manager contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
-            STAssertNotNil(error, @"expected an error");
+            XCTAssertNotNil(error, @"expected an error");
             [self pause];
         }];
         [self runUntilPaused];
@@ -128,8 +128,8 @@
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
         [self.manager contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
-            STAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@", error);
-            STAssertTrue([contents count] == 0, @"shouldn't get content");
+            XCTAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@", error);
+            XCTAssertTrue([contents count] == 0, @"shouldn't get content");
 
             [self pause];
         }];
@@ -162,7 +162,7 @@
         } completionHandler:^(NSError *error) {
             if (error)
             {
-                STFail(@"got error %@", error);
+                XCTFail(@"got error %@", error);
             }
             [self pause];
         }];
@@ -177,7 +177,7 @@
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants|CK2DirectoryEnumerationIncludesDirectory;
         [self.manager enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *item) {
         } completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"expected an error");
+            XCTAssertNotNil(error, @"expected an error");
             [self pause];
         }];
         [self runUntilPaused];
@@ -193,11 +193,11 @@
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants|CK2DirectoryEnumerationIncludesDirectory;
         [self.manager enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *item) {
 
-            STFail(@"shouldn't get any items");
+            XCTFail(@"shouldn't get any items");
 
         } completionHandler:^(NSError *error) {
 
-            STAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@", error);
+            XCTAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@", error);
             [self pause];
 
         }];
@@ -214,7 +214,7 @@
 
         NSURL* url = [self URLForTestFolder];
         [self.manager createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
+            XCTAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];
         }];
@@ -227,7 +227,7 @@
 {
     [self enumerateWithBadURLS:^(NSURL *url) {
         [self.manager createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"expected an error");
+            XCTAssertNotNil(error, @"expected an error");
             [self pause];
         }];
         [self runUntilPaused];
@@ -244,7 +244,7 @@
         NSURL* url = [self URLForTestFolder];
         [self.manager createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             BOOL errorCanBeNil = [self usingProtocol:@"file"]; // the file protocol doesn't report an error in this situation
-            STAssertTrue([self checkIsCreationError:error nilAllowed:errorCanBeNil], @"expected file can't write error, got %@", error);
+            XCTAssertTrue([self checkIsCreationError:error nilAllowed:errorCanBeNil], @"expected file can't write error, got %@", error);
 
             [self pause];
         }];
@@ -261,7 +261,7 @@
         NSURL* url = [self URLForTestFolder];
         [self.manager createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
 
-            STAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@ underlying %@", error, error.userInfo[NSUnderlyingErrorKey]);
+            XCTAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@ underlying %@", error, error.userInfo[NSUnderlyingErrorKey]);
             [self pause];
         }];
 
@@ -278,7 +278,7 @@
         NSURL* url = [self URLForTestFile1];
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
         [self.manager createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
+            XCTAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];
         }];
@@ -292,7 +292,7 @@
     NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
     [self enumerateWithBadURLS:^(NSURL *url) {
         [self.manager createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"expected an error");
+            XCTAssertNotNil(error, @"expected an error");
             [self pause];
         }];
         [self runUntilPaused];
@@ -308,19 +308,19 @@
         NSURL* temp = [NSURL fileURLWithPath:NSTemporaryDirectory()];
         NSURL* source = [temp URLByAppendingPathComponent:@"test.txt"];
         NSError* error = nil;
-        STAssertTrue([@"Some test text" writeToURL:source atomically:YES encoding:NSUTF8StringEncoding error:&error], @"failed to write temporary file with error %@", error);
+        XCTAssertTrue([@"Some test text" writeToURL:source atomically:YES encoding:NSUTF8StringEncoding error:&error], @"failed to write temporary file with error %@", error);
 
         NSURL* url = [self URLForTestFile1];
 
         [self.manager createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
+            XCTAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];
         }];
 
         [self runUntilPaused];
 
-        STAssertTrue([[NSFileManager defaultManager] removeItemAtURL:source error:&error], @"failed to remove temporary file with error %@", error);
+        XCTAssertTrue([[NSFileManager defaultManager] removeItemAtURL:source error:&error], @"failed to remove temporary file with error %@", error);
     }
 }
 
@@ -329,17 +329,17 @@
     NSURL* temp = [NSURL fileURLWithPath:NSTemporaryDirectory()];
     NSURL* source = [temp URLByAppendingPathComponent:@"test.txt"];
     NSError* error = nil;
-    STAssertTrue([@"Some test text" writeToURL:source atomically:YES encoding:NSUTF8StringEncoding error:&error], @"failed to write temporary file with error %@", error);
+    XCTAssertTrue([@"Some test text" writeToURL:source atomically:YES encoding:NSUTF8StringEncoding error:&error], @"failed to write temporary file with error %@", error);
 
     [self enumerateWithBadURLS:^(NSURL *url) {
         [self.manager createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"expected an error");
+            XCTAssertNotNil(error, @"expected an error");
             [self pause];
         }];
         [self runUntilPaused];
     }];
 
-    STAssertTrue([[NSFileManager defaultManager] removeItemAtURL:source error:&error], @"failed to remove temporary file with error %@", error);
+    XCTAssertTrue([[NSFileManager defaultManager] removeItemAtURL:source error:&error], @"failed to remove temporary file with error %@", error);
 }
 
 - (void)testCreateFileAtURLSourceDoesntExist
@@ -350,7 +350,7 @@
         NSURL* url = [self URLForTestFile1];
 
         [self.manager createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"expected an error");
+            XCTAssertNotNil(error, @"expected an error");
 
             [self pause];
         }];
@@ -367,7 +367,7 @@
         NSURL* url = [self URLForTestFile1];
 
         [self.manager createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"expected an error");
+            XCTAssertNotNil(error, @"expected an error");
 
             [self pause];
         }];
@@ -394,7 +394,7 @@
         }
 
         [self.manager createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
+            XCTAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];
         }];
@@ -412,7 +412,7 @@
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
 
         [self.manager createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNotNil(error, nil);
+            XCTAssertNotNil(error);
             // TODO: Test for specific error
 
             [self pause];
@@ -434,7 +434,7 @@
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
 
         [self.manager createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
+            XCTAssertNil(error, @"got unexpected error %@", error);
 
             // Make sure the file went into root, rather than home
             // This could be done by changing directory to /, or storing directly to /test.txt
@@ -462,11 +462,11 @@
                             {
                                 *stop = YES;
                                 haveChangedDirectory = YES;
-                                STAssertTrue([aTranscriptEntry.value isEqualToString:@"CWD /\r\n"], @"libcurl changed to the wrong directory: %@", aTranscriptEntry.value);
+                                XCTAssertTrue([aTranscriptEntry.value isEqualToString:@"CWD /\r\n"], @"libcurl changed to the wrong directory: %@", aTranscriptEntry.value);
                             }
                         }];
 
-                        STAssertTrue(haveChangedDirectory, @"libcurl never changed directory");
+                        XCTAssertTrue(haveChangedDirectory, @"libcurl never changed directory");
                     }
                 }
             }];
@@ -491,19 +491,19 @@
 
         [self.manager createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
 
-            STAssertNil(error, @"got unexpected error %@", error);
+            XCTAssertNil(error, @"got unexpected error %@", error);
 
             [self.manager createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
 
-                STAssertNil(error, @"got unexpected error %@", error);
+                XCTAssertNil(error, @"got unexpected error %@", error);
 
                 [self.manager createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
 
-                    STAssertNil(error, @"got unexpected error %@", error);
+                    XCTAssertNil(error, @"got unexpected error %@", error);
 
                     [self.manager createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
 
-                        STAssertNil(error, @"got unexpected error %@", error);
+                        XCTAssertNil(error, @"got unexpected error %@", error);
                         [self pause];
                     }];
                 }];
@@ -526,18 +526,18 @@
 
         // rename file
         [self.manager renameItemAtURL:url toFilename:newName completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
+            XCTAssertNil(error, @"got unexpected error %@", error);
 
             if (!self.useMockServer)
             {
                 // try to remove original file - if we don't get an error here it's a hint that the move didn't work (although sadly for SFTP we won't get an error currently, so it's not conclusive)
                 [self.manager removeItemAtURL:url completionHandler:^(NSError *error) {
                     BOOL errorCanBeNil = [self usingMockServerWithProtocol:@"sftp"]; // SFTP is a bit crap at reporting errors
-                    STAssertTrue([self checkIsRemovalError:error nilAllowed:errorCanBeNil], @"expected removal error, got %@", error);
+                    XCTAssertTrue([self checkIsRemovalError:error nilAllowed:errorCanBeNil], @"expected removal error, got %@", error);
 
                     // try to remove renamed file - again, if we get an error here it's a big hint that the move didn't work
                     [self.manager removeItemAtURL:renamed completionHandler:^(NSError *error) {
-                        STAssertNil(error, @"got unexpected error %@", error);
+                        XCTAssertNil(error, @"got unexpected error %@", error);
                         [self pause];
                     }];
                 }];
@@ -559,7 +559,7 @@
         [self makeTestDirectoryWithFiles:YES];
         NSURL* url = [self URLForTestFile1];
         [self.manager removeItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
+            XCTAssertNil(error, @"got unexpected error %@", error);
             [self pause];
         }];
         
@@ -571,7 +571,7 @@
 {
     [self enumerateWithBadURLS:^(NSURL *url) {
         [self.manager removeItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"expected an error");
+            XCTAssertNotNil(error, @"expected an error");
             [self pause];
         }];
         [self runUntilPaused];
@@ -588,7 +588,7 @@
         [self.manager removeItemAtURL:url completionHandler:^(NSError *error) {
 
             BOOL errorCanBeNil = [self usingProtocol:@"sftp"]; // SFTP is a bit crap at reporting errors
-            STAssertTrue([self checkIsRemovalError:error nilAllowed:errorCanBeNil], @"expected removal error, got %@", error);
+            XCTAssertTrue([self checkIsRemovalError:error nilAllowed:errorCanBeNil], @"expected removal error, got %@", error);
 
             [self pause];
         }];
@@ -607,7 +607,7 @@
         NSURL* url = [self URLForTestFile1];
         [self.manager removeItemAtURL:url completionHandler:^(NSError *error) {
             BOOL errorCanBeNil = [self usingMockServerWithProtocol:@"sftp"]; // SFTP is a bit crap at reporting errors
-            STAssertTrue([self checkIsRemovalError:error nilAllowed:errorCanBeNil], @"expected removal error, got %@", error);
+            XCTAssertTrue([self checkIsRemovalError:error nilAllowed:errorCanBeNil], @"expected removal error, got %@", error);
 
             [self pause];
         }];
@@ -625,7 +625,7 @@
         NSURL* url = [self URLForTestFile1];
         [self.manager removeItemAtURL:url completionHandler:^(NSError *error) {
 
-            STAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@", error);
+            XCTAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@", error);
             [self pause];
         }];
 
@@ -641,7 +641,7 @@
         NSURL* url = [self URLForTestFile1];
         NSDictionary* values = @{ @"test" : @"test" };
         [self.manager setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
+            XCTAssertNil(error, @"got unexpected error %@", error);
             [self pause];
         }];
 
@@ -657,7 +657,7 @@
         NSURL* url = [self URLForTestFile1];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.manager setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
+            XCTAssertNil(error, @"got unexpected error %@", error);
             [self pause];
         }];
 
@@ -670,7 +670,7 @@
     NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
     [self enumerateWithBadURLS:^(NSURL *url) {
         [self.manager setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"expected an error");
+            XCTAssertNotNil(error, @"expected an error");
             [self pause];
         }];
         [self runUntilPaused];
@@ -685,7 +685,7 @@
         NSURL* url = [self URLForTestFolder];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0777)};
         [self.manager setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
+            XCTAssertNil(error, @"got unexpected error %@", error);
             [self pause];
         }];
 
@@ -703,7 +703,7 @@
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.manager setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             BOOL errorCanBeNil = [self usingMockServerWithProtocol:@"webdav"]; // no errors because it's not supported in WebDAV
-            STAssertTrue([self checkIsUpdateError:error nilAllowed:errorCanBeNil], @"expected file can't write error, got %@", error);
+            XCTAssertTrue([self checkIsUpdateError:error nilAllowed:errorCanBeNil], @"expected file can't write error, got %@", error);
             [self pause];
         }];
 
@@ -721,7 +721,7 @@
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.manager setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             BOOL errorCanBeNil = [self usingMockServerWithProtocol:@"webdav"]; // no errors because it's not supported in WebDAV
-            STAssertTrue([self checkIsUpdateError:error nilAllowed:errorCanBeNil], @"expected file can't write error, got %@", error);
+            XCTAssertTrue([self checkIsUpdateError:error nilAllowed:errorCanBeNil], @"expected file can't write error, got %@", error);
             [self pause];
         }];
 
@@ -738,7 +738,7 @@
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.manager setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             // For servers which don't understand or support CHMOD, treat as success, like -[NSURL setResourceValue:forKey:error:] does
-            STAssertNil(error, @"got unexpected error %@", error);
+            XCTAssertNil(error, @"got unexpected error %@", error);
             [self pause];
         }];
 
@@ -755,7 +755,7 @@
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.manager setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             // For servers which don't understand or support CHMOD, treat as success, like -[NSURL setResourceValue:forKey:error:] does
-            STAssertNil(error, @"got unexpected error %@", error);
+            XCTAssertNil(error, @"got unexpected error %@", error);
             [self pause];
         }];
 
@@ -775,16 +775,16 @@
             if ([domain isEqualToString:NSURLErrorDomain])
             {
                 // get NSURLErrorNoPermissionsToReadFile if the path doesn't exist or isn't readable on the server
-                STAssertTrue(error.code == NSURLErrorNoPermissionsToReadFile, @"unexpected error %@", error);
+                XCTAssertTrue(error.code == NSURLErrorNoPermissionsToReadFile, @"unexpected error %@", error);
             }
             else if ([domain isEqualToString:NSCocoaErrorDomain])
             {
-                STAssertTrue((error.code == NSFileWriteUnknownError || // FTP has no hard way to know it was a permissions error
+                XCTAssertTrue((error.code == NSFileWriteUnknownError || // FTP has no hard way to know it was a permissions error
                               error.code == NSFileWriteNoPermissionError), @"unexpected error %@", error);
             }
             else
             {
-                STFail(@"unexpected error %@", error);
+                XCTFail(@"unexpected error %@", error);
             }
 
             [self pause];
@@ -804,13 +804,13 @@
         NSURL* url = [self URLForTestFolder];
         [self.manager createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             
-            STAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@", error);
+            XCTAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@", error);
             
             self.user = self.originalUser;
             [self useResponseSet:@"default"];
             
             [self.manager createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-                STAssertNil(error, @"got unexpected error %@", error);
+                XCTAssertNil(error, @"got unexpected error %@", error);
                 
                 [self pause];
             }];

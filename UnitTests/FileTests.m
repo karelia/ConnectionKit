@@ -34,19 +34,19 @@
 
     NSURL* testFile = [tempFolder URLByAppendingPathComponent:@"test.txt"];
     ok = [@"Some test text" writeToURL:testFile atomically:YES encoding:NSUTF8StringEncoding error:&error];
-    STAssertTrue(ok, @"couldn't make test file: %@", error);
+    XCTAssertTrue(ok, @"couldn't make test file: %@", error);
 
     if (ok)
     {
         ok = [fm createDirectoryAtURL:testSubfolder withIntermediateDirectories:YES attributes:nil error:&error];
-        STAssertTrue(ok, @"couldn't make test subdirectory: %@", error);
+        XCTAssertTrue(ok, @"couldn't make test subdirectory: %@", error);
     }
 
     if (ok)
     {
         NSURL* otherFile = [testSubfolder URLByAppendingPathComponent:@"another.txt"];
         ok = [@"Some more text" writeToURL:otherFile atomically:YES encoding:NSUTF8StringEncoding error:&error];
-        STAssertTrue(ok, @"couldn't make other test file: %@", error);
+        XCTAssertTrue(ok, @"couldn't make other test file: %@", error);
     }
 
     if (!ok)
@@ -68,15 +68,15 @@
 
         // try to make subdirectory in /System - this really ought to fail
         [self.manager createDirectoryAtURL:url withIntermediateDirectories:NO openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"expected an error here");
-            STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
-            STAssertEquals([error code], (NSInteger) NSFileWriteNoPermissionError, @"unexpected error code %ld", [error code]);
+            XCTAssertNotNil(error, @"expected an error here");
+            XCTAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
+            XCTAssertEqual([error code], (NSInteger) NSFileWriteNoPermissionError, @"unexpected error code %ld", [error code]);
 
             [self pause];
         }];
 
         [self runUntilPaused];
-        STAssertFalse([fm fileExistsAtPath:[url path]], @"directory shouldn't exist");
+        XCTAssertFalse([fm fileExistsAtPath:[url path]], @"directory shouldn't exist");
     }
 }
 
@@ -90,9 +90,9 @@
         // try to make file - should fail because we don't have permission
         NSURL* url = [NSURL fileURLWithPath:@"/System/test.txt"];
         [self.manager createFileAtURL:url contents:data withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"expected an error here");
-            STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
-            STAssertEquals([error code], (NSInteger) NSFileWriteNoPermissionError, @"unexpected error code %ld", [error code]);
+            XCTAssertNotNil(error, @"expected an error here");
+            XCTAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
+            XCTAssertEqual([error code], (NSInteger) NSFileWriteNoPermissionError, @"unexpected error code %ld", [error code]);
 
             [self pause];
         }];
@@ -102,9 +102,9 @@
         // try again, should fail again, but this time because we can't make the intermediate directory
         url = [NSURL fileURLWithPath:@"/System/Test Directory/test.txt"];
         [self.manager createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"expected an error here");
-            STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
-            STAssertEquals([error code], (NSInteger) NSFileWriteNoPermissionError, @"unexpected error code %ld", [error code]);
+            XCTAssertNotNil(error, @"expected an error here");
+            XCTAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
+            XCTAssertEqual([error code], (NSInteger) NSFileWriteNoPermissionError, @"unexpected error code %ld", [error code]);
 
             [self pause];
         }];
@@ -135,7 +135,7 @@
             STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
 #else
-            STAssertNil(error, @"got unexpected error %@", error);
+            XCTAssertNil(error, @"got unexpected error %@", error);
 #endif
             [self pause];
         }];

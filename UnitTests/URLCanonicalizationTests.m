@@ -6,11 +6,11 @@
 //
 //
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 
 #import "CK2CURLBasedProtocol.h"
 
-@interface URLCanonicalizationTests : SenTestCase
+@interface URLCanonicalizationTests : XCTestCase
 @end
 
 
@@ -20,23 +20,23 @@
 {    
     // Test first with no user set. e.g. anonymous login
     NSURL *url = [CK2CURLBasedProtocol URLByReplacingUserInfoInURL:[NSURL URLWithString:@"ftp://example.com/image.png"] withUser:nil];
-    STAssertEqualObjects(url.absoluteString, @"ftp://example.com/image.png", nil);
+    XCTAssertEqualObjects(url.absoluteString, @"ftp://example.com/image.png");
     
     // Adding user into the URL
     url = [CK2CURLBasedProtocol URLByReplacingUserInfoInURL:[NSURL URLWithString:@"ftp://example.com/image.png"] withUser:@"user"];
-    STAssertEqualObjects(url.absoluteString, @"ftp://user@example.com/image.png", nil);
+    XCTAssertEqualObjects(url.absoluteString, @"ftp://user@example.com/image.png");
     
     // Replacing existing user
     url = [CK2CURLBasedProtocol URLByReplacingUserInfoInURL:[NSURL URLWithString:@"ftp://test@example.com/image.png"] withUser:@"user"];
-    STAssertEqualObjects(url.absoluteString, @"ftp://user@example.com/image.png", nil);
+    XCTAssertEqualObjects(url.absoluteString, @"ftp://user@example.com/image.png");
     
     // Replacing existing user + password
     url = [CK2CURLBasedProtocol URLByReplacingUserInfoInURL:[NSURL URLWithString:@"ftp://test:sekret@example.com/image.png"] withUser:@"user"];
-    STAssertEqualObjects(url.absoluteString, @"ftp://user@example.com/image.png", nil);
+    XCTAssertEqualObjects(url.absoluteString, @"ftp://user@example.com/image.png");
     
     // Escaping of unusual characters
     url = [CK2CURLBasedProtocol URLByReplacingUserInfoInURL:[NSURL URLWithString:@"ftp://example.com/image.png"] withUser:@"user/:1@example.com"];
-    STAssertEqualObjects(url.absoluteString, @"ftp://user%2F%3A1%40example.com@example.com/image.png", nil);
+    XCTAssertEqualObjects(url.absoluteString, @"ftp://user%2F%3A1%40example.com@example.com/image.png");
 }
 
 @end
