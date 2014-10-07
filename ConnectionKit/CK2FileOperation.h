@@ -8,6 +8,8 @@
 
 #import "CK2FileManager.h"
 
+@class CK2Protocol;
+
 
 typedef NS_ENUM(NSInteger, CK2FileOperationState) {
     CK2FileOperationStateRunning = 0,                     /* The operation is currently being serviced by the file manager */
@@ -17,7 +19,6 @@ typedef NS_ENUM(NSInteger, CK2FileOperationState) {
 };
 
 
-@class CK2Protocol;
 @interface CK2FileOperation : NSObject <NSCopying>  // retains self when copying
 {
   @private
