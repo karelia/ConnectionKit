@@ -166,6 +166,10 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  
  WebDAV:
  Some servers out there choose to treat `createIntermediates` as if it's always YES.
+ When asking to create intermediate directories, most WebDAV servers will require uploading the
+ entire file data before finding out if directories actually do need to be created. For a large file,
+ that could be quite a waste of time and bandwidth. In some applications it may be better to create
+ the intermediate directories first, regardless of need, and then try the upload.
  
  @param url A URL that specifies the file to create. This parameter must not be nil.
  @param data A data object containing the contents of the new file.
@@ -214,6 +218,10 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  
  WebDAV:
  Some servers out there choose to treat `createIntermediates` as if it's always YES.
+ When asking to create intermediate directories, most WebDAV servers will require uploading the
+ entire file data before finding out if directories actually do need to be created. For a large file,
+ that could be quite a waste of time and bandwidth. In some applications it may be better to create
+ the intermediate directories first, regardless of need, and then try the upload.
  
  @param destinationURL A URL that specifies the file to create. This parameter must not be nil.
  @param sourceURL The file whose contents to use for creating the new file.
