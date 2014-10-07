@@ -109,6 +109,9 @@
 - (NSError*)standardAuthenticationErrorWithUnderlyingError:(NSError*)error;
 
 /**
+ Replaces the user info portion of `aURL` (i.e. the username and password) with a single desired
+ username.
+ 
  Handy for subclasses to make sure the URLs they vend out refer to the correct user.
  */
 + (NSURL *)URLByReplacingUserInfoInURL:(NSURL *)aURL withUser:(NSString *)nsUser;
