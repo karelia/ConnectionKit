@@ -156,14 +156,20 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  If you particularly care about setting attributes on a remote server, then a
  follow-up call to -setAttributes:… is needed.
  
- Note: Even though this is a "write" operation, it is still possible to get back
- something like `NSFileReadUnknownError`. In particular, FTP must traverse the
- directory hierarchy which can fail if the target directory turns out not to
- exist, or the user has insufficient permissions to access it.
+ Protocol Quirks To Be Aware Of:
+ 
+ FTP:
+ Even though this is a "write" operation, it is still possible to get back `NSFileReadUnknownError`.
+ FTP clients must traverse the directory hierarchy which can fail if the target directory turns out
+ not to exist (and you haven't asked to create it), or the user has insufficient permissions to
+ access it.
+ 
+ WebDAV:
+ Some servers out there choose to treat `createIntermediates` as if it's always YES.
  
  @param url A URL that specifies the file to create. This parameter must not be nil.
  @param data A data object containing the contents of the new file.
- @param createIntermediates If YES, this method creates any non-existent parent directories as part of creating the file in url. If NO, this method fails if any of the intermediate parent directories does not exist.
+ @param createIntermediates If YES, this method creates any non-existent parent directories as part of creating the file in url. If NO, this method should fail if any of the intermediate parent directories does not exist (see WebDAV caveat above).
  @param attributes to apply *only* if the server supports supplying them at creation time. See discussion for more details.
  @param progressBlock Called as each "chunk" of the file is written. In some cases, uploads have to be restarted from the beginning; the previousAttemptCount argument tells you how many times that has happened so far
  @param handler Called at the end of the operation. A non-nil error indicates failure.
@@ -200,14 +206,18 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  It's up to the individual protocol implementation, but generally ConnectionKit
  will avoid loading the entire source file into memory at once.
  
- Note: Even though this is a "write" operation, it is still possible to get back
- something like `NSFileReadUnknownError`. In particular, FTP must traverse the
- directory hierarchy which can fail if the target directory turns out not to
- exist, or the user has insufficient permissions to access it.
+ FTP:
+ Even though this is a "write" operation, it is still possible to get back `NSFileReadUnknownError`.
+ FTP clients must traverse the directory hierarchy which can fail if the target directory turns out
+ not to exist (and you haven't asked to create it), or the user has insufficient permissions to
+ access it.
+ 
+ WebDAV:
+ Some servers out there choose to treat `createIntermediates` as if it's always YES.
  
  @param destinationURL A URL that specifies the file to create. This parameter must not be nil.
  @param sourceURL The file whose contents to use for creating the new file.
- @param createIntermediates If YES, this method creates any non-existent parent directories as part of creating the file in url. If NO, this method fails if any of the intermediate parent directories does not exist.
+ @param createIntermediates If YES, this method creates any non-existent parent directories as part of creating the file in url. If NO, this method should fail if any of the intermediate parent directories does not exist (see WebDAV caveat above).
  @param attributes to apply *only* if the server supports supplying them at creation time. See discussion for more details.
  @param progressBlock Called as each "chunk" of the file is written. In some cases, uploads have to be restarted from the beginning; the previousAttemptCount argument tells you how many times that has happened so far
  @param handler Called at the end of the operation. A non-nil error indicates failure.
