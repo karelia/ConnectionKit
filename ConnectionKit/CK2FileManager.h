@@ -80,6 +80,10 @@ typedef NS_OPTIONS(NSInteger, CK2DirectoryEnumerationOptions) {
  The order of the files in the returned array generally follows that returned by the server, which is likely undefined.
  
  Paths are standardized if possible (i.e. case is corrected if needed, and relative paths resolved).
+ Any user info you pass in as part of `url` (username or password) will be included back in returned
+ URLs. Note that if you use the authentication callback to specify a user different to the one in
+ `url`, the results you get back won't reflect that change in user; it becomes your responsibility
+ to adjust the resultant URLs if your app needs it.
  
  Many protocols provide a decent error code indicating *why* the operation
  failed. Unfortunately, FTP cannot. The FTP spec means the only machine-readable

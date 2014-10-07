@@ -335,7 +335,7 @@
         else
         {
             // Correct relative paths if we can
-            NSURL *directoryURL = [self.class URLByReplacingUserInfoInURL:request.URL withUser:_user];
+            NSURL *directoryURL = request.URL;
             NSString *directoryPath = [self.class pathOfURLRelativeToHomeDirectory:directoryURL];
 
             NSURL *home = [self.class homeDirectoryURLForServerAtURL:directoryURL];
