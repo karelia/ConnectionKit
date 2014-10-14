@@ -51,7 +51,6 @@
     [_errorHandler release];
     [_queue release];
     [_session release];
-    [_user release];
 
     [super dealloc];
 }
@@ -97,7 +96,6 @@
 
                     NSURL* url = [[davRequest concatenatedURLWithPath:[item href]] absoluteURL];
                     NSAssert(url, @"-concatenatedURLWithPath: returned nil URL. Shouldn't happen unless davRequest has no URL, and that shouldn't ever happen!");
-                    url = [self.class URLByReplacingUserInfoInURL:url withUser:_user];
                     
                     [CK2FileManager setTemporaryResourceValue:[item modificationDate] forKey:NSURLContentModificationDateKey inURL:url];
                     [CK2FileManager setTemporaryResourceValue:[item creationDate] forKey:NSURLCreationDateKey inURL:url];
@@ -391,15 +389,6 @@
     CK2WebDAVLog(@"webdav received challenge");
     
     [self.client protocol:self didReceiveChallenge:challenge completionHandler:^(CK2AuthChallengeDisposition disposition, NSURLCredential *credential) {
-        
-        if (disposition == CK2AuthChallengeUseCredential)
-        {
-            NSString *user = credential.user;
-            if (user)
-            {
-                [_user release]; _user = [user copy];
-            }
-        }
         
         completionHandler(disposition, credential);
     }];
