@@ -430,6 +430,10 @@
                     
                     if (error.code == NSURLErrorUserAuthenticationRequired && [error.domain isEqualToString:NSURLErrorDomain])
                     {
+                        [self.client protocol:self
+                                 appendString:[NSString stringWithFormat:@"Authentication failed for user %@", credential.user]
+                                 toTranscript:CK2TranscriptText];
+                        
                         // Retry auth
                         NSURLAuthenticationChallenge *newChallenge = [[NSURLAuthenticationChallenge alloc]
                                                                       initWithProtectionSpace:challenge.protectionSpace
