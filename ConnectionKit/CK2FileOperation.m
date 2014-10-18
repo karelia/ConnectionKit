@@ -327,14 +327,18 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     CK2FileManager *manager = self.fileManager;
     NSAssert(manager, @"%@ disconnected from its manager too early", self.class);
-    id <CK2FileManagerDelegate> delegate = manager.delegate;
     
-    if (!selector || [delegate respondsToSelector:selector])    // will crash if delegate is a zombie, as in https://rink.hockeyapp.net/manage/apps/101581/crash_reasons/21102964/multiple
-    {
-        [manager.delegateQueue addOperationWithBlock:^{
-            block(manager.delegate);    // I have a suspicion delegate is occasionally a zombie otherwise https://karelia.fogbugz.com/f/cases/236528
-        }];
-    }
+    // Clients could change the delegate at any time. If we trust them to do so in concert with the
+    // delegate queue, then that can be made reasonably safe by only accessing the delegate from
+    // within the queue.
+    // It's still inherently a bit dangerous though, as the client could change it on a different
+    // queue, or could have specified a non-serial delegate queue.
+    [manager.delegateQueue addOperationWithBlock:^{
+        id <CK2FileManagerDelegate> delegate = manager.delegate;
+        if (!selector || [delegate respondsToSelector:selector]) {
+            block(delegate);
+        }
+    }];
 }
 
 #pragma mark URL & Requests
