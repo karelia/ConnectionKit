@@ -318,6 +318,10 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 + (NSURL *)URLWithPath:(NSString *)path isDirectory:(BOOL)isDir hostURL:(NSURL *)baseURL;
 {
+    NSParameterAssert(path);
+    NSParameterAssert(baseURL);
+    
+    
     // Make a directory if demanded
     if (isDir && ![path hasSuffix:@"/"] && path.length)
     {
