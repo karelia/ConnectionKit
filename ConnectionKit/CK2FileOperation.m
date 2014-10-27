@@ -14,7 +14,6 @@
 
 @interface CK2FileOperation () <CK2ProtocolClient>
 @property(readonly) CK2FileManager *fileManager;    // goes to nil once finished/failed
-@property(readonly) NSURL *originalURL;
 @property (readwrite) int64_t countOfBytesWritten;
 @property (readwrite) int64_t countOfBytesExpectedToWrite;
 @property(readwrite) CK2FileOperationState state;

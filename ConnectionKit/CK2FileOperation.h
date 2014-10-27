@@ -46,6 +46,21 @@ typedef NS_ENUM(NSInteger, CK2FileOperationState) {
 }
 
 /**
+ @return a deep copy of the original connection request.
+ 
+ You can think of this as the "primary" URL for a given operation. Normally this is fairly obvious:
+ if uploading, it's the URL being uploaded to. When we come to support downloads, it's the URL being
+ downloaded from.
+ 
+ This can potentially get a bit tricky doing something like renaming/moving a file; in which case,
+ this URL will be that of the _source_ file.
+ 
+ ConnectionKit doesn't currently support redirects, but were it to, this URL would remain constant
+ and we'd likely introduce a new `currentURL` property for retrieving the redirected URL if need be.
+ */
+@property (readonly, copy) NSURL *originalURL;
+
+/**
  * Number of body bytes already written.
  *
  * Excludes any headers, such as in HTTP messages, or FTP control connection.
