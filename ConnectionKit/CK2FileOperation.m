@@ -55,7 +55,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     {
         _state = CK2FileOperationStateSuspended;
         _manager = [manager retain];
-        _URL = [url copy];
+        _originalURL = [url copy];
         _descriptionForErrors = [errorDescription copy];
         
         if (!completionBlock)
@@ -306,7 +306,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     //[_protocol release];  DON'T release protocol. It should be a weak reference by the time deallocation happens
     [_manager release];
-    [_URL release];
+    [_originalURL release];
     if (_queue) dispatch_release(_queue);
     [_completionBlock release];
     [_enumerationBlock release];
@@ -342,7 +342,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 #pragma mark URL & Requests
 
-@synthesize originalURL = _URL;
+@synthesize originalURL = _originalURL;
 
 - (NSURLRequest *)requestWithURL:(NSURL *)url;
 {

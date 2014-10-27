@@ -26,7 +26,7 @@ typedef NS_ENUM(NSInteger, CK2FileOperationState) {
 {
   @private
     CK2FileManager  *_manager;
-    NSURL           *_URL;
+    NSURL           *_originalURL;
     NSString        *_descriptionForErrors;
     dispatch_queue_t    _queue;
     
