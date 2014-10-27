@@ -13,11 +13,6 @@
 #import <CURLHandle/CURLHandle.h>
 
 
-@interface CK2FileOperation (SecretsIKnow)
-- (NSURL *)originalURL;
-@end
-
-
 @implementation CKUploader
 
 #pragma mark Lifecycle
