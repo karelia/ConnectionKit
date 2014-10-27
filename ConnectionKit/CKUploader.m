@@ -120,7 +120,7 @@
                                                   openingAttributes:attributes
                                                   completionHandler:NULL];
     
-    return [self uploadToURL:url attributes:attributes usingOperation:op];
+    return [self uploadUsingOperation:op attributes:attributes];
 }
 
 - (CKTransferRecord *)uploadToURL:(NSURL *)url fromFile:(NSURL *)fileURL;
@@ -139,23 +139,23 @@
                                                   openingAttributes:attributes
                                                   completionHandler:NULL];
     
-    return [self uploadToURL:url attributes:attributes usingOperation:op];
+    return [self uploadUsingOperation:op attributes:attributes];
 }
 
 static void *sOperationStateObservationContext = &sOperationStateObservationContext;
 
-- (CKTransferRecord *)uploadToURL:(NSURL *)url attributes:(NSDictionary *)attributes usingOperation:(CK2FileOperation *)operation;
+- (CKTransferRecord *)uploadUsingOperation:(CK2FileOperation *)operation attributes:(NSDictionary *)attributes;
 {
     NSParameterAssert(operation);
     
     // Create transfer record
-    CKTransferRecord *result = [self makeTransferRecordWithURL:url operation:operation];
+    CKTransferRecord *result = [self makeTransferRecordForOperation:operation];
     
     
     // Delete first if requested
     if (_options & CKUploadingDeleteExistingFileFirst)
 	{
-        [self removeItemAtURL:url
+        [self removeItemAtURL:operation.originalURL
                transferRecord:nil // don't want failure to be reported
             completionHandler:NULL];
 	}
@@ -171,7 +171,7 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
     
     // Set permissions after if requested
     if (self.options & CKUploadingSetFilePermissionsAfterWriting) {
-        CK2FileOperation *op = [_fileManager setAttributesOperationWithURL:url
+        CK2FileOperation *op = [_fileManager setAttributesOperationWithURL:operation.originalURL
                                                                 attributes:attributes
                                                          completionHandler:NULL];   // nothing really to do; don't care if fails
         
@@ -299,8 +299,9 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
 
 #pragma mark Transfer Records
 
-- (CKTransferRecord *)makeTransferRecordWithURL:(NSURL *)url operation:(CK2FileOperation *)operation;
+- (CKTransferRecord *)makeTransferRecordForOperation:(CK2FileOperation *)operation;
 {
+    NSURL *url = operation.originalURL;
     NSString *path = [CK2FileManager pathOfURL:url];
     
     CKTransferRecord *result = [CKTransferRecord recordWithName:path.lastPathComponent
