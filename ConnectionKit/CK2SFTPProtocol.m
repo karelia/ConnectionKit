@@ -70,7 +70,7 @@
 
     NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
 
-    NSString* command = [@"mkdir " stringByAppendingString:path];
+    NSString* command = [@"mkdir " stringByAppendingFormat:@"\"%@\"",path];
     self = [self initWithCustomCommands:[NSArray arrayWithObject:command]
                                 request:mutableRequest
           createIntermediateDirectories:createIntermediates
