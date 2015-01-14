@@ -79,7 +79,7 @@
     path = [path stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""];
     NSString* command = [@"mkdir " stringByAppendingFormat:@"\"%@\"",path];
     
-    self = [self initWithCustomCommands:[NSArray arrayWithObject:command]
+    self = [self initWithCustomCommands:@[command]
                                 request:mutableRequest
           createIntermediateDirectories:createIntermediates
                                  client:client
