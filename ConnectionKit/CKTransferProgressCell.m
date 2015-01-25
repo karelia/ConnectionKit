@@ -115,11 +115,13 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, CGFloat toMaxDimension);
 									 NSMidY(imageRect) - (s.height / 2),
 									 s.width,
 									 s.height);
-		[sErrorImage setFlipped:[controlView isFlipped]];
-		[sErrorImage drawInRect:centered
+
+        [sErrorImage drawInRect:centered
 					   fromRect:NSZeroRect
 					  operation:NSCompositeSourceOver
-					   fraction:1.0];
+					   fraction:1.0
+                 respectFlipped:YES
+                          hints:nil];
 	}
 	else if (myProgress >= 0 && !_finished)
 	{
@@ -181,11 +183,13 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, CGFloat toMaxDimension);
 									 NSMidY(imageRect) - (s.height / 2),
 									 s.width,
 									 s.height);
-		[sFinishedImage setFlipped:[controlView isFlipped]];
+        
 		[sFinishedImage drawInRect:centered
 						  fromRect:NSZeroRect
 						 operation:NSCompositeSourceOver
-						  fraction:1.0];
+						  fraction:1.0
+                    respectFlipped:YES
+                             hints:nil];
 	}
 }
 
