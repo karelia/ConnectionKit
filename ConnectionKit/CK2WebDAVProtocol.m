@@ -90,11 +90,12 @@
             
             for (DAVResponseItem* item in items)
             {
-                NSString *name = [[item href] lastPathComponent];
+                NSString *href = item.href;
+                NSString *name = [href lastPathComponent];
                 if (!((mask & NSDirectoryEnumerationSkipsHiddenFiles) && [name hasPrefix:@"."]))
                 {
 
-                    NSURL* url = [[davRequest concatenatedURLWithPath:[item href]] absoluteURL];
+                    NSURL* url = [[davRequest concatenatedURLWithPath:href] absoluteURL];
                     NSAssert(url, @"-concatenatedURLWithPath: returned nil URL. Shouldn't happen unless davRequest has no URL, and that shouldn't ever happen!");
                     
                     [CK2FileManager setTemporaryResourceValue:[item modificationDate] forKey:NSURLContentModificationDateKey inURL:url];
