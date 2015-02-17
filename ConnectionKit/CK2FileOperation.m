@@ -138,7 +138,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                          progressBlock:(CK2ProgressBlock)progressBlock
                        completionBlock:(void (^)(NSError *))block;
 {
-    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be uploaded.", "error descrption"),
+    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be uploaded.", "error description"),
                              url.lastPathComponent];
     
     self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
