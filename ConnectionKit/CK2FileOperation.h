@@ -41,6 +41,9 @@ typedef NS_ENUM(NSInteger, CK2FileOperationState) {
     int64_t _bytesExpectedToWrite;
     CK2ProgressBlock    _progressBlock;
     
+    // Temporary hack which gets us to fire off extra directory creating requests should the main op fail
+    BOOL    _createIntermediateDirectories;
+    
     CK2FileOperationState   _state;
     NSError                 *_error;
 }

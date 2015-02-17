@@ -128,6 +128,11 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                                         openingAttributes:attributes
                                                                    client:self];
     }];
+    
+    // Special case SFTP for now.
+    if ([url.scheme caseInsensitiveCompare:@"sftp"] == NSOrderedSame) {
+        _createIntermediateDirectories = createIntermediates;
+    }
 }
 
 - (id)initFileCreationOperationWithURL:(NSURL *)url
@@ -158,6 +163,11 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     _bytesExpectedToWrite = data.length;
     _progressBlock = [progressBlock copy];
+    
+    // Special case SFTP for now.
+    if ([url.scheme caseInsensitiveCompare:@"sftp"] == NSOrderedSame) {
+        _createIntermediateDirectories = createIntermediates;
+    }
 
     return self;
 }
@@ -225,6 +235,11 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     _bytesExpectedToWrite = fileSize.longLongValue;
     _progressBlock = [progressBlock copy];
+    
+    // Special case SFTP for now.
+    if ([url.scheme caseInsensitiveCompare:@"sftp"] == NSOrderedSame) {
+        _createIntermediateDirectories = createIntermediates;
+    }
     
     return self;
 }
@@ -443,6 +458,32 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     // Errors should start with our description
     if (error)
     {
+        if (_createIntermediateDirectories) {
+            NSString *path = [CK2FileManager pathOfURL:_URL];
+            if (path.length && ![path isEqualToString:@"/"]) {
+                
+                NSURL *directoryURL = [_URL URLByDeletingLastPathComponent];
+                _createIntermediateDirectories = NO;    // avoid doing this again
+                
+                [self.fileManager createDirectoryAtURL:directoryURL
+                           withIntermediateDirectories:YES
+                                     openingAttributes:nil  // probably ought to provide something better, but I'm being lazy
+                                     completionHandler:^(NSError *directoryError) {
+                                         
+                                         // If creating directory also fails, give up. Otherwise let's try again!
+                                         if (directoryError) {
+                                             [self protocol:protocol didCompleteWithError:error];
+                                         }
+                                         else {
+                                             [_protocol release]; _protocol = nil;
+                                             [self createProtocolAndStart];
+                                         }
+                                     }];
+                
+                return;
+            }
+        }
+        
         if (_descriptionForErrors)
         {
             NSMutableDictionary *info = [error.userInfo mutableCopy];
