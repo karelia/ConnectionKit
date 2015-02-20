@@ -127,6 +127,11 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                                         openingAttributes:attributes
                                                                    client:self];
     }];
+    
+    // Special case SFTP for now.
+    if ([url.scheme caseInsensitiveCompare:@"sftp"] == NSOrderedSame) {
+        _createIntermediateDirectories = createIntermediates;
+    }
 }
 
 - (id)initFileCreationOperationWithURL:(NSURL *)url
@@ -137,7 +142,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                          progressBlock:(CK2ProgressBlock)progressBlock
                        completionBlock:(void (^)(NSError *))block;
 {
-    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be uploaded.", "error descrption"),
+    NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be uploaded.", "error description"),
                              url.lastPathComponent];
     
     self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
@@ -157,6 +162,11 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     _bytesExpectedToWrite = data.length;
     _progressBlock = [progressBlock copy];
+    
+    // Special case SFTP for now.
+    if ([url.scheme caseInsensitiveCompare:@"sftp"] == NSOrderedSame) {
+        _createIntermediateDirectories = createIntermediates;
+    }
 
     return self;
 }
@@ -224,6 +234,11 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     _bytesExpectedToWrite = fileSize.longLongValue;
     _progressBlock = [progressBlock copy];
+    
+    // Special case SFTP for now.
+    if ([url.scheme caseInsensitiveCompare:@"sftp"] == NSOrderedSame) {
+        _createIntermediateDirectories = createIntermediates;
+    }
     
     return self;
 }
@@ -384,44 +399,53 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     if (self.state == CK2FileOperationStateSuspended)
     {
         self.state = CK2FileOperationStateRunning;
-        NSURL *url = self.originalURL;
-        
-        [CK2Protocol classForURL:url completionHandler:^(Class protocolClass) {
-            
-            if (protocolClass)
-            {
-                // Bounce over to operation's own queue for kicking off the real work
-                // Keep an eye out for early opportunity to bail out if get cancelled
-                dispatch_async(_queue, ^{
-                    
-                    if (self.state == CK2FileOperationStateRunning)
-                    {
-                        _protocol = _createProtocolBlock(protocolClass);
-                        if (!_protocol)
-                        {
-                            // it's likely that the protocol has already called protocol:didFailWithError:, which will have called finishWithError:, which means that a call to the completion
-                            // block is queue up already with an error in it
-                            // just in case though, we can report a more generic error here - once the completion block is called once it will be cleared out, the protocol's error will win
-                            // if there is one
-                            NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
-                            NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info]; // TODO: what's the correct error to report here?
-                            [self completeWithError:error];
-                            [error release];
-                        }
-                        
-                        if (self.state == CK2FileOperationStateRunning) [_protocol start];
-                    }
-                });
-            }
-            else
-            {
-                NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
-                NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info];
-                [self completeWithError:error];
-                [error release];
-            }
-        }];
+        [self createProtocolAndStart];
     }
+}
+
+/**
+ Private method that does the work of creating the protocol instance, and getting it going
+ */
+- (void)createProtocolAndStart {
+    NSURL *url = self.originalURL;
+    
+    [CK2Protocol classForURL:url completionHandler:^(Class protocolClass) {
+        
+        if (protocolClass)
+        {
+            // Bounce over to operation's own queue for kicking off the real work
+            // Keep an eye out for early opportunity to bail out if get cancelled
+            dispatch_async(_queue, ^{
+                
+                if (self.state == CK2FileOperationStateRunning)
+                {
+                    NSAssert(_protocol == nil, @"Protocol has already been created");
+                    _protocol = _createProtocolBlock(protocolClass);
+                    
+                    if (!_protocol)
+                    {
+                        // it's likely that the protocol has already called protocol:didFailWithError:, which will have called finishWithError:, which means that a call to the completion
+                        // block is queue up already with an error in it
+                        // just in case though, we can report a more generic error here - once the completion block is called once it will be cleared out, the protocol's error will win
+                        // if there is one
+                        NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
+                        NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info]; // TODO: what's the correct error to report here?
+                        [self completeWithError:error];
+                        [error release];
+                    }
+                    
+                    if (self.state == CK2FileOperationStateRunning) [_protocol start];
+                }
+            });
+        }
+        else
+        {
+            NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
+            NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info];
+            [self completeWithError:error];
+            [error release];
+        }
+    }];
 }
 
 #pragma mark CK2ProtocolClient
@@ -433,6 +457,32 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     // Errors should start with our description
     if (error)
     {
+        if (_createIntermediateDirectories) {
+            NSString *path = [CK2FileManager pathOfURL:_URL];
+            if (path.length && ![path isEqualToString:@"/"]) {
+                
+                NSURL *directoryURL = [_URL URLByDeletingLastPathComponent];
+                _createIntermediateDirectories = NO;    // avoid doing this again
+                
+                [self.fileManager createDirectoryAtURL:directoryURL
+                           withIntermediateDirectories:YES
+                                     openingAttributes:nil  // probably ought to provide something better, but I'm being lazy
+                                     completionHandler:^(NSError *directoryError) {
+                                         
+                                         // If creating directory also fails, give up. Otherwise let's try again!
+                                         if (directoryError) {
+                                             [self protocol:protocol didCompleteWithError:error];
+                                         }
+                                         else {
+                                             [_protocol release]; _protocol = nil;
+                                             [self createProtocolAndStart];
+                                         }
+                                     }];
+                
+                return;
+            }
+        }
+        
         if (_descriptionForErrors)
         {
             NSMutableDictionary *info = [error.userInfo mutableCopy];

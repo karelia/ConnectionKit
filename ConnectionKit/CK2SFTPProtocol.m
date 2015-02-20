@@ -81,7 +81,7 @@
     
     self = [self initWithCustomCommands:@[command]
                                 request:mutableRequest
-          createIntermediateDirectories:createIntermediates
+          createIntermediateDirectories:NO  // rely on file operation to do this instead
                                  client:client
                       completionHandler:^(NSError *error) {
                           if (error)
@@ -108,11 +108,17 @@
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
     [mutableRequest curl_setNewFilePermissions:[attributes objectForKey:NSFilePosixPermissions]];
     
-    if (self = [self initForCreatingFileWithRequest:mutableRequest size:size withIntermediateDirectories:createIntermediates client:client completionHandler:NULL])
+    if (self = [self initForCreatingFileWithRequest:mutableRequest
+                                               size:size
+                        withIntermediateDirectories:NO  // rely on file operation to do this instead
+                                             client:client
+                                  completionHandler:NULL])
     {
         NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
         NSString* name = [path lastPathComponent];
         _transcriptMessage = [[NSString alloc] initWithFormat:@"Uploading %@ to %@\n", name, path];
+        
+        
     }
     
     [mutableRequest release];
