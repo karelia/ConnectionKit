@@ -458,10 +458,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     if (error)
     {
         if (_createIntermediateDirectories) {
-            NSString *path = [CK2FileManager pathOfURL:_URL];
+            NSString *path = [CK2FileManager pathOfURL:self.originalURL];
             if (path.length && ![path isEqualToString:@"/"]) {
                 
-                NSURL *directoryURL = [_URL URLByDeletingLastPathComponent];
+                NSURL *directoryURL = [self.originalURL URLByDeletingLastPathComponent];
                 _createIntermediateDirectories = NO;    // avoid doing this again
                 
                 [self.fileManager createDirectoryAtURL:directoryURL
