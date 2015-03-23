@@ -119,6 +119,8 @@
 		27999BB7170B4BA200A54BEE /* CK2FileManagerWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */; };
 		27A2072B1671634800D8284D /* CK2CURLBasedProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27A207291671634800D8284D /* CK2CURLBasedProtocol.h */; };
 		27A2072C1671634800D8284D /* CK2CURLBasedProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27A2072A1671634800D8284D /* CK2CURLBasedProtocol.m */; };
+		27ADC5771AC0CD7D0085C7F7 /* CK2CurlTransferStackManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 27ADC5751AC0CD7D0085C7F7 /* CK2CurlTransferStackManager.h */; };
+		27ADC5781AC0CD7D0085C7F7 /* CK2CurlTransferStackManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 27ADC5761AC0CD7D0085C7F7 /* CK2CurlTransferStackManager.m */; };
 		27CFEC7218E73526007158A4 /* URLs.testdata in Resources */ = {isa = PBXBuildFile; fileRef = 27CFEC7118E73526007158A4 /* URLs.testdata */; };
 		27D03B421471787000FEA588 /* CKUploader.h in Headers */ = {isa = PBXBuildFile; fileRef = 27D03B401471787000FEA588 /* CKUploader.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27D03B431471787000FEA588 /* CKUploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 27D03B411471787000FEA588 /* CKUploader.m */; };
@@ -363,6 +365,8 @@
 		27993E8316FCB30D008DC1B0 /* CK2FileOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileOperation.m; sourceTree = "<group>"; };
 		27A207291671634800D8284D /* CK2CURLBasedProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2CURLBasedProtocol.h; sourceTree = "<group>"; };
 		27A2072A1671634800D8284D /* CK2CURLBasedProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2CURLBasedProtocol.m; sourceTree = "<group>"; };
+		27ADC5751AC0CD7D0085C7F7 /* CK2CurlTransferStackManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2CurlTransferStackManager.h; sourceTree = "<group>"; };
+		27ADC5761AC0CD7D0085C7F7 /* CK2CurlTransferStackManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2CurlTransferStackManager.m; sourceTree = "<group>"; };
 		27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CURLHandle.xcodeproj; path = ../CurlHandle/CURLHandleSource/CURLHandle.xcodeproj; sourceTree = "<group>"; };
 		27CFEC7118E73526007158A4 /* URLs.testdata */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = URLs.testdata; sourceTree = "<group>"; };
 		27D03B401471787000FEA588 /* CKUploader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CKUploader.h; path = ConnectionKit/CKUploader.h; sourceTree = "<group>"; };
@@ -733,6 +737,8 @@
 				2790A8281627636E000C9D9F /* CK2Protocol.m */,
 				27A207291671634800D8284D /* CK2CURLBasedProtocol.h */,
 				27A2072A1671634800D8284D /* CK2CURLBasedProtocol.m */,
+				27ADC5751AC0CD7D0085C7F7 /* CK2CurlTransferStackManager.h */,
+				27ADC5761AC0CD7D0085C7F7 /* CK2CurlTransferStackManager.m */,
 				2790A94616278F1D000C9D9F /* CK2FTPProtocol.h */,
 				2790A94716278F1D000C9D9F /* CK2FTPProtocol.m */,
 				27F394F3162C162900944F43 /* CK2SFTPProtocol.h */,
@@ -999,6 +1005,7 @@
 				2743E8091622E47600019979 /* CK2FileManager.h in Headers */,
 				2790A8291627636E000C9D9F /* CK2Protocol.h in Headers */,
 				2790A94816278F1D000C9D9F /* CK2FTPProtocol.h in Headers */,
+				27ADC5771AC0CD7D0085C7F7 /* CK2CurlTransferStackManager.h in Headers */,
 				27F394F5162C162900944F43 /* CK2SFTPProtocol.h in Headers */,
 				27431CA01630381D00F6FB58 /* CK2FileProtocol.h in Headers */,
 				27A2072B1671634800D8284D /* CK2CURLBasedProtocol.h in Headers */,
@@ -1225,7 +1232,8 @@
 		279117E1178B5A86006BF857 /* CURLHandleTests.octest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
-			path = CURLHandleTests.octest;
+			name = CURLHandleTests.octest;
+			path = CURLHandleTests.xctest;
 			remoteRef = 279117E0178B5A86006BF857 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -1425,6 +1433,7 @@
 				798313CA0B0D67E000F5078E /* CKTransferProgressCell.m in Sources */,
 				27D03B431471787000FEA588 /* CKUploader.m in Sources */,
 				2743E80A1622E47600019979 /* CK2FileManager.m in Sources */,
+				27ADC5781AC0CD7D0085C7F7 /* CK2CurlTransferStackManager.m in Sources */,
 				2790A82A1627636E000C9D9F /* CK2Protocol.m in Sources */,
 				2790A94916278F1D000C9D9F /* CK2FTPProtocol.m in Sources */,
 				27F394F6162C162900944F43 /* CK2SFTPProtocol.m in Sources */,

@@ -4,7 +4,7 @@
 
 #import "CK2FileManager.h"
 
-@class CURLMultiHandle;
+@class CURLTransferStack;
 
 /**
  CK2FileManager with some additional API for test purposes.
@@ -13,7 +13,7 @@
 @interface CK2FileManagerWithTestSupport : CK2FileManager
 {
     BOOL _dontShareConnections;
-    CURLMultiHandle* _multi;
+    CURLTransferStack* _multi;
 }
 
 /**
@@ -21,7 +21,7 @@
  This is generated on demand, if dontShareConnections is set.
  */
 
-@property (strong, readonly, nonatomic) CURLMultiHandle* multi;
+@property (strong, readonly, nonatomic) CURLTransferStack* multi;
 
 /**
  Set this property to force CURL based protocols use an alternative CURLTransfer instead of the default one
@@ -32,10 +32,10 @@
 @end
 
 @interface NSURLRequest(CK2FileManagerDebugging)
-- (CURLMultiHandle*)ck2_multi;
+- (CURLTransferStack*)ck2_multi;
 @end
 
 @interface NSMutableURLRequest(CK2FileManagerDebugging)
-- (void)ck2_setMulti:(CURLMultiHandle*)multi;
+- (void)ck2_setMulti:(CURLTransferStack*)multi;
 @end
 

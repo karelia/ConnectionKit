@@ -7,16 +7,13 @@
 //
 
 #import "CK2CURLBasedProtocol.h"
+#import "CK2CurlTransferStackManager.h"
 
 #import <CURLHandle/CURLHandle.h>
 #import <sys/dirent.h>
 
 #import <AppKit/AppKit.h>   // for NSImage
-
-
-@interface CURLTransfer (Testing)
-- (id)initWithRequest:(NSURLRequest *)request credential:(NSURLCredential *)credential delegate:(id<CURLTransferDelegate>)delegate delegateQueue:(NSOperationQueue *)queue multi:(CURLMultiHandle *)multi;
-@end
+#import <objc/runtime.h>
 
 
 @implementation CK2CURLBasedProtocol
@@ -476,7 +473,7 @@
     
     request = [self.client protocol:self willSendRequest:request redirectResponse:nil];
     
-    CURLMultiHandle* multi = nil;
+    CURLTransferStack* multi = nil;
     if ([request respondsToSelector:@selector(ck2_multi)])  // should only be a testing/debugging feature
     {
         multi = [request performSelector:@selector(ck2_multi)]; // typically this is nil, meaning use the default, but we can override it for test purposes
@@ -486,18 +483,21 @@
 
     if ([[self class] usesMultiHandle])
     {
-        if (multi)
-        {
-            _transfer = [[CURLTransfer alloc] initWithRequest:request
-                                                 credential:credential
-                                                   delegate:self
-                                              delegateQueue:nil
-                                                      multi:multi];
+        // Nasty, nasty HACK here, to share across the file manager
+        CK2FileManager *fileManager = [self valueForKeyPath:@"client.fileManager"];
+        @synchronized(fileManager) {
+            static void *key = &key;
+            multi = [objc_getAssociatedObject(fileManager, key) transferStack];
+            if (!multi) {
+                CK2CurlTransferStackManager *manager = [[CK2CurlTransferStackManager alloc] init];
+                multi = manager.transferStack;
+                objc_setAssociatedObject(fileManager, key, manager, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+                [manager release];
+            }
         }
-        else
-        {
-            _transfer = [[CURLTransfer alloc] initWithRequest:request credential:credential delegate:self delegateQueue:nil];
-        }
+        
+        _transfer = [[multi transferWithRequest:request credential:credential delegate:self] retain];
+        [_transfer resume];
     }
     else
     {

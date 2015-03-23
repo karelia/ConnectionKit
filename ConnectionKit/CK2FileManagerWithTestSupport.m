@@ -9,8 +9,8 @@
 
 
 @interface CURLTransfer (Testing)
-+ (void)cleanupStandaloneMulti:(CURLMultiHandle *)multi;
-+ (CURLMultiHandle *)standaloneMultiForTestPurposes;
++ (void)cleanupStandaloneMulti:(CURLTransferStack *)multi;
++ (CURLTransferStack *)standaloneMultiForTestPurposes;
 @end
 
 
@@ -32,7 +32,7 @@
     return [CK2FileOperationWithTestSupport class];
 }
 
-- (CURLMultiHandle*)multi
+- (CURLTransferStack*)multi
 {
     if (_dontShareConnections && !_multi)
     {
@@ -46,7 +46,7 @@
 
 @implementation NSURLRequest(CK2FileManagerDebugging)
 
-- (CURLMultiHandle*)ck2_multi
+- (CURLTransferStack*)ck2_multi
 {
     return [NSURLProtocol propertyForKey:@"ck2_multi" inRequest:self];
 }
@@ -54,7 +54,7 @@
 @end
 @implementation NSMutableURLRequest(CK2FileManagerDebugging)
 
-- (void)ck2_setMulti:(CURLMultiHandle*)multi
+- (void)ck2_setMulti:(CURLTransferStack*)multi
 {
     [NSURLProtocol setProperty:multi forKey:@"ck2_multi" inRequest:self];
 }
