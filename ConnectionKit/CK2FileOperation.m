@@ -310,6 +310,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             }];
             
             [_completionBlock release]; _completionBlock = nil;
+            [_progressBlock release];   _progressBlock = nil;
+            [_enumerationBlock release];_enumerationBlock = nil;
             
             
             // Break retain cycle, but deliberately keep weak reference so we know we're associated with it
