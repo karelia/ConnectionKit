@@ -303,7 +303,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             // Make all notifications — including KVO — happen on the delegate queue
             void (^block)(NSError*) = _completionBlock;
             
-            [self tryToMessageDelegateSelector:NULL usingBlock:^(id<CK2FileManagerDelegate> delegate) {
+            [self tryToMessageDelegateSelector:NULL usingBlock:^(id<CK2FileManagerDelegate> delegate) { // NULL selector so always executes
                 self.error = error;
                 self.state = CK2FileOperationStateCompleted;
                 block(error);
