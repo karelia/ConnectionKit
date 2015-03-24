@@ -425,6 +425,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                     NSAssert(_protocol == nil, @"Protocol has already been created");
                     _protocol = _createProtocolBlock(protocolClass);
                     
+                    // Protocol creation block was probably creating a retain cycle back to self, so
+                    // dispose of now we've used it
+                    [_createProtocolBlock release]; _createProtocolBlock = nil;
+                    
                     if (!_protocol)
                     {
                         // it's likely that the protocol has already called protocol:didFailWithError:, which will have called finishWithError:, which means that a call to the completion
