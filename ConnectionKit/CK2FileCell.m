@@ -125,23 +125,14 @@
     if (!_isTextOnly)
     {
         NSRect imageRect = [self imageRectForBounds:cellFrame];
-        if (self.image) {
-            // Flip images that don't agree with our flipped state
-            BOOL flipped = [controlView isFlipped] != [self.image isFlipped];
-            if (flipped) {
-                [[NSGraphicsContext currentContext] saveGraphicsState];
-                NSAffineTransform *transform = [[NSAffineTransform alloc] init];
-                [transform translateXBy:0 yBy:cellFrame.origin.y + cellFrame.size.height];
-                [transform scaleXBy:1.0 yBy:-1.0];
-                [transform translateXBy:0 yBy:-cellFrame.origin.y];
-                [transform concat];
-                [transform release];
-            }
-            [self.image drawInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-            if (flipped) {
-                [[NSGraphicsContext currentContext] restoreGraphicsState];
-            }
-        }
+        
+        [self.image drawInRect:imageRect
+                      fromRect:NSZeroRect
+                     operation:NSCompositeSourceOver
+                      fraction:1.0
+                respectFlipped:YES
+                         hints:nil];
+        
         CGFloat inset = (ICON_INSET_HORIZ + ICON_SIZE + ICON_TEXT_SPACING);
         cellFrame.origin.x += inset;
         cellFrame.size.width -= inset;
