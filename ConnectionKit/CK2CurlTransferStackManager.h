@@ -11,7 +11,7 @@
 
 /**
  This is a little wrapper around a CURLTransferStack. We use it to tie each CK2FileManager to a
- transfer stack, and invalidate that stack down when appropriate.
+ transfer stack, and invalidate that stack when appropriate.
  */
 @interface CK2CurlTransferStackManager : NSObject {
     CURLTransferStack   *_transferStack;
