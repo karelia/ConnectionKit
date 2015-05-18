@@ -113,6 +113,12 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return [self initWithDelegate:nil delegateQueue:nil];
 }
 
+- (void)dealloc {
+    [_delegateQueue release];
+    
+    [super dealloc];
+}
+
 #pragma mark Discovering Directory Contents
 
 - (CK2FileOperation *)contentsOfDirectoryAtURL:(NSURL *)url

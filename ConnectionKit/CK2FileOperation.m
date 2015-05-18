@@ -300,15 +300,18 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             
             // Store the error and notify completion handler
             // Make all notifications — including KVO — happen on the delegate queue
-            void (^block)(NSError*) = _completionBlock;
             
-            [self tryToMessageDelegateSelector:NULL usingBlock:^(id<CK2FileManagerDelegate> delegate) {
+            [self tryToMessageDelegateSelector:NULL usingBlock:^(id<CK2FileManagerDelegate> delegate) { // NULL selector so always executes
                 self.error = error;
                 self.state = CK2FileOperationStateCompleted;
-                block(error);
+                _completionBlock(error);
+                
+                // Clean up now we're done notifying. Have to do this at completion time since it
+                // most likely breaks a retain cycle.
+                [_completionBlock release]; _completionBlock = nil;
+                [_progressBlock release];   _progressBlock = nil;
+                [_enumerationBlock release];_enumerationBlock = nil;
             }];
-            
-            [_completionBlock release]; _completionBlock = nil;
             
             
             // Break retain cycle, but deliberately keep weak reference so we know we're associated with it
@@ -421,6 +424,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                 {
                     NSAssert(_protocol == nil, @"Protocol has already been created");
                     _protocol = _createProtocolBlock(protocolClass);
+                    
+                    // Protocol creation block was probably creating a retain cycle back to self, so
+                    // dispose of now we've used it
+                    [_createProtocolBlock release]; _createProtocolBlock = nil;
                     
                     if (!_protocol)
                     {
