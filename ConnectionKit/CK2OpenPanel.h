@@ -115,7 +115,7 @@
 
 + (CK2OpenPanel *)openPanel;
 
-@property(nonatomic, assign) id <CK2OpenPanelDelegate> delegate;
+@property(assign) id <CK2OpenPanelDelegate> delegate;
 
 /**
  The completion block will not be called until the given URL's contents are fully loaded. That way, if you show the
