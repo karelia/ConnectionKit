@@ -40,7 +40,25 @@
 //TODO: Save window/view dimensions?
 //TODO: Autocomplete in the path field?
 
-@protocol CK2OpenPanelDelegate;
+
+@class CK2OpenPanel;
+@protocol CK2OpenPanelDelegate <NSWindowDelegate>
+
+@optional
+
+- (void)panel:(CK2OpenPanel *)sender didChangeToDirectoryURL:(NSURL *)url;
+- (BOOL)panel:(CK2OpenPanel *)sender shouldEnableURL:(NSURL *)url;
+- (BOOL)panel:(CK2OpenPanel *)sender validateURL:(NSURL *)url error:(NSError **)outError;
+- (void)panelSelectionDidChange:(CK2OpenPanel *)sender;
+
+- (void)panel:(CK2OpenPanel *)sender didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
+- (void)panel:(CK2OpenPanel *)sender appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
+
+- (void)panel:(CK2OpenPanel *)sender didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge __attribute((deprecated("implement -panel:didReceiveChallenge:completionHandler instead")));
+
+@end
+
+
 @class CK2OpenPanelController;
 
 /**
@@ -165,22 +183,5 @@
 - (IBAction)cancel:(id)sender;
 
 - (void)validateVisibleColumns;
-
-@end
-
-
-@protocol CK2OpenPanelDelegate <NSObject>
-
-@optional
-
-- (void)panel:(CK2OpenPanel *)sender didChangeToDirectoryURL:(NSURL *)url;
-- (BOOL)panel:(CK2OpenPanel *)sender shouldEnableURL:(NSURL *)url;
-- (BOOL)panel:(CK2OpenPanel *)sender validateURL:(NSURL *)url error:(NSError **)outError;
-- (void)panelSelectionDidChange:(CK2OpenPanel *)sender;
-
-- (void)panel:(CK2OpenPanel *)sender didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential *))completionHandler;
-- (void)panel:(CK2OpenPanel *)sender appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
-
-- (void)panel:(CK2OpenPanel *)sender didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge __attribute((deprecated("implement -panel:didReceiveChallenge:completionHandler instead")));
 
 @end
