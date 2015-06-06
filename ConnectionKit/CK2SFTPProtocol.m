@@ -254,7 +254,7 @@
     // Note what we're up to
     if (_transcriptMessage)
     {
-        [self.client protocol:self appendString:_transcriptMessage toTranscript:CK2TranscriptHeaderOut];
+        [self.client protocol:self appendStringToTranscript:_transcriptMessage isCommand:YES];
         [_transcriptMessage release]; _transcriptMessage = nil;
     }
     

@@ -163,7 +163,7 @@
  */
 - (void)protocol:(CK2Protocol *)protocol didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(CK2AuthChallengeDisposition, NSURLCredential*))completionHandler;
 
-- (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
+- (void)protocol:(CK2Protocol *)protocol appendStringToTranscript:(NSString *)info isCommand:(BOOL)isCommand;
 
 
 #pragma mark Operation-Specific

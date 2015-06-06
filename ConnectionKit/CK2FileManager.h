@@ -454,21 +454,6 @@ typedef NS_ENUM(NSInteger, CK2AuthChallengeDisposition) {
                               totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToSend;
 
 
-typedef NS_ENUM(NSUInteger, CK2TranscriptType) {
-	CK2TranscriptText,
-	CK2TranscriptHeaderIn,
-	CK2TranscriptHeaderOut,
-};    // deliberately aligned with curl_infotype for convenience
-
-/**
- Reports received transcript info.
- 
- @param manager The file manager.
- @param info The received transcript line(s). Should end in a newline character.
- @param transcript The type of transcript received.
- */
-- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
-
 /**
  * Sent as the last message related to a specific operation. Error may be
  * `nil`, which implies that no error occurred and this operation is finished.

@@ -108,8 +108,6 @@ typedef NSUInteger CKUploadingOptions;
 @required
 - (void)uploader:(CKUploader *)uploader didBeginUploadToPath:(NSString *)path;
 
-- (void)uploader:(CKUploader *)uploader appendString:(NSString *)string toTranscript:(CK2TranscriptType)transcript;
-
 @optional
 - (void)uploader:(CKUploader *)uploader didBeginRemovingItemAtURL:(NSURL *)url;
 

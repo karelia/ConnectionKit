@@ -55,6 +55,8 @@
 		22FEB6691680818800BB778B /* KMSTranscriptEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 22FEB6671680818800BB778B /* KMSTranscriptEntry.m */; };
 		271059521671334500E20511 /* DAVKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		27105953167143D800E20511 /* CURLHandle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
+		273605911869A93600A32419 /* CK2Transcript.h in Headers */ = {isa = PBXBuildFile; fileRef = 2736058F1869A93600A32419 /* CK2Transcript.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		273605921869A93600A32419 /* CK2Transcript.m in Sources */ = {isa = PBXBuildFile; fileRef = 273605901869A93600A32419 /* CK2Transcript.m */; };
 		27431CA01630381D00F6FB58 /* CK2FileProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */; };
 		27431CA11630381D00F6FB58 /* CK2FileProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */; };
 		2743E8091622E47600019979 /* CK2FileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 2743E8071622E47600019979 /* CK2FileManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -341,6 +343,8 @@
 		22FEB6671680818800BB778B /* KMSTranscriptEntry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSTranscriptEntry.m; sourceTree = "<group>"; };
 		22FEB6681680818800BB778B /* KMSTranscriptEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KMSTranscriptEntry.h; sourceTree = "<group>"; };
 		2702E4671459D0F50085BBC4 /* libssh2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh2.dylib; path = CurlHandle/SFTP/libssh2.dylib; sourceTree = "<group>"; };
+		2736058F1869A93600A32419 /* CK2Transcript.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2Transcript.h; sourceTree = "<group>"; };
+		273605901869A93600A32419 /* CK2Transcript.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2Transcript.m; sourceTree = "<group>"; };
 		27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileProtocol.h; sourceTree = "<group>"; };
 		27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileProtocol.m; sourceTree = "<group>"; };
 		2743E8071622E47600019979 /* CK2FileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileManager.h; sourceTree = "<group>"; };
@@ -532,6 +536,8 @@
 				278D8B78167FF35D00622468 /* CK2Authentication.m */,
 				27993E8216FCB30D008DC1B0 /* CK2FileOperation.h */,
 				27993E8316FCB30D008DC1B0 /* CK2FileOperation.m */,
+				2736058F1869A93600A32419 /* CK2Transcript.h */,
+				273605901869A93600A32419 /* CK2Transcript.m */,
 			);
 			name = Public;
 			path = ConnectionKit;
@@ -1001,6 +1007,7 @@
 				79CFD89509F704F400172CDD /* ConnectionKit.h in Headers */,
 				7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */,
 				798313C90B0D67E000F5078E /* CKTransferProgressCell.h in Headers */,
+				273605911869A93600A32419 /* CK2Transcript.h in Headers */,
 				27D03B421471787000FEA588 /* CKUploader.h in Headers */,
 				2743E8091622E47600019979 /* CK2FileManager.h in Headers */,
 				2790A8291627636E000C9D9F /* CK2Protocol.h in Headers */,
@@ -1439,6 +1446,7 @@
 				27F394F6162C162900944F43 /* CK2SFTPProtocol.m in Sources */,
 				27431CA11630381D00F6FB58 /* CK2FileProtocol.m in Sources */,
 				2288CD76165A99FC00F34E24 /* CK2WebDAVProtocol.m in Sources */,
+				273605921869A93600A32419 /* CK2Transcript.m in Sources */,
 				27A2072C1671634800D8284D /* CK2CURLBasedProtocol.m in Sources */,
 				278D8B7A167FF35D00622468 /* CK2Authentication.m in Sources */,
 				27993E8516FCB30D008DC1B0 /* CK2FileOperation.m in Sources */,

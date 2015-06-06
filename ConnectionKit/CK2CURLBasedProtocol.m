@@ -109,6 +109,19 @@
 
 - (NSError*)processData:(NSMutableData*)data request:(NSURLRequest *)request url:(NSURL*)directoryURL path:(NSString*)directoryPath keys:(NSArray*)keys options:(NSDirectoryEnumerationOptions)mask
 {
+    NSString *listing = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    if (listing)
+    {
+        [self.client protocol:self appendStringToTranscript:listing isCommand:NO];
+    }
+    else
+    {
+        listing = [[NSString alloc] initWithFormat:@"Unable to stringify listing: %@", data];
+        [self.client protocol:self appendStringToTranscript:listing isCommand:NO];
+    }
+    [listing release];
+    
+    
     NSError* result = nil;
 
     // Process the data to make a directory listing
@@ -690,26 +703,19 @@
 
 - (void)transfer:(CURLTransfer *)transfer didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
 {
-    CK2TranscriptType ckType;
     switch (type)
     {
         case CURLINFO_HEADER_IN:
-            ckType = CK2TranscriptHeaderIn;
+            [self.client protocol:self appendStringToTranscript:string isCommand:NO];
             break;
 
         case CURLINFO_HEADER_OUT:
-            ckType = CK2TranscriptHeaderOut;
-            break;
-
-        case CURLINFO_TEXT:
-            ckType = CK2TranscriptText;
+            [self.client protocol:self appendStringToTranscript:string isCommand:YES];
             break;
             
         default:
-            return;
+            break;
     }
-
-    [[self client] protocol:self appendString:string toTranscript:ckType];
 }
 
 #pragma mark Customization

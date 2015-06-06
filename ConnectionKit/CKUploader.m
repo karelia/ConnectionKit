@@ -475,10 +475,5 @@ static void *sOperationStateObservationContext = &sOperationStateObservationCont
         }
 }
 
-- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
-{
-    [[self delegate] uploader:self appendString:info toTranscript:transcript];
-}
-
 @end
 

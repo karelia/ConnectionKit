@@ -8,6 +8,7 @@
 
 #import "CK2FileOperation.h"
 #import "CK2Protocol.h"
+#import "CK2Transcript.h"
 
 #import <AppKit/AppKit.h>   // so icon handling can use NSImage and NSWorkspace for now
 
@@ -601,16 +602,12 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     // TODO: Cache credentials per protection space
 }
 
-- (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CK2TranscriptType)transcript;
+- (void)protocol:(CK2Protocol *)protocol appendStringToTranscript:(NSString *)info isCommand:(BOOL)isCommand;
 {
     NSAssert(protocol == _protocol, @"Message received from unexpected protocol: %@ (should be %@)", protocol, _protocol);
     
     
-    // Pass straight onto delegate and trust it not to take too long handling it
-    // We used to dispatch off onto one of the global queues, but that does have the nasty downside of messages sometimes arriving out-of-order or concurrently
-    [self tryToMessageDelegateSelector:@selector(fileManager:appendString:toTranscript:) usingBlock:^(id<CK2FileManagerDelegate> delegate) {
-        [delegate fileManager:self.fileManager appendString:info toTranscript:transcript];
-    }];
+    [[CK2Transcript sharedTranscript] addEntryWithText:info isCommand:isCommand];
 }
 
 - (void)protocol:(CK2Protocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
