@@ -32,7 +32,6 @@
 		22662EE4165D1EE4005FCC4A /* BaseCKTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22662EE3165D1EE3005FCC4A /* BaseCKTests.m */; };
 		22662EF3165D2EEC005FCC4A /* ftp.json in Resources */ = {isa = PBXBuildFile; fileRef = 22662EF1165D2EEC005FCC4A /* ftp.json */; };
 		22662EF4165D2EEC005FCC4A /* webdav.json in Resources */ = {isa = PBXBuildFile; fileRef = 22662EF2165D2EEC005FCC4A /* webdav.json */; };
-		227113BF168388FD00280005 /* http.json in Resources */ = {isa = PBXBuildFile; fileRef = 227113BE168388FD00280005 /* http.json */; };
 		2288CD76165A99FC00F34E24 /* CK2WebDAVProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */; };
 		228E180C1700AD5600ACDE94 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
 		2298E4AB17442272005A4160 /* FileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2298E4AA17442272005A4160 /* FileTests.m */; };
@@ -1296,7 +1295,6 @@
 				791E83050B0EDAC90060E5FC /* error.png in Resources */,
 				791E83060B0EDAC90060E5FC /* finished.png in Resources */,
 				7978FC150B117D7C0048168B /* bookmark.tif in Resources */,
-				227113BF168388FD00280005 /* http.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
