@@ -120,7 +120,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The folder “%@” could not be created.", "error descrption"),
                              url.lastPathComponent];
     
-    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForCreatingDirectoryWithRequest:[self requestWithURL:url]
                                               withIntermediateDirectories:createIntermediates
@@ -132,6 +132,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     if ([url.scheme caseInsensitiveCompare:@"sftp"] == NSOrderedSame) {
         _createIntermediateDirectories = createIntermediates;
     }
+    
+    return self;
 }
 
 - (id)initFileCreationOperationWithURL:(NSURL *)url
