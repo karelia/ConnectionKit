@@ -308,6 +308,13 @@
 {
     NSString *path = [CK2WebDAVProtocol pathOfURLRelativeToHomeDirectory:request.URL];
     if (!path) path = @"/";
+    
+    // In some cases, a client can pass in to us a URL that contains multiple slashes in the path
+    // (e.g. Sandvox is guilty of this in one particular circumstance). Because we then pass that as
+    // a path into DAVKit, it needs cleaning up to avoid being mis-resolved.
+    while ([path hasPrefix:@"//"]) {
+        path = [path substringFromIndex:1];
+    }
 
     return path;
 }
