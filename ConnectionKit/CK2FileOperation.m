@@ -13,6 +13,13 @@
 
 
 @interface CK2FileOperation () <CK2ProtocolClient>
+
+- (id)initWithURL:(NSURL *)url
+ errorDescription:(NSString *)errorDescription
+          manager:(CK2FileManager *)manager
+completionHandler:(void (^)(NSError *))completionBlock
+createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock NS_DESIGNATED_INITIALIZER;
+
 @property(readonly) CK2FileManager *fileManager;    // goes to nil once finished/failed
 @property (readwrite) int64_t countOfBytesWritten;
 @property (readwrite) int64_t countOfBytesExpectedToWrite;
@@ -51,7 +58,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSParameterAssert(url);
     NSParameterAssert(manager);
     
-    if (self = [self init])
+    if (self = [super init])
     {
         _state = CK2FileOperationStateSuspended;
         _manager = [manager retain];
