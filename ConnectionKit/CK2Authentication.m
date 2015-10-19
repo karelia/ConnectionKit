@@ -75,7 +75,7 @@ NSString * const CK2AuthenticationMethodHostFingerprint = @"CK2AuthenticationMet
 
 + (NSURLCredential *)ck2_credentialForKnownHostWithPersistence:(NSURLCredentialPersistence)persistence;
 {
-    return [self credentialWithUser:nil password:nil persistence:persistence];
+    return [self credentialWithUser:@"" password:@"" persistence:persistence];
 }
 
 @end
