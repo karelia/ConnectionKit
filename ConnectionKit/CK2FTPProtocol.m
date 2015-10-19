@@ -23,10 +23,6 @@
 #pragma mark -
 
 
-@interface CK2FTPProtocol () <NSURLAuthenticationChallengeSender>
-@end
-
-
 @implementation CK2FTPProtocol
 
 #pragma mark URLs
@@ -480,24 +476,6 @@
     }
     
     [super transfer:transfer didReceiveDebugInformation:string ofType:type];
-}
-
-#pragma mark NSURLAuthenticationChallengeSender
-
-/*  We don't want anyone using these old APIs, but have to supply a valid object to satisfy the
- *  compiler, so take the opportunity to throw if someone does.
- */
-
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-    [self doesNotRecognizeSelector:_cmd];
-}
-
-- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-    [self doesNotRecognizeSelector:_cmd];
-}
-
-- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-    [self doesNotRecognizeSelector:_cmd];
 }
 
 @end

@@ -399,7 +399,7 @@
                                                previousFailureCount:0
                                                failureResponse:nil
                                                error:nil
-                                               sender:nil];
+                                               sender:self];
     
     [self sendAuthChallenge:challenge];
     [challenge release];
@@ -438,7 +438,7 @@
                                                                       previousFailureCount:(challenge.previousFailureCount + 1)
                                                                       failureResponse:nil
                                                                       error:error
-                                                                      sender:nil];
+                                                                      sender:self];
                         
                         [self sendAuthChallenge:newChallenge];
                         [newChallenge release];
@@ -717,5 +717,19 @@
 // Much to my annoyance, multi-socket backend doesn't seem to be working right at the moment
 // But we're now using the regular multi API, which seems to be working a treat
 + (BOOL)usesMultiHandle; { return YES; }
+
+#pragma mark NSURLAuthenticationChallengeSender
+
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+    [self doesNotRecognizeSelector:_cmd];
+}
+
+- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+    [self doesNotRecognizeSelector:_cmd];
+}
+
+- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
+    [self doesNotRecognizeSelector:_cmd];
+}
 
 @end

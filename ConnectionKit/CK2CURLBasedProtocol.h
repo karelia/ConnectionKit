@@ -13,7 +13,12 @@
 
 @class CK2RemoteURL;
 
-@interface CK2CURLBasedProtocol : CK2Protocol <CURLTransferDelegate>
+/**
+ We don't want anyone using the old auth challenge sender APIs, but have to supply a valid object to
+ satisfy the compiler. So you can pass in an instance of this class, and it will throw if any of the
+ messages are attempted.
+ */
+@interface CK2CURLBasedProtocol : CK2Protocol <CURLTransferDelegate, NSURLAuthenticationChallengeSender>
 {
     CURLTransfer    *_transfer;
     BOOL            _cancelled;

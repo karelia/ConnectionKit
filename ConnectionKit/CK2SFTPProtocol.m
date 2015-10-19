@@ -373,7 +373,7 @@
                                                                          previousFailureCount:0
                                                                               failureResponse:nil
                                                                                         error:nil
-                                                                                       sender:nil];
+                                                                                       sender:self];
         
         _fingerprintSemaphore = dispatch_semaphore_create(0);   // must be setup before handing off to client
         
