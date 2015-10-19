@@ -245,7 +245,7 @@
     }
     else
     {
-        [_browser selectRowIndexes:nil inColumn:0];
+        [_browser selectRowIndexes:[NSIndexSet indexSet] inColumn:0];
     }
 }
 
