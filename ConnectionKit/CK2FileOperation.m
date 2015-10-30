@@ -12,7 +12,33 @@
 #import <AppKit/AppKit.h>   // so icon handling can use NSImage and NSWorkspace for now
 
 
+@interface CK2FileOperationCallbacks : NSObject {
+    
+    CK2Protocol *(^_protocolCreator)(CK2FileOperation *fileOp, Class protocolClass);
+}
+
+/**
+ @param protocolCreator The block is passed the file operation it applies to — so don't wind up with
+ a retain cycle — and the class of the protocol to be created.
+ */
++ (instancetype)callbacksWithProtocolCreator:(CK2Protocol *(^)(CK2FileOperation *fileOp, Class protocolClass))protocolCreator;
+
+- (CK2Protocol *)createProtocolForFileOperation:(CK2FileOperation *)fileOp class:(Class)protocolClass NS_RETURNS_RETAINED;
+
+@end
+
+
+#pragma mark -
+
+
 @interface CK2FileOperation () <CK2ProtocolClient>
+
+- (id)initWithURL:(NSURL *)url
+ errorDescription:(NSString *)errorDescription
+          manager:(CK2FileManager *)manager
+completionHandler:(void (^)(NSError *))completionBlock
+callbacks:(CK2FileOperationCallbacks *)callbacks NS_DESIGNATED_INITIALIZER;
+
 @property(readonly) CK2FileManager *fileManager;    // goes to nil once finished/failed
 @property (readwrite) int64_t countOfBytesWritten;
 @property (readwrite) int64_t countOfBytesExpectedToWrite;
@@ -46,12 +72,12 @@
  errorDescription:(NSString *)errorDescription
           manager:(CK2FileManager *)manager
 completionHandler:(void (^)(NSError *))completionBlock
-createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
+callbacks:(CK2FileOperationCallbacks *)callbacks;
 {
     NSParameterAssert(url);
     NSParameterAssert(manager);
     
-    if (self = [self init])
+    if (self = [super init])
     {
         _state = CK2FileOperationStateSuspended;
         _manager = [manager retain];
@@ -70,7 +96,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         }
         _completionBlock = [completionBlock copy];
         
-        _createProtocolBlock = [createBlock copy];
+        _callbacks = [callbacks retain];
         _queue = dispatch_queue_create("com.karelia.connection.file-operation", NULL);
     }
     
@@ -97,18 +123,18 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         description = NSLocalizedString(@"The server could not be accessed.", "error description");
     }
     
-    self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    CK2FileOperationCallbacks *callbacks = [CK2FileOperationCallbacks callbacksWithProtocolCreator:^CK2Protocol *(CK2FileOperation *fileOp, Class protocolClass) {
         
         // If we try to do this outside the block there's a risk the protocol object will be created *before* the enum block has been stored, which ends real badly
-        _enumerationBlock = [enumBlock copy];
+        fileOp->_enumerationBlock = [enumBlock copy];
         
-        return [[protocolClass alloc] initForEnumeratingDirectoryWithRequest:[self requestWithURL:url]
+        return [[protocolClass alloc] initForEnumeratingDirectoryWithRequest:[fileOp requestWithURL:url]
                                                   includingPropertiesForKeys:keys
                                                                      options:mask
-                                                                      client:self];
+                                                                      client:fileOp];
     }];
     
-    return self;
+    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block callbacks:callbacks];
 }
 
 - (id)initDirectoryCreationOperationWithURL:(NSURL *)url
@@ -120,13 +146,15 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The folder “%@” could not be created.", "error descrption"),
                              url.lastPathComponent];
     
-    self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    CK2FileOperationCallbacks *callbacks = [CK2FileOperationCallbacks callbacksWithProtocolCreator:^CK2Protocol *(CK2FileOperation *fileOp, Class protocolClass) {
         
-        return [[protocolClass alloc] initForCreatingDirectoryWithRequest:[self requestWithURL:url]
+        return [[protocolClass alloc] initForCreatingDirectoryWithRequest:[fileOp requestWithURL:url]
                                               withIntermediateDirectories:createIntermediates
                                                         openingAttributes:attributes
-                                                                   client:self];
+                                                                   client:fileOp];
     }];
+    
+    self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block callbacks:callbacks];
     
     // Special case SFTP for now.
     if ([url.scheme caseInsensitiveCompare:@"sftp"] == NSOrderedSame) {
@@ -147,20 +175,22 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be uploaded.", "error description"),
                              url.lastPathComponent];
     
-    self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    CK2FileOperationCallbacks *callbacks = [CK2FileOperationCallbacks callbacksWithProtocolCreator:^CK2Protocol *(CK2FileOperation *fileOp, Class protocolClass) {
         
-        NSMutableURLRequest *request = [[self requestWithURL:url] mutableCopy];
+        NSMutableURLRequest *request = [[fileOp requestWithURL:url] mutableCopy];
         request.HTTPBody = data;
         
         CK2Protocol *result = [[protocolClass alloc] initForCreatingFileWithRequest:request
                                                                                size:data.length
                                                         withIntermediateDirectories:createIntermediates
                                                                   openingAttributes:attributes
-                                                                             client:self];
+                                                                             client:fileOp];
         
         [request release];
         return result;
     }];
+    
+    self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block callbacks:callbacks];
     
     _bytesExpectedToWrite = data.length;
     _progressBlock = [progressBlock copy];
@@ -187,17 +217,17 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSNumber *fileSize;
     if (![sourceURL getResourceValue:&fileSize forKey:NSURLFileSizeKey error:NULL]) fileSize = nil;;
     
-    self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    CK2FileOperationCallbacks *callbacks = [CK2FileOperationCallbacks callbacksWithProtocolCreator:^CK2Protocol *(CK2FileOperation *fileOp, Class protocolClass) {
         
-        _localURL = [sourceURL copy];
+        fileOp->_localURL = [sourceURL copy];
         
-        NSMutableURLRequest *request = [[self requestWithURL:url] mutableCopy];
+        NSMutableURLRequest *request = [[fileOp requestWithURL:url] mutableCopy];
         
         // Read the data using an input stream if possible, and know file size
         int64_t size = (fileSize ? fileSize.longLongValue : NSURLResponseUnknownLength);
         if (size >= 0)
         {
-            NSInputStream *stream = [self protocol:nil needNewBodyStream:nil];
+            NSInputStream *stream = [fileOp protocol:nil needNewBodyStream:nil];
             if (stream)
             {
                 [request setHTTPBodyStream:stream];
@@ -219,7 +249,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             {
                 [request release];
                 if (!error) error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil];
-                [self protocol:nil didCompleteWithError:error];
+                [fileOp protocol:nil didCompleteWithError:error];
                 return nil;
             }
         }
@@ -228,11 +258,13 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                                                                size:size
                                                         withIntermediateDirectories:createIntermediates
                                                                   openingAttributes:attributes
-                                                                             client:self];
+                                                                             client:fileOp];
         
         [request release];
         return result;
     }];
+    
+    self = [self initWithURL:url errorDescription:description manager:manager completionHandler:block callbacks:callbacks];
     
     _bytesExpectedToWrite = fileSize.longLongValue;
     _progressBlock = [progressBlock copy];
@@ -252,10 +284,11 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be deleted.", "error descrption"),
                              url.lastPathComponent];
     
-    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
-        
-        return [[protocolClass alloc] initForRemovingItemWithRequest:[self requestWithURL:url] client:self];
+    CK2FileOperationCallbacks *callbacks = [CK2FileOperationCallbacks callbacksWithProtocolCreator:^CK2Protocol *(CK2FileOperation *fileOp, Class protocolClass) {
+        return [[protocolClass alloc] initForRemovingItemWithRequest:[fileOp requestWithURL:url] client:fileOp];
     }];
+    
+    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block callbacks:callbacks];
 }
 
 - (id)initRenameOperationWithSourceURL:(NSURL *)srcURL
@@ -266,10 +299,11 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be renamed.", "error descrption"),
                              srcURL.lastPathComponent];
     
-    return [self initWithURL:srcURL errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
-        
-        return [[protocolClass alloc] initForRenamingItemWithRequest:[self requestWithURL:srcURL] newName:newName client:self];
+    CK2FileOperationCallbacks *callbacks = [CK2FileOperationCallbacks callbacksWithProtocolCreator:^CK2Protocol *(CK2FileOperation *fileOp, Class protocolClass) {
+        return [[protocolClass alloc] initForRenamingItemWithRequest:[fileOp requestWithURL:srcURL] newName:newName client:fileOp];
     }];
+    
+    return [self initWithURL:srcURL errorDescription:description manager:manager completionHandler:block callbacks:callbacks];
 }
 
 - (id)initResourceValueSettingOperationWithURL:(NSURL *)url
@@ -280,12 +314,14 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSString *description = [NSString stringWithFormat:NSLocalizedString(@"The file “%@” could not be updated.", "error descrption"),
                              url.lastPathComponent];
     
-    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    CK2FileOperationCallbacks *callbacks = [CK2FileOperationCallbacks callbacksWithProtocolCreator:^CK2Protocol *(CK2FileOperation *fileOp, Class protocolClass) {
         
         return [[protocolClass alloc] initForSettingAttributes:keyedValues
-                                             ofItemWithRequest:[self requestWithURL:url]
-                                                        client:self];
+                                             ofItemWithRequest:[fileOp requestWithURL:url]
+                                                        client:fileOp];
     }];
+    
+    return [self initWithURL:url errorDescription:description manager:manager completionHandler:block callbacks:callbacks];
 }
 
 - (void)completeWithError:(NSError *)error;
@@ -302,18 +338,22 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             
             // Store the error and notify completion handler
             // Make all notifications — including KVO — happen on the delegate queue
+            // Grab the handler now since we're about to clear out the original storage. The
+            // delegate block should capture this so we don't need to retain it ourselves
+            void (^handler)(NSError *) = _completionBlock;
             
             [self tryToMessageDelegateSelector:NULL usingBlock:^(id<CK2FileManagerDelegate> delegate) { // NULL selector so always executes
                 self.error = error;
                 self.state = CK2FileOperationStateCompleted;
-                _completionBlock(error);
-                
-                // Clean up now we're done notifying. Have to do this at completion time since it
-                // most likely breaks a retain cycle.
-                [_completionBlock release]; _completionBlock = nil;
-                [_progressBlock release];   _progressBlock = nil;
-                [_enumerationBlock release];_enumerationBlock = nil;
+                handler(error);
             }];
+            
+            // Clean up too so as to break retain cycles. HAS to happen within this block (and not
+            // e.g. during the delegate call back) so _completionBlock is cleared out and never
+            // allowed to run twice
+            [_completionBlock release]; _completionBlock = nil;
+            [_progressBlock release];   _progressBlock = nil;
+            [_enumerationBlock release];_enumerationBlock = nil;
             
             
             // Break retain cycle, but deliberately keep weak reference so we know we're associated with it
@@ -330,7 +370,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     if (_queue) dispatch_release(_queue);
     [_completionBlock release];
     [_enumerationBlock release];
-    [_createProtocolBlock release];
+    [_callbacks release];
     [_progressBlock release];
     [_localURL release];
     [_error release];
@@ -425,11 +465,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                 if (self.state == CK2FileOperationStateRunning)
                 {
                     NSAssert(_protocol == nil, @"Protocol has already been created");
-                    _protocol = _createProtocolBlock(protocolClass);
-                    
-                    // Protocol creation block was probably creating a retain cycle back to self, so
-                    // dispose of now we've used it
-                    [_createProtocolBlock release]; _createProtocolBlock = nil;
+                    _protocol = [_callbacks createProtocolForFileOperation:self class:protocolClass];
                     
                     if (!_protocol)
                     {
@@ -751,6 +787,24 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     // For easy stashing in dictionaries
     return [self retain];
+}
+
+@end
+
+
+#pragma mark -
+
+
+@implementation CK2FileOperationCallbacks
+
++ (instancetype)callbacksWithProtocolCreator:(CK2Protocol *(^)(CK2FileOperation *, Class))protocolCreator {
+    CK2FileOperationCallbacks *result = [[self alloc] init];
+    result->_protocolCreator = [protocolCreator copy];
+    return [result autorelease];
+}
+
+- (CK2Protocol *)createProtocolForFileOperation:(CK2FileOperation *)fileOp class:(Class)protocolClass {
+    return _protocolCreator(fileOp, protocolClass);
 }
 
 @end

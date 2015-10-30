@@ -19,6 +19,8 @@ typedef NS_ENUM(NSInteger, CK2FileOperationState) {
 };
 
 
+@class CK2FileOperationCallbacks;
+
 /**
  All @properties are KVO-compliant.
 */
@@ -31,7 +33,7 @@ typedef NS_ENUM(NSInteger, CK2FileOperationState) {
     dispatch_queue_t    _queue;
     
     CK2Protocol *_protocol;
-    CK2Protocol *(^_createProtocolBlock)(Class);
+    CK2FileOperationCallbacks   *_callbacks;
     
     void    (^_completionBlock)(NSError *);
     void    (^_enumerationBlock)(NSURL *);
