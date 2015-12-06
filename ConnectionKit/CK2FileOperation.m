@@ -659,10 +659,13 @@ callbacks:(CK2FileOperationCallbacks *)callbacks;
     // Provide ancestry and other fairly generic keys on-demand
     [self.class setResourceValueBlocksForURL:url protocolClass:protocol.class];
     
-    
-        [self tryToMessageDelegateSelector:NULL usingBlock:^(id<CK2FileManagerDelegate> delegate) {
-            if (_enumerationBlock) _enumerationBlock(url);
-        }];
+    // Capture enumeration block ivar here. The queues used for managing ivars, and communicating
+    // with delegate are independent, so if we don't capture, it's quite possible the ivar has been
+    // cleared out by the time our message goes through
+    void (^handler)(NSURL *) = _enumerationBlock;
+    [self tryToMessageDelegateSelector:NULL usingBlock:^(id<CK2FileManagerDelegate> delegate) {
+        if (handler) handler(url);
+    }];
     
     // It seems poor security to vend out passwords here, so have a quick sanity check
     if (CFURLGetByteRangeForComponent((CFURLRef)url, kCFURLComponentPassword, NULL).location != kCFNotFound)
