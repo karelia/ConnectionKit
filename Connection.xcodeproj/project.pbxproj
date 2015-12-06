@@ -52,8 +52,6 @@
 		22E67F1B171311C5001ECE34 /* ConnectionKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* ConnectionKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		22F6D112165A8A2200443CC9 /* URLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* URLTests.m */; };
 		22FEB6691680818800BB778B /* KMSTranscriptEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 22FEB6671680818800BB778B /* KMSTranscriptEntry.m */; };
-		271059521671334500E20511 /* DAVKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		27105953167143D800E20511 /* CURLHandle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		27431CA01630381D00F6FB58 /* CK2FileProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */; };
 		27431CA11630381D00F6FB58 /* CK2FileProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */; };
 		2743E8091622E47600019979 /* CK2FileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 2743E8071622E47600019979 /* CK2FileManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -246,17 +244,6 @@
 			dstSubfolderSpec = 10;
 			files = (
 				22E67F1B171311C5001ECE34 /* ConnectionKit.framework in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		27282EDA167131150057CCF7 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				271059521671334500E20511 /* DAVKit.framework in CopyFiles */,
-				27105953167143D800E20511 /* CURLHandle.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1118,7 +1105,6 @@
 				79CFD12409F702BE00172CDD /* Frameworks */,
 				79CFD12109F702BE00172CDD /* Headers */,
 				79CFD12209F702BE00172CDD /* Resources */,
-				27282EDA167131150057CCF7 /* CopyFiles */,
 			);
 			buildRules = (
 			);
