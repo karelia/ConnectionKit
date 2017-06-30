@@ -392,6 +392,9 @@ callbacks:(CK2FileOperationCallbacks *)callbacks;
     // within the queue.
     // It's still inherently a bit dangerous though, as the client could change it on a different
     // queue, or could have specified a non-serial delegate queue.
+    //
+    // This crashes randomly quite frequently when canceling out of the private key password
+    // input dialog window. -AK, June 30, 2017
     [manager.delegateQueue addOperationWithBlock:^{
         id <CK2FileManagerDelegate> delegate = manager.delegate;
         if (!selector || [delegate respondsToSelector:selector]) {
