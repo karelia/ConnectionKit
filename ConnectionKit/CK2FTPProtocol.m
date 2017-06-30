@@ -412,7 +412,7 @@
         
         NSURLProtectionSpace *space = [[CK2FTPSProtectionSpace alloc] initWithServerTrust:trust
                                                                                      host:url.host
-                                                                            port:url.port.integerValue];
+																					 port:url.port.integerValue];
         
         _sslFailures++;
         
