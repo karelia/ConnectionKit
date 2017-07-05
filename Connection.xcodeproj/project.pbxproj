@@ -606,7 +606,7 @@
 			isa = PBXGroup;
 			children = (
 				220526E8165E96AA00A2BBC9 /* CURLHandle.framework */,
-				279117E1178B5A86006BF857 /* CURLHandleTests.octest */,
+				279117E1178B5A86006BF857 /* CURLHandleTests.xctest */,
 				22C9CFFB1703AD4D004610FE /* Standalone Test */,
 			);
 			name = Products;
@@ -1229,10 +1229,9 @@
 			remoteRef = 22C9CFFA1703AD4D004610FE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		279117E1178B5A86006BF857 /* CURLHandleTests.octest */ = {
+		279117E1178B5A86006BF857 /* CURLHandleTests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
-			name = CURLHandleTests.octest;
 			path = CURLHandleTests.xctest;
 			remoteRef = 279117E0178B5A86006BF857 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -1934,7 +1933,10 @@
 				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
-				HEADER_SEARCH_PATHS = "\"$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(SOURCE_ROOT)/CurlHandle/SFTP/libssh2/include\"",
+					"\"$(SOURCE_ROOT)/CurlHandle/CURLHandleSource/built/include/curl-$(CURRENT_ARCH)\"",
+				);
 				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@rpath";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks";
@@ -1972,7 +1974,10 @@
 				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
-				HEADER_SEARCH_PATHS = "\"$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(SOURCE_ROOT)/CurlHandle/SFTP/libssh2/include\"",
+					"\"$(SOURCE_ROOT)/CurlHandle/CURLHandleSource/built/include/curl-$(CURRENT_ARCH)\"",
+				);
 				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@rpath";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks";
