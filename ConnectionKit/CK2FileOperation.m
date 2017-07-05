@@ -37,7 +37,7 @@
  errorDescription:(NSString *)errorDescription
           manager:(CK2FileManager *)manager
 completionHandler:(void (^)(NSError *))completionBlock
-callbacks:(CK2FileOperationCallbacks *)callbacks NS_DESIGNATED_INITIALIZER;
+callbacks:(CK2FileOperationCallbacks *)callbacks;
 
 @property(readonly) CK2FileManager *fileManager;    // goes to nil once finished/failed
 @property (readwrite) int64_t countOfBytesWritten;
