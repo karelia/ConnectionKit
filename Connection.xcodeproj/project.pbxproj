@@ -1951,6 +1951,10 @@
 					Foundation,
 					"-framework",
 					AppKit,
+					"-Xlinker",
+					"-U",
+					"-Xlinker",
+					_objc_readClassPair,
 				);
 				PRODUCT_NAME = ConnectionKit;
 				RUN_CLANG_STATIC_ANALYZER = YES;
@@ -1992,6 +1996,10 @@
 					Foundation,
 					"-framework",
 					AppKit,
+					"-Xlinker",
+					"-U",
+					"-Xlinker",
+					_objc_readClassPair,
 				);
 				PRODUCT_NAME = ConnectionKit;
 				RUN_CLANG_STATIC_ANALYZER = YES;
@@ -2011,6 +2019,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"-Xlinker",
+					"-U",
+					"-Xlinker",
+					_objc_readClassPair,
+				);
 				SDKROOT = macosx10.9;
 			};
 			name = Debug;
@@ -2025,6 +2039,12 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				OTHER_LDFLAGS = (
+					"-Xlinker",
+					"-U",
+					"-Xlinker",
+					_objc_readClassPair,
+				);
 				SDKROOT = macosx10.9;
 			};
 			name = Release;
